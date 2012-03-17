@@ -1,0 +1,17 @@
+//===== eAthena Script ======================================= 
+//= Trap Specialist
+//===== By: ================================================== 
+//= Lionheart
+//===== Current Version: ===================================== 
+//= 1.0
+//===== Compatible With: ===================================== 
+//= eAthena SVN
+//===== Description: ========================================= 
+//= Official Ranger shop.
+//===== Additional Comments: ================================= 
+//= 1.0 First version. [Lionheart]
+//============================================================ 
+
+prt_in,109,68,4	shop	Trap Specialist#TS01::t_specialist	66,7940:200,12341:20000
+ra_in01,263,281,4	duplicate(t_specialist)	Trap Specialist#TS02	66
+mid_camp,129,284,3	duplicate(t_specialist)	Trap Specialist#TS03	66

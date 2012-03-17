@@ -1,0 +1,89 @@
+malangdo,163,216,4	script	Kafra Employee::kaf_mal	116,{
+	cutin "kafra_02",2;
+	mes "[^FF8000Kafra Employee^000000]";
+	mes "Welcome to the";
+	mes "Kafra Corporation.";
+	mes "The Kafra services";
+	mes "are always on your side.";
+	mes "How may I assist you?";
+	callfunc "F_Kafra",5,3,0,80,700;
+
+	M_Save:
+		savepoint "malangdo",170,207;
+		callfunc "F_KafEnd",0,1,"in the Malangdo Island";
+}
+
+dewata,198,184,4	script	Kafra Employee::kaf_dew	721,{
+	cutin "kafra_07",2;
+	callfunc "F_KafSetYun";
+	mes "[^FF8000Kafra Employee^000000]";
+	mes "The Kafra Corporation";
+	mes "is always working to provide";
+	mes "you with convenient services.";
+	mes "How may I be of assistance?";
+	callfunc "F_Kafra",5,0,0,40,800;
+
+	M_Save:
+		savepoint "dewata",200,177;
+		callfunc "F_KafEnd",0,1,"in the city of Dewata";
+}
+
+dicastes01,196,194,4	script	Kafra Employee::kaf_dic	117,{
+	cutin "kafra_01",2;
+	mes "[^FF8000Kafra Employee^000000]";
+	mes "Welcome to the";
+	mes "Kafra Corporation.";
+	mes "The Kafra services";
+	mes "are always on your side.";
+	mes "How may I assist you?";
+	callfunc "F_Kafra",5,3,0,80,700;
+
+	M_Save:
+		savepoint "dicastes01",198,182;
+		callfunc "F_KafEnd",0,1,"in the city of El Dicastes";
+}
+
+manuk,261,175,4	script	Kafra Employee::kaf_man	114,{
+	cutin "kafra_04",2;
+	mes "[^FF8000Kafra Employee^000000]";
+	mes "Welcome to the";
+	mes "Kafra Corporation.";
+	mes "The Kafra services";
+	mes "are always on your side.";
+	mes "How may I assist you?";
+	callfunc "F_Kafra",5,3,0,80,700;
+
+	M_Save:
+		savepoint "manuk",277,168;
+		callfunc "F_KafEnd",0,1,"in the city of Manuk";
+}
+
+splendide,205,154,4	script	Kafra Employee::kaf_spl	113,{
+	cutin "kafra_05",2;
+	mes "[^FF8000Kafra Employee^000000]";
+	mes "Welcome to the";
+	mes "Kafra Corporation.";
+	mes "The Kafra services";
+	mes "are always on your side.";
+	mes "How may I assist you?";
+	callfunc "F_Kafra",5,3,0,80,700;
+
+	M_Save:
+		savepoint "splendide",199,144;
+		callfunc "F_KafEnd",0,1,"in the city of Splendide";
+}
+
+mora,110,74,4	script	Kafra Employee::kaf_mra	116,{
+	cutin "kafra_02",2;
+	mes "[^FF8000Kafra Employee^000000]";
+	mes "Welcome to the";
+	mes "Kafra Corporation.";
+	mes "The Kafra services";
+	mes "are always on your side.";
+	mes "How may I assist you?";
+	callfunc "F_Kafra",5,3,0,80,700;
+
+	M_Save:
+		savepoint "mora",112,64;
+		callfunc "F_KafEnd",0,1,"in Mora, The Laphine Village";
+}
