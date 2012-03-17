@@ -1,0 +1,483 @@
+﻿Build started 17/03/2012 11:14:02.
+     1>Project "C:\Users\Administrator\Desktop\XTream\vcproj-10\map-server_sql.vcxproj" on node 2 (rebuild target(s)).
+     1>_PrepareForClean:
+         Deleting file "map-server_sql\Debug\map-server_sql.lastbuildstate".
+       InitializeBuildStatus:
+         Creating "map-server_sql\Debug\map-server_sql.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\3rdparty\mysql\include /I..\3rdparty\zlib\include /I..\3rdparty\pcre\include /I..\3rdparty\msinttypes\include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WIN32 /D __WIN32 /D _DEBUG /D PCRE_SUPPORT /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D FD_SETSIZE=4096 /D DB_MANUAL_CAST_TO_UNION /D _MBCS /Gm /RTC1 /MTd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"map-server_sql\Debug\\" /Fd"map-server_sql\Debug\vc100.pdb" /Gd /TC /wd4018 /wd4100 /wd4800 /analyze- /errorReport:prompt ..\src\common\core.c ..\src\common\db.c ..\src\common\ers.c ..\src\common\grfio.c ..\src\common\lock.c ..\src\common\malloc.c ..\src\common\md5calc.c ..\src\common\mapindex.c ..\src\common\nullpo.c ..\src\common\plugins.c ..\src\common\showmsg.c ..\src\common\socket.c ..\src\common\sql.c ..\src\common\strlib.c ..\src\common\timer.c ..\src\common\utils.c ..\src\map\atcommand.c ..\src\map\battle.c ..\src\map\battleground.c ..\src\map\buyingstore.c ..\src\map\chat.c ..\src\map\chrif.c ..\src\map\clif.c ..\src\map\date.c ..\src\map\duel.c ..\src\map\elemental.c ..\src\map\guild.c ..\src\map\intif.c ..\src\map\itemdb.c ..\src\map\log.c ..\src\map\mail.c ..\src\map\map.c ..\src\map\mapreg_sql.c ..\src\map\homunculus.c ..\src\map\instance.c ..\src\map\mercenary.c ..\src\map\mob.c ..\src\map\npc.c ..\src\map\npc_chat.c ..\src\map\party.c ..\src\map\path.c ..\src\map\pc.c ..\src\map\pet.c ..\src\map\quest.c ..\src\map\script.c ..\src\map\searchstore.c ..\src\map\skill.c ..\src\map\status.c ..\src\map\storage.c ..\src\map\trade.c ..\src\map\unit.c ..\src\map\vending.c
+         vending.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         unit.c
+     1>c:\users\administrator\desktop\xtream\src\map\unit.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.c(985): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         trade.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         storage.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         status.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\status.c(5065): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         skill.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\skill.c(4350): warning C4047: 'function' : 'map_session_data *' differs in levels of indirection from 'int'
+     1>c:\users\administrator\desktop\xtream\src\map\skill.c(4350): warning C4024: 'skill_get_cooldown' : different types for formal and actual parameter 1
+         searchstore.c
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         script.c
+     1>c:\users\administrator\desktop\xtream\src\map\script.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\script.c(1000): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\script.c(1981): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\script.c(7828): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\script.c(8990): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\script.c(9981): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\script.c(11096): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         quest.c
+     1>c:\users\administrator\desktop\xtream\src\common\version.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         pet.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\pet.c(1051): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         pc.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\pc.c(1011): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\pc.c(1884): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\pc.c(3757): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\pc.c(6494): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\pc.c(7441): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\pc.c(8440): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         path.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         party.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         npc_chat.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         npc.c
+     1>c:\users\administrator\desktop\xtream\src\map\npc.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\npc.c(2058): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         mob.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\mob.c(2304): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>c:\users\administrator\desktop\xtream\src\map\mob.c(2024): warning C4101: 'temp_rate' : unreferenced local variable
+         mercenary.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         instance.c
+     1>c:\users\administrator\desktop\xtream\src\common\version.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         homunculus.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         mapreg_sql.c
+         Generating Code...
+         Compiling...
+         map.c
+     1>c:\users\administrator\desktop\xtream\src\map\map.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\version.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\map.c(988): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\map.c(1970): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\map.c(3048): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         mail.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\mail.c(91): warning C4047: 'function' : 'int' differs in levels of indirection from 'map_session_data *'
+     1>c:\users\administrator\desktop\xtream\src\map\mail.c(91): warning C4024: 'pc_can_give_items' : different types for formal and actual parameter 1
+         log.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         itemdb.c
+     1>c:\users\administrator\desktop\xtream\src\map\itemdb.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         intif.c
+     1>c:\users\administrator\desktop\xtream\src\map\intif.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\intif.c(1001): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\intif.c(2127): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         guild.c
+     1>c:\users\administrator\desktop\xtream\src\map\guild.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\guild.c(1086): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         elemental.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         duel.c
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         date.c
+         clif.c
+     1>c:\users\administrator\desktop\xtream\src\map\clif.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\version.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\clif.c(3308): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\clif.c(4331): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\clif.c(5328): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\clif.c(6334): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\clif.c(7441): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\clif.c(8523): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\clif.c(10342): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\clif.c(11356): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\clif.c(12400): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\clif.c(15331): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         chrif.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         chat.c
+     1>c:\users\administrator\desktop\xtream\src\map\chat.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         buyingstore.c
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         battleground.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         battle.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.c(4796): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         atcommand.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         utils.c
+         timer.c
+         strlib.c
+         sql.c
+         Generating Code...
+     1>c:\users\administrator\desktop\xtream\src\map\battle.c(2306): warning C4700: uninitialized local variable 'ratio' used
+         Compiling...
+         socket.c
+         showmsg.c
+         plugins.c
+     1>c:\users\administrator\desktop\xtream\src\common\version.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         nullpo.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         mapindex.c
+         md5calc.c
+         malloc.c
+     1>c:\users\administrator\desktop\xtream\src\common\malloc.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         lock.c
+     1>c:\users\administrator\desktop\xtream\src\common\lock.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         grfio.c
+         ers.c
+         db.c
+     1>c:\users\administrator\desktop\xtream\src\common\db.c(1934): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         core.c
+     1>c:\users\administrator\desktop\xtream\src\common\version.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         Generating Code...
+       ManifestResourceCompile:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"map-server_sql\Debug\map-server_sql.exe.embed.manifest.res" map-server_sql\Debug\map-server_sql_manifest.rc 
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"..\map-server_sql.exe" /INCREMENTAL /NOLOGO /LIBPATH:..\3rdparty\mysql\lib /LIBPATH:..\3rdparty\zlib\lib /LIBPATH:..\3rdparty\pcre\lib libcmtd.lib oldnames.lib ws2_32.lib libmysql.lib zdll.lib pcre.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NODEFAULTLIB /MANIFEST /ManifestFile:"map-server_sql\Debug\map-server_sql.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"..\map-server_sql.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"..\map-server_sql.lib" /MACHINE:X86 "map-server_sql\Debug\map-server_sql.exe.embed.manifest.res"
+         "map-server_sql\Debug\core.obj"
+         "map-server_sql\Debug\db.obj"
+         "map-server_sql\Debug\ers.obj"
+         "map-server_sql\Debug\grfio.obj"
+         "map-server_sql\Debug\lock.obj"
+         "map-server_sql\Debug\malloc.obj"
+         "map-server_sql\Debug\md5calc.obj"
+         "map-server_sql\Debug\mapindex.obj"
+         "map-server_sql\Debug\nullpo.obj"
+         "map-server_sql\Debug\plugins.obj"
+         "map-server_sql\Debug\showmsg.obj"
+         "map-server_sql\Debug\socket.obj"
+         "map-server_sql\Debug\sql.obj"
+         "map-server_sql\Debug\strlib.obj"
+         "map-server_sql\Debug\timer.obj"
+         "map-server_sql\Debug\utils.obj"
+         "map-server_sql\Debug\atcommand.obj"
+         "map-server_sql\Debug\battle.obj"
+         "map-server_sql\Debug\battleground.obj"
+         "map-server_sql\Debug\buyingstore.obj"
+         "map-server_sql\Debug\chat.obj"
+         "map-server_sql\Debug\chrif.obj"
+         "map-server_sql\Debug\clif.obj"
+         "map-server_sql\Debug\date.obj"
+         "map-server_sql\Debug\duel.obj"
+         "map-server_sql\Debug\elemental.obj"
+         "map-server_sql\Debug\guild.obj"
+         "map-server_sql\Debug\intif.obj"
+         "map-server_sql\Debug\itemdb.obj"
+         "map-server_sql\Debug\log.obj"
+         "map-server_sql\Debug\mail.obj"
+         "map-server_sql\Debug\map.obj"
+         "map-server_sql\Debug\mapreg_sql.obj"
+         "map-server_sql\Debug\homunculus.obj"
+         "map-server_sql\Debug\instance.obj"
+         "map-server_sql\Debug\mercenary.obj"
+         "map-server_sql\Debug\mob.obj"
+         "map-server_sql\Debug\npc.obj"
+         "map-server_sql\Debug\npc_chat.obj"
+         "map-server_sql\Debug\party.obj"
+         "map-server_sql\Debug\path.obj"
+         "map-server_sql\Debug\pc.obj"
+         "map-server_sql\Debug\pet.obj"
+         "map-server_sql\Debug\quest.obj"
+         "map-server_sql\Debug\script.obj"
+         "map-server_sql\Debug\searchstore.obj"
+         "map-server_sql\Debug\skill.obj"
+         "map-server_sql\Debug\status.obj"
+         "map-server_sql\Debug\storage.obj"
+         "map-server_sql\Debug\trade.obj"
+         "map-server_sql\Debug\unit.obj"
+         "map-server_sql\Debug\vending.obj"
+       Manifest:
+         Deleting file "map-server_sql\Debug\map-server_sql.exe.embed.manifest".
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"map-server_sql\Debug\map-server_sql.exe.embed.manifest" /manifest "map-server_sql\Debug\map-server_sql.exe.intermediate.manifest"
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"map-server_sql\Debug\map-server_sql.exe.embed.manifest.res" map-server_sql\Debug\map-server_sql_manifest.rc 
+       LinkEmbedManifest:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"..\map-server_sql.exe" /INCREMENTAL /NOLOGO /LIBPATH:..\3rdparty\mysql\lib /LIBPATH:..\3rdparty\zlib\lib /LIBPATH:..\3rdparty\pcre\lib libcmtd.lib oldnames.lib ws2_32.lib libmysql.lib zdll.lib pcre.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NODEFAULTLIB /MANIFEST /ManifestFile:"map-server_sql\Debug\map-server_sql.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"..\map-server_sql.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"..\map-server_sql.lib" /MACHINE:X86 "map-server_sql\Debug\map-server_sql.exe.embed.manifest.res"
+         "map-server_sql\Debug\core.obj"
+         "map-server_sql\Debug\db.obj"
+         "map-server_sql\Debug\ers.obj"
+         "map-server_sql\Debug\grfio.obj"
+         "map-server_sql\Debug\lock.obj"
+         "map-server_sql\Debug\malloc.obj"
+         "map-server_sql\Debug\md5calc.obj"
+         "map-server_sql\Debug\mapindex.obj"
+         "map-server_sql\Debug\nullpo.obj"
+         "map-server_sql\Debug\plugins.obj"
+         "map-server_sql\Debug\showmsg.obj"
+         "map-server_sql\Debug\socket.obj"
+         "map-server_sql\Debug\sql.obj"
+         "map-server_sql\Debug\strlib.obj"
+         "map-server_sql\Debug\timer.obj"
+         "map-server_sql\Debug\utils.obj"
+         "map-server_sql\Debug\atcommand.obj"
+         "map-server_sql\Debug\battle.obj"
+         "map-server_sql\Debug\battleground.obj"
+         "map-server_sql\Debug\buyingstore.obj"
+         "map-server_sql\Debug\chat.obj"
+         "map-server_sql\Debug\chrif.obj"
+         "map-server_sql\Debug\clif.obj"
+         "map-server_sql\Debug\date.obj"
+         "map-server_sql\Debug\duel.obj"
+         "map-server_sql\Debug\elemental.obj"
+         "map-server_sql\Debug\guild.obj"
+         "map-server_sql\Debug\intif.obj"
+         "map-server_sql\Debug\itemdb.obj"
+         "map-server_sql\Debug\log.obj"
+         "map-server_sql\Debug\mail.obj"
+         "map-server_sql\Debug\map.obj"
+         "map-server_sql\Debug\mapreg_sql.obj"
+         "map-server_sql\Debug\homunculus.obj"
+         "map-server_sql\Debug\instance.obj"
+         "map-server_sql\Debug\mercenary.obj"
+         "map-server_sql\Debug\mob.obj"
+         "map-server_sql\Debug\npc.obj"
+         "map-server_sql\Debug\npc_chat.obj"
+         "map-server_sql\Debug\party.obj"
+         "map-server_sql\Debug\path.obj"
+         "map-server_sql\Debug\pc.obj"
+         "map-server_sql\Debug\pet.obj"
+         "map-server_sql\Debug\quest.obj"
+         "map-server_sql\Debug\script.obj"
+         "map-server_sql\Debug\searchstore.obj"
+         "map-server_sql\Debug\skill.obj"
+         "map-server_sql\Debug\status.obj"
+         "map-server_sql\Debug\storage.obj"
+         "map-server_sql\Debug\trade.obj"
+         "map-server_sql\Debug\unit.obj"
+         "map-server_sql\Debug\vending.obj"
+         map-server_sql.vcxproj -> C:\Users\Administrator\Desktop\XTream\vcproj-10\..\map-server_sql.exe
+       FinalizeBuildStatus:
+         Deleting file "map-server_sql\Debug\map-server_sql.unsuccessfulbuild".
+         Touching "map-server_sql\Debug\map-server_sql.lastbuildstate".
+     1>Done Building Project "C:\Users\Administrator\Desktop\XTream\vcproj-10\map-server_sql.vcxproj" (rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:29.03

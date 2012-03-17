@@ -1,0 +1,25 @@
+// Poring Box Summonable Monsters Database
+//
+// Structure of Database:
+// MobID,DummyName,Rate
+
+0,Poring,1002
+1002,Poring,1000000
+1031,Poporing,1000000
+1062,Santa Poring,200000
+1090,Mastering,400000
+1096,Angeling,200000
+1113,Drops,1000000
+1120,Ghostring,200000
+1242,Marin,1000000
+1388,Arc Angeling,200000
+//1520,Boiled Rice,800000
+1582,Deviling,200000
+1613,Metaling,1000000
+//1754,Skeggiold,100000
+//1755,Skeggiold,100000
+1784,Stapo,800000
+1836,Magmaring,800000
+1977,Heavy Metaling,400000
+2199,Siorava,800000
+

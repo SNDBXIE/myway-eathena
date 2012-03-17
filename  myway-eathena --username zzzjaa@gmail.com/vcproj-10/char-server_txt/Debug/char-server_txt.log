@@ -1,0 +1,110 @@
+﻿Build started 17/03/2012 11:14:28.
+     1>Project "C:\Users\Administrator\Desktop\XTream\vcproj-10\char-server_txt.vcxproj" on node 3 (rebuild target(s)).
+     1>_PrepareForClean:
+         Deleting file "char-server_txt\Debug\char-server_txt.lastbuildstate".
+       InitializeBuildStatus:
+         Creating "char-server_txt\Debug\char-server_txt.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\3rdparty\msinttypes\include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WIN32 /D __WIN32 /D _DEBUG /D TXT_ONLY /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D FD_SETSIZE=4096 /D DB_MANUAL_CAST_TO_UNION /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm /RTC1 /MTd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"char-server_txt\Debug\\" /Fd"char-server_txt\Debug\vc100.pdb" /Gd /TC /wd4800 /analyze- /errorReport:prompt ..\src\char\char.c ..\src\char\int_guild.c ..\src\char\int_homun.c ..\src\char\int_party.c ..\src\char\int_pet.c ..\src\char\int_status.c ..\src\char\int_storage.c ..\src\char\inter.c ..\src\common\core.c ..\src\common\db.c ..\src\common\ers.c ..\src\common\lock.c ..\src\common\malloc.c ..\src\common\mapindex.c ..\src\common\nullpo.c ..\src\common\plugins.c ..\src\common\showmsg.c ..\src\common\socket.c ..\src\common\strlib.c ..\src\common\timer.c ..\src\common\utils.c
+         utils.c
+         timer.c
+         strlib.c
+         socket.c
+         showmsg.c
+         plugins.c
+     1>c:\users\administrator\desktop\xtream\src\common\version.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         nullpo.c
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         mapindex.c
+         malloc.c
+     1>c:\users\administrator\desktop\xtream\src\common\malloc.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         lock.c
+     1>c:\users\administrator\desktop\xtream\src\common\lock.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         ers.c
+         db.c
+     1>c:\users\administrator\desktop\xtream\src\common\db.c(1934): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         core.c
+     1>c:\users\administrator\desktop\xtream\src\common\version.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         inter.c
+     1>c:\users\administrator\desktop\xtream\src\char\inter.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         int_storage.c
+     1>c:\users\administrator\desktop\xtream\src\char\int_storage.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         int_status.c
+         int_pet.c
+     1>c:\users\administrator\desktop\xtream\src\char\int_pet.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         int_party.c
+     1>c:\users\administrator\desktop\xtream\src\char\int_party.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         int_homun.c
+         int_guild.c
+     1>c:\users\administrator\desktop\xtream\src\char\int_guild.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\char\int_guild.c(1104): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         Generating Code...
+         Compiling...
+         char.c
+     1>c:\users\administrator\desktop\xtream\src\common\version.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\char\char.c(794): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\char\char.c(1619): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\xtream\src\char\char.c(3448): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+         Generating Code...
+       ManifestResourceCompile:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"char-server_txt\Debug\char-server.exe.embed.manifest.res" char-server_txt\Debug\char-server_manifest.rc 
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"..\char-server.exe" /INCREMENTAL /NOLOGO libcmtd.lib oldnames.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NODEFAULTLIB /MANIFEST /ManifestFile:"char-server_txt\Debug\char-server.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"..\char-server.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"..\char-server.lib" /MACHINE:X86 "char-server_txt\Debug\char-server.exe.embed.manifest.res"
+         "char-server_txt\Debug\char.obj"
+         "char-server_txt\Debug\int_guild.obj"
+         "char-server_txt\Debug\int_homun.obj"
+         "char-server_txt\Debug\int_party.obj"
+         "char-server_txt\Debug\int_pet.obj"
+         "char-server_txt\Debug\int_status.obj"
+         "char-server_txt\Debug\int_storage.obj"
+         "char-server_txt\Debug\inter.obj"
+         "char-server_txt\Debug\core.obj"
+         "char-server_txt\Debug\db.obj"
+         "char-server_txt\Debug\ers.obj"
+         "char-server_txt\Debug\lock.obj"
+         "char-server_txt\Debug\malloc.obj"
+         "char-server_txt\Debug\mapindex.obj"
+         "char-server_txt\Debug\nullpo.obj"
+         "char-server_txt\Debug\plugins.obj"
+         "char-server_txt\Debug\showmsg.obj"
+         "char-server_txt\Debug\socket.obj"
+         "char-server_txt\Debug\strlib.obj"
+         "char-server_txt\Debug\timer.obj"
+         "char-server_txt\Debug\utils.obj"
+       Manifest:
+         Deleting file "char-server_txt\Debug\char-server.exe.embed.manifest".
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"char-server_txt\Debug\char-server.exe.embed.manifest" /manifest "char-server_txt\Debug\char-server.exe.intermediate.manifest"
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"char-server_txt\Debug\char-server.exe.embed.manifest.res" char-server_txt\Debug\char-server_manifest.rc 
+       LinkEmbedManifest:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"..\char-server.exe" /INCREMENTAL /NOLOGO libcmtd.lib oldnames.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NODEFAULTLIB /MANIFEST /ManifestFile:"char-server_txt\Debug\char-server.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"..\char-server.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"..\char-server.lib" /MACHINE:X86 "char-server_txt\Debug\char-server.exe.embed.manifest.res"
+         "char-server_txt\Debug\char.obj"
+         "char-server_txt\Debug\int_guild.obj"
+         "char-server_txt\Debug\int_homun.obj"
+         "char-server_txt\Debug\int_party.obj"
+         "char-server_txt\Debug\int_pet.obj"
+         "char-server_txt\Debug\int_status.obj"
+         "char-server_txt\Debug\int_storage.obj"
+         "char-server_txt\Debug\inter.obj"
+         "char-server_txt\Debug\core.obj"
+         "char-server_txt\Debug\db.obj"
+         "char-server_txt\Debug\ers.obj"
+         "char-server_txt\Debug\lock.obj"
+         "char-server_txt\Debug\malloc.obj"
+         "char-server_txt\Debug\mapindex.obj"
+         "char-server_txt\Debug\nullpo.obj"
+         "char-server_txt\Debug\plugins.obj"
+         "char-server_txt\Debug\showmsg.obj"
+         "char-server_txt\Debug\socket.obj"
+         "char-server_txt\Debug\strlib.obj"
+         "char-server_txt\Debug\timer.obj"
+         "char-server_txt\Debug\utils.obj"
+         char-server_txt.vcxproj -> C:\Users\Administrator\Desktop\XTream\vcproj-10\..\char-server.exe
+       FinalizeBuildStatus:
+         Deleting file "char-server_txt\Debug\char-server_txt.unsuccessfulbuild".
+         Touching "char-server_txt\Debug\char-server_txt.lastbuildstate".
+     1>Done Building Project "C:\Users\Administrator\Desktop\XTream\vcproj-10\char-server_txt.vcxproj" (rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:09.59

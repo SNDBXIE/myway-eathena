@@ -1,0 +1,137 @@
+// Database Weight, HP, dan SP Job
+//
+// Struktur:
+// JobID,Weight,HPFactor,HPMultiplicator,SPFactor
+//
+//================================================
+
+   0,	20000,0    ,500  ,100 // Novice
+   1,	28000,70   ,500  ,200 // Swordman
+   2,	22000,30   ,500  ,600 // Magician
+   3,	26000,50   ,500  ,200 // Archer
+   4,	24000,40   ,500  ,500 // Acolyte
+   5,	28000,40   ,500  ,300 // Merchant
+   6,	24000,50   ,500  ,200 // Thief
+   7,	28000,150  ,500  ,300 // Knight
+   8,	26000,75   ,500  ,800 // Priest
+   9,	24000,55   ,500  ,900 // Wizard
+  10,	30000,90   ,500  ,400 // Blacksmith
+  11,	27000,85   ,500  ,400 // Hunter
+  12,	24000,110  ,500  ,400 // Assassin
+  13,	28000,150  ,500  ,300 // Knight (Peco)
+  14,	28000,110  ,700  ,470 // Crusader
+  15,	26000,90   ,650  ,470 // Monk
+  16,	24000,75   ,500  ,700 // Sage
+  17,	24000,85   ,500  ,500 // Rogue
+  18,	30000,90   ,500  ,400 // Alchemist
+  19,	27000,75   ,300  ,600 // Bard
+  20,	27000,75   ,300  ,600 // Dancer
+  21,	28000,110  ,700  ,470 // Crusader (Peco)
+  22,	20000,0    ,500  ,100 // Wedding
+  23,	20000,0    ,500  ,100 // Super Novice
+  24,	28000,75   ,0    ,450 // Gunslinger
+  25,	26000,80   ,500  ,515 // Ninja
+4001,	20000,0    ,500  ,100 // Novice High
+4002,	28000,70   ,500  ,200 // Swordman High
+4003,	22000,30   ,500  ,600 // Magician High
+4004,	26000,50   ,500  ,200 // Archer High
+4005,	24000,40   ,500  ,500 // Acolyte High
+4006,	28000,40   ,500  ,300 // Merchant High
+4007,	24000,50   ,500  ,200 // Thief High
+4008,	28000,150  ,500  ,300 // Lord Knight
+4009,	26000,75   ,500  ,800 // High Priest
+4010,	24000,55   ,500  ,900 // High Wizard
+4011,	30000,90   ,500  ,400 // Whitesmith
+4012,	27000,85   ,500  ,400 // Sniper
+4013,	24000,110  ,500  ,400 // Assassin Cross
+4014,	28000,150  ,500  ,300 // Lord Knight (Peco)
+4015,	28000,110  ,700  ,470 // Paladin
+4016,	26000,90   ,650  ,470 // Champion
+4017,	24000,75   ,500  ,700 // Professor
+4018,	24000,85   ,500  ,500 // Stalker
+4019,	30000,90   ,500  ,400 // Creator
+4020,	27000,75   ,300  ,600 // Clown
+4021,	27000,75   ,300  ,600 // Gypsy
+4022,	28000,110  ,700  ,470 // Paladin (Peco)
+4023,	20000,0    ,500  ,100 // Baby Novice
+4024,	28000,70   ,500  ,200 // Baby Swordman
+4025,	22000,30   ,500  ,600 // Baby Magician
+4026,	26000,50   ,500  ,200 // Baby Archer
+4027,	24000,40   ,500  ,500 // Baby Acolyte
+4028,	28000,40   ,500  ,300 // Baby Merchant
+4029,	24000,50   ,500  ,200 // Baby Thief
+4030,	28000,150  ,500  ,300 // Baby Knight
+4031,	26000,75   ,500  ,800 // Baby Priest
+4032,	24000,55   ,500  ,900 // Baby Wizard
+4033,	30000,90   ,500  ,400 // Baby Blacksmith
+4034,	27000,85   ,500  ,400 // Baby Hunter
+4035,	24000,110  ,500  ,400 // Baby Assassin
+4036,	28000,150  ,500  ,300 // Baby Knight (Peco)
+4037,	28000,110  ,700  ,470 // Baby Crusader
+4038,	26000,90   ,650  ,470 // Baby Monk
+4039,	24000,75   ,500  ,700 // Baby Sage
+4040,	24000,85   ,500  ,500 // Baby Rogue
+4041,	30000,90   ,500  ,400 // Baby Alchemist
+4042,	27000,75   ,300  ,600 // Baby Bard
+4043,	27000,75   ,300  ,600 // Baby Dancer
+4044,	28000,110  ,700  ,470 // Baby Crusader (Peco)
+4045,	20000,0    ,500  ,100 // Baby Super Novice
+4046,	28000,70   ,500  ,200 // Taekwon
+4047,	28000,90   ,650  ,470 // Star Knight
+4048,	28000,90   ,650  ,470 // Star Knight (flying)
+4049,	24000,75   ,500  ,900 // Soul Linker
+4054,	35000,150  ,500  ,300 // Rune Knight
+4055,	30000,55   ,500  ,900 // Warlock
+4056,	32000,85   ,500  ,400 // Ranger
+4057,	30000,75   ,500  ,800 // Arch Bishop
+4058,	38000,90   ,500  ,400 // Mechanic
+4059,	32000,110  ,500  ,400 // Guillotine Cross
+4060,	35000,150  ,500  ,300 // Rune Knight T
+4061,	30000,55   ,500  ,900 // Warlock T
+4062,	32000,85   ,500  ,400 // Ranger T
+4063,	30000,75   ,500  ,800 // Arch Bishop T
+4064,	38000,90   ,500  ,400 // Mechanic T
+4065,	32000,110  ,500  ,400 // Guillotine Cross T
+4066,	28000,110  ,700  ,470 // Royal Guard
+4067,	24000,75   ,500  ,700 // Sorcerer
+4068,	27000,75   ,300  ,600 // Minstrel
+4069,	27000,75   ,300  ,600 // Wanderer
+4070,	26000,90   ,650  ,470 // Sura
+4071,	30000,90   ,500  ,400 // Genetic
+4072,	24000,85   ,500  ,500 // Shadow Chaser
+4073,	28000,110  ,700  ,470 // Royal Guard T
+4074,	24000,75   ,500  ,700 // Sorcerer T
+4075,	27000,75   ,300  ,600 // Minstrel T
+4076,	27000,75   ,300  ,600 // Wanderer T
+4077,	26000,90   ,650  ,470 // Sura T
+4078,	30000,90   ,500  ,400 // Genetic T
+4079,	24000,85   ,500  ,500 // Shadow Chaser T
+4080,	35000,150  ,500  ,300 // Rune Knight (Dragon)
+4081,	35000,150  ,500  ,300 // Rune Knight T (Dragon)
+4082,	28000,110  ,700  ,470 // Royal Guard (Gryphon)
+4083,	28000,110  ,700  ,470 // Royal Guard T (Gryphon)
+4084,	32000,85   ,500  ,400 // Ranger (Warg)
+4085,	32000,85   ,500  ,400 // Ranger T (Warg)
+4086,	30000,90   ,500  ,400 // Mechanic Mount	(Base 2nd to 3rd)
+4087,	30000,90   ,500  ,400 // Mechanic Mount	(Trans 2nd to 3rd)
+4096,	28000,150  ,500  ,300 // Baby Rune Knight
+4097,	24000,55   ,500  ,900 // Baby Warlock
+4098,	27000,85   ,500  ,400 // Baby Ranger
+4099,	26000,75   ,500  ,800 // Baby Arch Bishop
+4100,	30000,90   ,500  ,400 // Baby Mechanic
+4101,	24000,110  ,500  ,400 // Baby Guillotine Cross
+4102,	28000,110  ,700  ,470 // Baby Royal Guard
+4103,	24000,75   ,500  ,700 // Baby Sorcerer
+4104,	27000,75   ,300  ,600 // Baby Minstrel
+4105,	27000,75   ,300  ,600 // Baby Wanderer
+4106,	26000,90   ,650  ,470 // Baby Sura
+4107,	30000,90   ,500  ,400 // Baby Genetic
+4108,	24000,85   ,500  ,500 // Baby Shadow Chaser
+4109,	28000,150  ,500  ,300 // Baby Rune Knight Mount
+4110,	28000,110  ,700  ,470 // Baby Royal Guard Mount
+4111,	27000,85   ,500  ,400 // Baby Ranger Mount
+4112,	30000,90   ,500  ,400 // Baby Mechanic Mount
+4190,	20000,0    ,500  ,100 // Super Novice (Extended)
+4191,	20000,0    ,500  ,100 // Super Novice Baby (Extended)
+4211,	26000,80   ,500  ,515 // Kagerou
+4212,	26000,80   ,500  ,515 // Oboro
