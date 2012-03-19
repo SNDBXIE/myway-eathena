@@ -1,5 +1,3 @@
-#Log
-
 = MyWay Log Update =
 
 *r1* by _zzzjaa_ - 23/01/2012
