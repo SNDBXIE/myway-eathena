@@ -1,0 +1,101 @@
+//Add Boss in Dung
+ice_dun03,0,0,0,0	boss_monster	Ktullanux	1779,1,7200000,600000,1
+tha_t12,129,51,35,35	boss_monster	Thanatos	1708,1,7200000,600000,1
+
+//Sealshine
+1@cata,0,0,0,0	monster	Wind Crystal	1395,5,0,0,0
+1@cata,0,0,0,0	monster	Earth Crystal	1396,5,0,0,0
+1@cata,0,0,0,0	monster	Fire Crystal	1397,5,0,0,0
+1@cata,0,0,0,0	monster	Water Crystal	1398,5,0,0,0
+1@cata,0,0,0,0	monster	Pouring	1894,10,0,0,0
+1@cata,0,0,0,0	monster	Zombie Master	1298,15;
+1@cata,0,0,0,0	monster	Wraith Dead	1291,15;
+1@cata,0,0,0,0	monster	Ancient Mimic	1699,15;
+1@cata,0,0,0,0	monster	Flame Skull	1869,15;
+1@cata,0,0,0,0	monster	Skeleton General	1290,15;
+1@cata,0,0,0,0	monster	Khalitzburg	1132,15;
+1@cata,0,0,0,0	monster	Wind Ghost	1263,15;
+1@cata,0,0,0,0	monster	Lude	1509,15;
+1@cata,0,0,0,0	monster	Evil Druid	1117,15;
+1@cata,0,0,0,0	monster	Banshee	1867,15;
+1@cata,0,0,0,0	monster	Dark Illusion	1302,5;
+
+2@cata,0,0,0,0	monster	Zombie Master	1298,10;
+2@cata,0,0,0,0	monster	Wraith Dead	1291,10;
+2@cata,0,0,0,0	monster	Ancient Mimic	1699,10;
+2@cata,0,0,0,0	monster	Flame Skull	1869,10;
+2@cata,0,0,0,0	monster	Skeleton General	1290,10;
+2@cata,0,0,0,0	monster	Khalitzburg	1132,10;
+2@cata,0,0,0,0	monster	Wind Ghost	1263,10;
+2@cata,0,0,0,0	monster	Lude	1509,10;
+2@cata,0,0,0,0	monster	Evil Druid	1117,10;
+2@cata,0,0,0,0	monster	Banshee	1867,10;
+2@cata,0,0,0,0	monster	Dark Illusion	1302,5;
+2@cata,0,0,0,0	monster	Garden Watcher	1933,10,0,0,0
+2@cata,0,0,0,0	monster	Garden Keeper	1932,10,0,0,0
+2@cata,44,101,115,30	monster	Piamette	1930,1,28800000,600000,1
+2@cata,44,101,115,30	monster	Wish Maiden	1931,1,28800000,600000,1
+2@cata,44,101,115,30	boss_monster	Great Demon Baphomet	1929,1,28800000,3600000,1
+
+//Bossnia
+bossnia_01,0,0,0,0	monster	Osiris	1038,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Baphomet	1039,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Doppelganger	1046,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Mistress	1059,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Golden Thief Bug	1086,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Orc Hero	1087,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Drake	1112,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Eddga	1115,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Moonlight Flower	1150,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Pharaoh	1157,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Phreeoni	1159,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Orc Lord	1190,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Garm	1252,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Dark Lord	1272,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Turtle General	1312,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Maya	1147,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Lord of Death	1373,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Dracula	1389,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Evil Snake Lord	1418,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Incantation Samurai	1492,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Amon Ra	1511,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	White Lady	1630,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Knight of Windstorm	1251,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Tao Gunka	1583,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	RSX-0806	1623,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Vesper	1685,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Lady Tanee	1688,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Thanatos	1708,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Detale	1719,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Kiel D-01	1734,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Valkyrie Randgris	1751,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Gloom Under Night	1768,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Ktullanux	1779,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Atroce	1785,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Ifrit	1832,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Byorgue	1839,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Fallen Bishop	1871,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Beelzebub	1874,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Zmey Gorynych	1885,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Satan Morroc	1917,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Naght Seiger	1956,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Entweihen Crothen	1957,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Hardrock Mammoth	1990,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Tendril Lion	1991,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Nidhoggr's Shadow	2022,1,3600000,3600000,1
+bossnia_01,0,0,0,0	monster	Poring V	1502,1,3600000,3600000,1
+
+//InW Dung
+que_san04,0,0,0,0	monster	GameMaster InW	2900,1,3600000,3600000,1
+que_san04,0,0,0,0	monster	Rune Knight InW	2901,3,0,0,0
+que_san04,0,0,0,0	monster	Guillotine Cross InW	2902,3,0,0,0
+que_san04,0,0,0,0	monster	Ranger InW	2903,3,0,0,0
+que_san04,0,0,0,0	monster	Arch Bishop InW	2904,3,0,0,0
+que_san04,0,0,0,0	monster	Warlock InW	2905,3,0,0,0
+que_san04,0,0,0,0	monster	Mechanic InW	2906,3,0,0,0
+que_san04,0,0,0,0	monster	Royal Guard InW	2907,3,0,0,0
+que_san04,0,0,0,0	monster	Shadow Chaser InW	2908,3,0,0,0
+que_san04,0,0,0,0	monster	Sura InW	2909,3,0,0,0
+que_san04,0,0,0,0	monster	Sorcerer InW	2910,3,0,0,0
+que_san04,0,0,0,0	monster	Genetic InW	2911,3,0,0,0
+
