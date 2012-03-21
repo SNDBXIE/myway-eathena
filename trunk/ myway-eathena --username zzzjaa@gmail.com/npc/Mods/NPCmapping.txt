@@ -1,3 +1,0 @@
-//izlude,135,79,4	duplicate(jobchange)	Job Master#01	729
-
-izlude,135,90,1	duplicate(WeaponMaster)	Weapon#1	729
