@@ -260,7 +260,7 @@ struct map_session_data {
 	unsigned int ks_floodprotect_tick; // [Kill Steal Protection]
 	
 	struct {
-		int nameid;
+		short nameid;
 		unsigned int tick;
 	} item_delay[MAX_ITEMDELAYS]; // [Paradox924X]
 
@@ -961,4 +961,8 @@ enum pc_msg {
 	MSG_UPGRADESKER_SECONDJOB	=  0x61f
 };
 
+/**
+ * Item Cooldown persistency
+ **/
+void pc_itemcd_do(struct map_session_data *sd, bool load);
 #endif /* _PC_H_ */

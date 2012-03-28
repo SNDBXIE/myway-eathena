@@ -1,9 +1,9 @@
-﻿Build started 19/03/2012 21:30:13.
-     1>Project "C:\Users\Administrator\Desktop\MyWay\vcproj-10\map-server_sql.vcxproj" on node 3 (rebuild target(s)).
+﻿Build started 28/03/2012 16:52:05.
+     1>Project "C:\Users\Administrator\Desktop\MyWay\vcproj-10\map-server_sql.vcxproj" on node 2 (rebuild target(s)).
      1>_PrepareForClean:
          Deleting file "map-server_sql\Debug\map-server_sql.lastbuildstate".
        InitializeBuildStatus:
-         Creating "map-server_sql\Debug\map-server_sql.unsuccessfulbuild" because "AlwaysCreate" was specified.
+         Touching "map-server_sql\Debug\map-server_sql.unsuccessfulbuild".
        ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\3rdparty\mysql\include /I..\3rdparty\zlib\include /I..\3rdparty\pcre\include /I..\3rdparty\msinttypes\include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WIN32 /D __WIN32 /D _DEBUG /D PCRE_SUPPORT /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D FD_SETSIZE=4096 /D DB_MANUAL_CAST_TO_UNION /D _MBCS /Gm /RTC1 /MTd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"map-server_sql\Debug\\" /Fd"map-server_sql\Debug\vc100.pdb" /Gd /TC /wd4018 /wd4100 /wd4800 /analyze- /errorReport:prompt ..\src\common\core.c ..\src\common\db.c ..\src\common\ers.c ..\src\common\grfio.c ..\src\common\lock.c ..\src\common\malloc.c ..\src\common\md5calc.c ..\src\common\mapindex.c ..\src\common\nullpo.c ..\src\common\plugins.c ..\src\common\showmsg.c ..\src\common\socket.c ..\src\common\sql.c ..\src\common\strlib.c ..\src\common\timer.c ..\src\common\utils.c ..\src\map\atcommand.c ..\src\map\battle.c ..\src\map\battleground.c ..\src\map\buyingstore.c ..\src\map\chat.c ..\src\map\chrif.c ..\src\map\clif.c ..\src\map\date.c ..\src\map\duel.c ..\src\map\elemental.c ..\src\map\guild.c ..\src\map\intif.c ..\src\map\itemdb.c ..\src\map\log.c ..\src\map\mail.c ..\src\map\map.c ..\src\map\mapreg_sql.c ..\src\map\homunculus.c ..\src\map\instance.c ..\src\map\mercenary.c ..\src\map\mob.c ..\src\map\npc.c ..\src\map\npc_chat.c ..\src\map\party.c ..\src\map\path.c ..\src\map\pc.c ..\src\map\pet.c ..\src\map\quest.c ..\src\map\script.c ..\src\map\searchstore.c ..\src\map\skill.c ..\src\map\status.c ..\src\map\storage.c ..\src\map\trade.c ..\src\map\unit.c ..\src\map\vending.c
          vending.c
@@ -24,7 +24,7 @@
      1>c:\users\administrator\desktop\myway\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\unit.c(985): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\unit.c(984): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
          trade.c
      1>c:\users\administrator\desktop\myway\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
@@ -61,8 +61,8 @@
      1>c:\users\administrator\desktop\myway\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\skill.c(4350): warning C4047: 'function' : 'map_session_data *' differs in levels of indirection from 'int'
-     1>c:\users\administrator\desktop\myway\src\map\skill.c(4350): warning C4024: 'skill_get_cooldown' : different types for formal and actual parameter 1
+     1>c:\users\administrator\desktop\myway\src\map\skill.c(4373): warning C4047: 'function' : 'map_session_data *' differs in levels of indirection from 'int'
+     1>c:\users\administrator\desktop\myway\src\map\skill.c(4373): warning C4024: 'skill_get_cooldown' : different types for formal and actual parameter 1
          searchstore.c
      1>c:\users\administrator\desktop\myway\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
@@ -81,10 +81,10 @@
      1>c:\users\administrator\desktop\myway\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\script.c(1000): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\script.c(1980): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\script.c(7825): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\script.c(8985): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\script.c(9989): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\script.c(11095): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\script.c(7830): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\script.c(8989): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\script.c(10001): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\script.c(11094): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
          quest.c
      1>c:\users\administrator\desktop\myway\src\common\version.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
@@ -113,12 +113,13 @@
      1>c:\users\administrator\desktop\myway\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\pc.c(1021): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\pc.c(1881): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\pc.c(1024): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\pc.c(1880): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\pc.c(3762): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\pc.c(6493): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\pc.c(7428): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\pc.c(8426): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\pc.c(4659): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\pc.c(6469): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\pc.c(7421): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\pc.c(8405): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
          path.c
      1>c:\users\administrator\desktop\myway\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
@@ -198,8 +199,8 @@
      1>c:\users\administrator\desktop\myway\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\map.c(988): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\map.c(1971): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\map.c(3049): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\map.c(1973): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\map.c(3051): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
          mail.c
      1>c:\users\administrator\desktop\myway\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
@@ -274,10 +275,10 @@
      1>c:\users\administrator\desktop\myway\src\map\clif.c(6338): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\clif.c(7442): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\clif.c(8525): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\clif.c(10347): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\clif.c(11345): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\clif.c(12403): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\clif.c(15328): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\clif.c(10342): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\clif.c(11333): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\clif.c(12396): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\clif.c(15315): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
          chrif.c
      1>c:\users\administrator\desktop\myway\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
@@ -319,7 +320,7 @@
      1>c:\users\administrator\desktop\myway\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
-     1>c:\users\administrator\desktop\myway\src\map\battle.c(4796): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+     1>c:\users\administrator\desktop\myway\src\map\battle.c(4798): warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
          atcommand.c
      1>c:\users\administrator\desktop\myway\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
      1>c:\users\administrator\desktop\myway\src\map\battle.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
@@ -336,7 +337,7 @@
          strlib.c
          sql.c
          Generating Code...
-     1>c:\users\administrator\desktop\myway\src\map\battle.c(2307): warning C4700: uninitialized local variable 'ratio' used
+     1>c:\users\administrator\desktop\myway\src\map\battle.c(2315): warning C4700: uninitialized local variable 'ratio' used
          Compiling...
          socket.c
          showmsg.c
@@ -480,4 +481,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:29.61
+Time Elapsed 00:00:17.79

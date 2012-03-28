@@ -72,6 +72,18 @@ const struct sg_data sg_info[MAX_PC_FEELHATE] = {
 		{ SG_STAR_ANGER, SG_STAR_BLESS, SG_STAR_COMFORT, "PC_FEEL_STAR", "PC_HATE_MOB_STAR", is_day_of_star }
 	};
 
+/**
+ * Item Cool Down Delay Saving
+ * Struct item_cd is not a member of struct map_session_data
+ * to keep cooldowns in memory between player log-ins.
+ * All cooldowns are reset when server is restarted.
+ **/
+DBMap* itemcd_db = NULL; // char_id -> struct skill_cd
+struct item_cd {
+	unsigned int tick[MAX_ITEMDELAYS];//tick
+	short nameid[MAX_ITEMDELAYS];//skill id
+};
+
 //PVP Area by Mr.Postman
 void pc_setpvparea(struct map_session_data* sd, bool flag)
 {
@@ -1261,6 +1273,10 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 		// Fixes login-without-aura glitch (the screen won't blink at this point, don't worry :P)
 		clif_changemap(sd,sd->mapindex,sd->bl.x,sd->bl.y);
 	}
+	/**
+	 * Check if player have any item cooldowns on
+	 **/
+	pc_itemcd_do(sd,true);
 
 	// Request all registries (auth is considered completed whence they arrive)
 	intif_request_registry(sd,7);
@@ -1558,6 +1574,10 @@ int pc_calc_skilltree(struct map_session_data *sd)
 					(inf2&INF2_SPIRIT_SKILL && !sd->sc.data[SC_SPIRIT])
 				))
 					continue; //Cannot be learned via normal means. Note this check DOES allows raising already known skills.
+				
+				/* This thing is present in all skill trees (for whatever reason) and it crashes if gm w/o PC_PERM_ALL_SKILL uses @allskills */
+				if( id == ALL_BUYING_STORE )
+					continue;
 
 				sd->status.skill[id].id = id;
 
@@ -4566,12 +4586,22 @@ int pc_useitem(struct map_session_data *sd,int n)
 
 	if( sd->inventory_data[n]->delay > 0 ) { // Check if there is a delay on this item [Paradox924X]
 		ARR_FIND(0, MAX_ITEMDELAYS, i, sd->item_delay[i].nameid == nameid || !sd->item_delay[i].nameid);
-		if( i < MAX_ITEMDELAYS )
-		{
-			if( sd->item_delay[i].nameid )
-			{// found
-				if( DIFF_TICK(sd->item_delay[i].tick, tick) > 0 )
+		if( i < MAX_ITEMDELAYS ) {
+			if( sd->item_delay[i].nameid ) {// found
+				if( DIFF_TICK(sd->item_delay[i].tick, tick) > 0 ) {
+					int e_tick = DIFF_TICK(sd->item_delay[i].tick, tick)/1000;
+					char e_msg[100];
+					if( e_tick > 99 )
+						sprintf(e_msg,"Item Failed. [%s] is cooling down. wait %.1f minutes.",
+										itemdb_jname(sd->status.inventory[n].nameid),
+										(double)e_tick / 60);
+					else
+						sprintf(e_msg,"Item Failed. [%s] is cooling down. wait %d seconds.",
+										itemdb_jname(sd->status.inventory[n].nameid),
+										e_tick);
+					clif_displaymessage (sd->fd, e_msg);
 					return 0; // Delay has not expired yet
+				}
 			}
 			else
 			{// not yet used item (all slots are initially empty)
@@ -4582,6 +4612,13 @@ int pc_useitem(struct map_session_data *sd,int n)
 		else
 		{// should not happen
 			ShowError("pc_useitem: Exceeded item delay array capacity! (nameid=%d, char_id=%d)\n", nameid, sd->status.char_id);
+		}
+		//clean up used delays so we can give room for more
+		for(i = 0; i < MAX_ITEMDELAYS; i++) {
+			if( DIFF_TICK(sd->item_delay[i].tick, tick) <= 0 ) {
+				sd->item_delay[i].tick = 0;
+				sd->item_delay[i].nameid = 0;
+			}
 		}
 	}
 
@@ -7019,8 +7056,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
   	{
 		unsigned int next = pc_nextbaseexp(sd);
 		if( next == 0 ) next = pc_thisbaseexp(sd);
-		if( get_percentage(sd->status.base_exp,next) >= 99 && !map_flag_gvg(sd->bl.m) )
-		{
+		if( get_percentage(sd->status.base_exp,next) >= 99 ) {
 			sd->state.snovice_dead_flag = 1;
 			pc_setstand(sd);
 			status_percent_heal(&sd->bl, 100, 100);
@@ -9611,17 +9647,53 @@ int pc_read_motd(void)
 	
 	return 0;
 }
-
+void pc_itemcd_do(struct map_session_data *sd, bool load) {
+	int i,cursor = 0;
+	struct item_cd* cd = NULL;
+	
+	if( load ) {
+		if( !(cd = idb_get(itemcd_db, sd->status.char_id)) ) {
+			// no skill cooldown is associated with this character
+			return;
+		}
+		for(i = 0; i < MAX_ITEMDELAYS; i++) {
+			if( cd->nameid[i] && DIFF_TICK(gettick(),cd->tick[i]) < 0 ) {
+				sd->item_delay[cursor].tick = cd->tick[i];
+				sd->item_delay[cursor].nameid = cd->nameid[i];
+				cursor++;
+			}
+		}
+		idb_remove(itemcd_db,sd->status.char_id);
+	} else {
+		if( !(cd = idb_get(itemcd_db,sd->status.char_id)) ) {
+			// create a new skill cooldown object for map storage
+			CREATE( cd, struct item_cd, 1 );
+			idb_put( itemcd_db, sd->status.char_id, cd );
+		}
+		for(i = 0; i < MAX_ITEMDELAYS; i++) {
+			if( sd->item_delay[i].nameid && DIFF_TICK(gettick(),sd->item_delay[i].tick) < 0 ) {
+				cd->tick[cursor] = sd->item_delay[i].tick;
+				cd->nameid[cursor] = sd->item_delay[i].nameid;
+				cursor++;
+			}
+		}
+	}
+	return;
+}
 /*==========================================
  * pc? åWèâä˙âª
  *------------------------------------------*/
-void do_final_pc(void)
-{
+void do_final_pc(void) {
+
+	db_destroy(itemcd_db);
+
 	return;
 }
 
-int do_init_pc(void)
-{
+int do_init_pc(void) {
+
+	itemcd_db = idb_alloc(DB_OPT_RELEASE_DATA);
+
 	pc_readdb();
 	pc_read_motd(); // Read MOTD [Valaris]
 

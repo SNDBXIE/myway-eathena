@@ -534,7 +534,6 @@ extern struct Battle_Config
 
 	//PVP Area by Mr.Postman
 	int deathmatch;
-	int nosupport;
 	
 	// Guardian show Guild name
 	int guardianguild;

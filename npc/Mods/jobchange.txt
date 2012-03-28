@@ -13,7 +13,7 @@
 					menu "1st Class",LFirstClass,"Baby Class",LBabyClass;
 				if((class >= 1 && class <=6) || class == 23 || class == 4046)
 					goto LSecondClass;
-				if((class >=7 && class <= 21)
+				if(class >=7 && class <= 21)
 					menu "Hi-Class",LHighClass,"3rd Class",LThirdClass;
 				if(class >=4001 && class <= 4007)
 					goto LHighClass;
@@ -29,7 +29,7 @@
 				goto LPlatinum;
 				close;
 			case 4:
-				switch(select("Reset Status:Reset Skill"){
+				switch(select("Reset Status:Reset Skill")){
 					case 1:
 						goto LRestat;
 						close;
