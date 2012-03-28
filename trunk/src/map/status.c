@@ -511,7 +511,7 @@ void initChangeTables(void)
 	set_sc( SR_RAISINGDRAGON            , SC_RAISINGDRAGON        , SI_RAISINGDRAGON            , SCB_REGEN|SCB_MAXHP|SCB_MAXSP|SCB_ASPD );
 	set_sc( SR_GENTLETOUCH_ENERGYGAIN   , SC_GT_ENERGYGAIN        , SI_GENTLETOUCH_ENERGYGAIN   , SCB_NONE );
 	set_sc( SR_GENTLETOUCH_CHANGE       , SC_GT_CHANGE            , SI_GENTLETOUCH_CHANGE       , SCB_BATK|SCB_ASPD|SCB_MDEF|SCB_MAXHP );
-	set_sc( SR_GENTLETOUCH_REVITALIZE   , SC_GT_REVITALIZE        , SI_GENTLETOUCH_REVITALIZE   , SCB_MAXHP|SCB_DEF2|SCB_REGEN|SCB_SPEED );
+	set_sc( SR_GENTLETOUCH_REVITALIZE   , SC_GT_REVITALIZE        , SI_GENTLETOUCH_REVITALIZE   , SCB_MAXHP|SCB_VIT|SCB_DEF2|SCB_REGEN|SCB_SPEED );
 
 	set_sc( WA_SWING_DANCE                , SC_SWINGDANCE              , SI_SWINGDANCE                , SCB_SPEED|SCB_ASPD );
 	set_sc( WA_SYMPHONY_OF_LOVER          , SC_SYMPHONYOFLOVER         , SI_SYMPHONYOFLOVERS          , SCB_MDEF );
@@ -4165,6 +4165,8 @@ static unsigned short status_calc_vit(struct block_list *bl, struct status_chang
 		vit += sc->data[SC_INSPIRATION]->val2;
 	if(sc->data[SC_STOMACHACHE])
 		vit -= sc->data[SC_STOMACHACHE]->val1;
+	if(sc->data[SC_GT_REVITALIZE])
+		vit += sc->data[SC_GT_REVITALIZE]->val1;
 
 	return (unsigned short)cap_value(vit,0,USHRT_MAX);
 }
@@ -7485,49 +7487,50 @@ int status_change_start(struct block_list* bl,enum sc_type type,int rate,int val
 
 		case SC_COMBO:
 		{
-			//val1: Skill ID
-			//val2: When given, target (for autotargetting skills)
-			//val3: When set, this combo time should NOT delay attack/movement
-			//val4: Combo time
-			struct unit_data *ud = unit_bl2ud(bl);
-			switch (val1) {
-				case TK_STORMKICK:
-					clif_skill_nodamage(bl,bl,TK_READYSTORM,1,1);
-					break;
-				case TK_DOWNKICK:
-					clif_skill_nodamage(bl,bl,TK_READYDOWN,1,1);
-					break;
-				case TK_TURNKICK:
-					clif_skill_nodamage(bl,bl,TK_READYTURN,1,1);
-					break;
-				case TK_COUNTER:
-					clif_skill_nodamage(bl,bl,TK_READYCOUNTER,1,1);
-					break;
-				case MO_COMBOFINISH:
-				case CH_TIGERFIST:
-				case CH_CHAINCRUSH:
-				case SR_DRAGONCOMBO:
-					if( sd )
-					{
-						sd->state.combo = 1;
-						clif_skillinfoblock(sd);
-					}
-					break;
-				case TK_JUMPKICK:
-					if( sd )
-					{
-						sd->state.combo = 2;
-						clif_skillinfoblock(sd);
-					}
-					break;
+				//val1: Skill ID
+				//val2: When given, target (for autotargetting skills)
+				//val3: When set, this combo time should NOT delay attack/movement
+				//val4: Combo time
+				struct unit_data *ud = unit_bl2ud(bl);
+				switch (val1) {
+					case TK_STORMKICK:
+						clif_skill_nodamage(bl,bl,TK_READYSTORM,1,1);
+						break;
+					case TK_DOWNKICK:
+						clif_skill_nodamage(bl,bl,TK_READYDOWN,1,1);
+						break;
+					case TK_TURNKICK:
+						clif_skill_nodamage(bl,bl,TK_READYTURN,1,1);
+						break;
+					case TK_COUNTER:
+						clif_skill_nodamage(bl,bl,TK_READYCOUNTER,1,1);
+						break;
+					case MO_COMBOFINISH:
+					case CH_TIGERFIST:
+					case CH_CHAINCRUSH:
+					case SR_DRAGONCOMBO:
+						if( sd )
+						{
+							sd->state.combo = 1;
+							clif_skillinfoblock(sd);
+						}
+						break;
+					case TK_JUMPKICK:
+						if( sd )
+						{
+							sd->state.combo = 2;
+							clif_skillinfoblock(sd);
+						}
+						break;
+				}
+				if (ud && !val3) 
+				{
+					ud->attackabletime = gettick()+tick;
+					unit_set_walkdelay(bl, gettick(), tick, 1);
+				}
+				val3 = 0;
+				val4 = tick; //Store combo-time in val4.
 			}
-			if (ud && !val3) 
-			{
-				ud->attackabletime = gettick()+tick;
-				unit_set_walkdelay(bl, gettick(), tick, 1);
-			}
-			val4 = tick; //Store combo-time in val4.
-		}
 			break;
 		case SC_EARTHSCROLL:
 			val2 = 11-val1; //Chance to consume: 11-skilllv%

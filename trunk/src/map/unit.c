@@ -873,20 +873,6 @@ int unit_skilluse_id(struct block_list *src, int target_id, short skill_num, sho
 {
 	if(skill_num < 0) return 0;
 
-	//PVP Area by Mr.Postman
-	if( battle_config.nosupport)
-	{
-		struct map_session_data* sd		= map_id2sd(src->id);
-		struct map_session_data* dstsd	= map_id2sd(target_id);
-	 	struct block_list *target;
-		
-		target = map_id2bl(target_id);
-
-		if( src->id != target_id && target->type == BL_PC)
-			if( !sd->pvp && dstsd->pvp)
-				return 0;
-	}
-
 	return unit_skilluse_id2(
 		src, target_id, skill_num, skill_lv,
 		skill_castfix(src, skill_num, skill_lv),

@@ -546,7 +546,7 @@ int skillnotok(int skillid, struct map_session_data *sd)
 	// This code will compare the player's attack motion value which is influenced by ASPD before
 	// allowing a skill to be cast. This is to prevent no-delay ACT files from spamming skills such as
 	// AC_DOUBLE which do not have a skill delay and are not regarded in terms of attack motion.
-	if( sd->skillitem != skillid && sd->canskill_tick &&
+	if( !sd->state.autocast && sd->skillitem != skillid && sd->canskill_tick &&
 		DIFF_TICK(gettick(), sd->canskill_tick) < (sd->battle_status.amotion * (100 + battle_config.skill_amotion_leniency) / 100) )
 	{// attempted to cast a skill before the attack motion has finished
 			return 1;
@@ -1135,7 +1135,7 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, int 
 		break;
 	case GS_BULLSEYE: //0.1% coma rate.
 		if(tstatus->race == RC_BRUTE || tstatus->race == RC_DEMIHUMAN)
-			status_change_start(bl,SC_COMA,10,skilllv,0,0,0,0,0);
+			status_change_start(bl,SC_COMA,10,skilllv,0,src->id,0,0,0);
 		break;
 	case GS_PIERCINGSHOT:
 		sc_start(bl,SC_BLEEDING,(skilllv*3),skilllv,skill_get_time2(skillid,skilllv));
@@ -1255,12 +1255,18 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, int 
 		sc_start(bl, SC_STUN, rate, skilllv, skill_get_time(skillid,skilllv));
 		break;	
 	case LG_PINPOINTATTACK:
-		rate = (30 + skilllv * 5 + (sstatus->agi + status_get_lv(src)))/10;
-		switch( skilllv )
-		{
-			case 1: sc_start(bl,SC_BLEEDING,rate,skilllv,skill_get_time(skillid,skilllv)); break;
-			case 2: if( dstsd && dstsd->spiritball && rand()%100 < rate ) pc_delspiritball(dstsd, dstsd->spiritball, 0); break;
-			default: skill_break_equip(bl,(skilllv == 3) ? EQP_SHIELD : (skilllv == 4) ? EQP_ARMOR : EQP_WEAPON,rate * 100,BCT_ENEMY); break;
+		rate = 30 + (((5 * (sd?pc_checkskill(sd,LG_PINPOINTATTACK):skilllv)) + (sstatus->agi + status_get_lv(src))) / 10);
+		switch( skilllv ) {
+			case 1:
+				sc_start(bl,SC_BLEEDING,rate,skilllv,skill_get_time(skillid,skilllv));
+				break;
+			case 2:
+				if( dstsd && dstsd->spiritball && rand()%100 < rate )
+					pc_delspiritball(dstsd, dstsd->spiritball, 0);
+				break;
+			default:
+				skill_break_equip(bl,(skilllv == 3) ? EQP_SHIELD : (skilllv == 4) ? EQP_ARMOR : EQP_WEAPON,rate * 100,BCT_ENEMY);
+				break;
 		}
 		break;
 	case LG_MOONSLASHER:
@@ -1414,7 +1420,7 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, int 
 			rate += sd->weapon_coma_race[tstatus->race];
 			rate += sd->weapon_coma_race[tstatus->mode&MD_BOSS?RC_BOSS:RC_NONBOSS];
 			if (rate)
-				status_change_start(bl, SC_COMA, rate, 0, 0, 0, 0, 0, 0);
+				status_change_start(bl, SC_COMA, rate, 0, 0, src->id, 0, 0, 0);
 		}
 		if( sd && battle_config.equip_self_break_rate )
 		{	// Self weapon breaking
@@ -1458,7 +1464,7 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, int 
 	{
 		struct block_list *tbl;
 		struct unit_data *ud;
-		int i, skilllv, type;
+		int i, skilllv, type, notok;
 
 		for (i = 0; i < ARRAYLENGTH(sd->autospell) && sd->autospell[i].id; i++) {
 
@@ -1469,7 +1475,11 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, int 
 
 			skill = (sd->autospell[i].id > 0) ? sd->autospell[i].id : -sd->autospell[i].id;
 
-			if (skillnotok(skill, sd))
+			sd->state.autocast = 1;
+			notok = skillnotok(skill, sd);
+			sd->state.autocast = 0;
+
+			if ( notok )
 				continue;
 
 			skilllv = sd->autospell[i].lv?sd->autospell[i].lv:1;
@@ -1613,7 +1623,7 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, int 
 
 int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, int skillid, unsigned int tick)
 {
-	int skill, skilllv, i, type;
+	int skill, skilllv, i, type, notok;
 	struct block_list *tbl;
 
 	if( sd == NULL || skillid <= 0 )
@@ -1628,7 +1638,12 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, int s
 			continue;  // autospell already being executed
 
 		skill = (sd->autospell3[i].id > 0) ? sd->autospell3[i].id : -sd->autospell3[i].id;
-		if( skillnotok(skill, sd) )
+
+		sd->state.autocast = 1;
+		notok = skillnotok(skill, sd);
+		sd->state.autocast = 0;
+
+		if ( notok )
 			continue;
 
 		skilllv = sd->autospell3[i].lv ? sd->autospell3[i].lv : 1;
@@ -1682,6 +1697,7 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, int s
 		}
 		sd->autospell3[i].lock = false;
 		sd->state.autocast = 0;
+		skill_onskillusage(sd, bl, skill, tick);
 	}
 
 	if( sd && sd->autobonus3[0].rate )
@@ -1829,7 +1845,7 @@ int skill_counter_additional_effect (struct block_list* src, struct block_list *
 	{
 		struct block_list *tbl;
 		struct unit_data *ud;
-		int i, skillid, skilllv, rate, type;
+		int i, skillid, skilllv, rate, type, notok;
 
 		for (i = 0; i < ARRAYLENGTH(dstsd->autospell2) && dstsd->autospell2[i].id; i++) {
 
@@ -1846,7 +1862,11 @@ int skill_counter_additional_effect (struct block_list* src, struct block_list *
 			if (attack_type&BF_LONG)
 				 rate>>=1;
 
-			if (skillnotok(skillid, dstsd))
+			dstsd->state.autocast = 1;
+			notok = skillnotok(skillid, dstsd);
+			dstsd->state.autocast = 0;
+
+			if ( notok )
 				continue;
 			if (rand()%1000 >= rate)
 				continue;
@@ -2254,7 +2274,10 @@ int skill_attack(int attack_type, struct block_list* src, struct block_list *dsr
 			sd = BL_CAST(BL_PC, src);
 			tsd = BL_CAST(BL_PC, bl);
 			sc = status_get_sc(bl);
-			if (sc && !sc->count) sc = NULL; //Don't need it.
+			if (sc && !sc->count)
+				sc = NULL; //Don't need it.
+			/* bugreport:2564 flag&2 disables double casting trigger */
+			flag |= 2;
 
 			//Spirit of Wizard blocks Kaite's reflection
 			if( type == 2 && sc && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_WIZARD )
@@ -4253,7 +4276,7 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, int 
 			int heal = skill_attack(skill_get_type(skillid), src, src, bl, skillid, skilllv, tick, flag);
 			int rate = 70 + 4 * skilllv + ( sd ? sd->status.job_level : 50 ) / 5;
 
-			heal = 8 * skilllv;
+			heal = (heal * 8 * skilllv) / 100;
 			if( status_get_lv(src) > 100 ) heal = heal * status_get_lv(src) / 100;	// Base level bonus.
 
 			if( bl->type == BL_SKILL )
@@ -6533,10 +6556,14 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, in
 		break;
 	case AM_TWILIGHT3:
 		if (sd) {
+			int ebottle = pc_search_inventory(sd,713);
+			if( ebottle >= 0 )
+				ebottle = sd->status.inventory[ebottle].amount;
 			//check if you can produce all three, if not, then fail:
 			if (!skill_can_produce_mix(sd,970,-1, 100) //100 Alcohol
 				|| !skill_can_produce_mix(sd,7136,-1, 50) //50 Acid Bottle
 				|| !skill_can_produce_mix(sd,7135,-1, 50) //50 Flame Bottle
+				|| ebottle < 200 //200 empty bottle are required at total.
 			) {
 				clif_skill_fail(sd,skillid,0,0,0);
 				break;
@@ -9119,6 +9146,16 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, in
 			sc_start(bl,type,100,skilllv,skill_get_time(skillid,skilllv));
 			break;
 
+	case GM_SANDMAN:
+		if( tsc ) {
+			if( tsc->opt1 == OPT1_SLEEP )
+				tsc->opt1 = 0;
+			else
+				tsc->opt1 = OPT1_SLEEP;
+			clif_changeoption(bl);
+			clif_skill_nodamage (src, bl, skillid, skilllv, 1);
+		}
+		break; 
 	default:
 		ShowWarning("skill_castend_nodamage_id: Unknown skill used:%d\n",skillid);
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
@@ -12586,7 +12623,7 @@ int skill_check_condition_castbegin(struct map_session_data* sd, short skill, sh
 	case TK_COUNTER:
 		if ((sd->class_&MAPID_UPPERMASK) == MAPID_SOUL_LINKER)
 			return 0; //Anti-Soul Linker check in case you job-changed with Stances active.
-		if(!(sc && sc->data[SC_COMBO]))
+		if(!(sc && sc->data[SC_COMBO]) || sc->data[SC_COMBO]->val1 == TK_JUMPKICK)
 			return 0; //Combo needs to be ready
 		if (pc_famerank(sd->status.char_id,MAPID_TAEKWON))
 		{	//Unlimited Combo
@@ -13218,14 +13255,6 @@ int skill_check_condition_castend(struct map_session_data* sd, short skill, shor
 	case PR_BENEDICTIO:
 		skill_check_pc_partner(sd, skill, &lv, 1, 1);
 		break;
-	case AB_ADORAMUS:
-		if( skill_check_pc_partner(sd,skill,&lv, 1, 2) )
-			sd->state.no_gemstone = 1; // Mark this skill as it don't consume ammo because partners gives SP
-		break;
-	case WL_COMET:
-		if( skill_check_pc_partner(sd,skill,&lv, 1, 0) )
-			sd->state.no_gemstone = 1; // No need to consume 2 Red Gemstones if there are partners near
-		break;
 	case AM_CANNIBALIZE:
 	case AM_SPHEREMINE:
 	{
@@ -13509,6 +13538,14 @@ struct skill_condition skill_get_requirement(struct map_session_data* sd, short 
 			break;
 		case WZ_FIREPILLAR: // celest
 			if (lv <= 5)	// no gems required at level 1-5
+				continue;
+			break;
+		case AB_ADORAMUS:
+			if( itemid_isgemstone(skill_db[j].itemid[i]) && skill_check_pc_partner(sd,skill,&lv, 1, 2) )
+				continue;
+			break;
+		case WL_COMET:
+			if( itemid_isgemstone(skill_db[j].itemid[i]) && skill_check_pc_partner(sd,skill,&lv, 1, 0) )
 				continue;
 			break;
 		case GN_FIRE_EXPANSION:

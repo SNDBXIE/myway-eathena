@@ -502,7 +502,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,struct Damag
 			status_change_end(bl, SC_SAFETYWALL, INVALID_TIMER);
 		}
 
-		if( ((sc->data[SC_PNEUMA] || sc->data[SC_NEUTRALBARRIER]) && (flag&(BF_MAGIC|BF_LONG)) == BF_LONG && skill_num != AC_SHOWER) || sc->data[SC__MANHOLE] )
+		if( (sc->data[SC_PNEUMA] && (flag&(BF_MAGIC|BF_LONG)) == BF_LONG && skill_num != AC_SHOWER) || sc->data[SC__MANHOLE] )
 		{
 			d->dmg_lv = ATK_BLOCK;
 			return 0;
@@ -586,7 +586,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,struct Damag
 			return 0;
 		}
 		
-		if(sc->data[SC_DODGE] && !sc->opt1 &&
+		if(sc->data[SC_DODGE] && ( !sc->opt1 || sc->opt1 == OPT1_BURNING ) &&
 			(flag&BF_LONG || sc->data[SC_SPURT])
 			&& rand()%100 < 20 && skill_num != RK_DRAGONBREATH)
 		{
@@ -610,6 +610,11 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,struct Damag
 		if(sc->data[SC_TATAMIGAESHI] && (flag&(BF_MAGIC|BF_LONG)) == BF_LONG && skill_num != RK_DRAGONBREATH)
 			return 0;
 
+		if( sc->data[SC_NEUTRALBARRIER] && (flag&(BF_MAGIC|BF_LONG)) == (BF_MAGIC|BF_LONG) ) {
+			d->dmg_lv = ATK_MISS;
+			return 0;
+		}
+		
 		if((sce=sc->data[SC_KAUPE]) && rand()%100 < sce->val2 && skill_num != RK_DRAGONBREATH)
 		{	//Kaupe blocks damage (skill or otherwise) from players, mobs, homuns, mercenaries.
 			clif_specialeffect(bl, 462, AREA);
@@ -674,13 +679,16 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,struct Damag
 				status_change_end( bl,SC_RAID,-1 );
 		}
 
-		if( sc->data[SC_DEEPSLEEP] )
-		{
-			damage += damage / 2; // 1.5 times more damage while in Deep Sleep.
-			status_change_end(bl,SC_DEEPSLEEP,-1);
+		if( damage ) {
+
+			if( sc->data[SC_DEEPSLEEP] ) {
+				damage += damage / 2; // 1.5 times more damage while in Deep Sleep.
+				status_change_end(bl,SC_DEEPSLEEP,-1);
+			}
+
+			if( sc->data[SC_VOICEOFSIREN] )
+				status_change_end(bl,SC_VOICEOFSIREN,-1);
 		}
-		if( sc->data[SC_VOICEOFSIREN] && damage > 0)
-			status_change_end(bl,SC_VOICEOFSIREN,-1);
 
 		if( sc->data[SC_DEFENDER] && ( (flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON) || skill_num == RK_DRAGONBREATH ))
 			damage = damage * (100 - sc->data[SC_DEFENDER]->val2) / 100;
@@ -3347,6 +3355,9 @@ static struct Damage battle_renewal_calc_weapon_attack(struct block_list *src,st
 				wd.damage2 += battle_attr_fix(src, target, damage, sc->data[SC_WATK_ELEMENT]->val1, tstatus->def_ele, tstatus->ele_lv);
 			}
 		}
+
+		if ( skill_num == CR_SHIELDBOOMERANG )
+			s_ele = s_ele_ = ELE_NEUTRAL;
 	}
 
 	if(skill_num == CR_GRANDCROSS || skill_num == NPC_GRANDDARKNESS)
@@ -5429,7 +5440,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	switch( target->type )
 	{ // Checks on actual target
 		case BL_PC:
-			if (((TBL_PC*)target)->invincible_timer != INVALID_TIMER || pc_isinvisible((TBL_PC*)target) || ((TBL_PC*)target)->sc.data[SC__MANHOLE])
+			if (((TBL_PC*)target)->invincible_timer != INVALID_TIMER || pc_isinvisible((TBL_PC*)target))
 				return -1; //Cannot be targeted yet.
 			break;
 		case BL_MOB:
@@ -6147,8 +6158,6 @@ static const struct _battle_data {
 	{ "guardianguild",           &battle_config.guardianguild,         1,     0,      1,              },
 //PVP Area by Mr.Postman
 	{ "deathmatch",							&battle_config.deathmatch,						0,		0,		1,				},
-	{ "nosupport",							&battle_config.nosupport,						1,		0,		1,				},
-
 };
 
 

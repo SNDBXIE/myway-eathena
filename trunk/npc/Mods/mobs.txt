@@ -84,18 +84,3 @@ bossnia_01,0,0,0,0	monster	Hardrock Mammoth	1990,1,3600000,3600000,1
 bossnia_01,0,0,0,0	monster	Tendril Lion	1991,1,3600000,3600000,1
 bossnia_01,0,0,0,0	monster	Nidhoggr's Shadow	2022,1,3600000,3600000,1
 bossnia_01,0,0,0,0	monster	Poring V	1502,1,3600000,3600000,1
-
-//InW Dung
-que_san04,0,0,0,0	monster	GameMaster InW	2900,1,3600000,3600000,1
-que_san04,0,0,0,0	monster	Rune Knight InW	2901,3,0,0,0
-que_san04,0,0,0,0	monster	Guillotine Cross InW	2902,3,0,0,0
-que_san04,0,0,0,0	monster	Ranger InW	2903,3,0,0,0
-que_san04,0,0,0,0	monster	Arch Bishop InW	2904,3,0,0,0
-que_san04,0,0,0,0	monster	Warlock InW	2905,3,0,0,0
-que_san04,0,0,0,0	monster	Mechanic InW	2906,3,0,0,0
-que_san04,0,0,0,0	monster	Royal Guard InW	2907,3,0,0,0
-que_san04,0,0,0,0	monster	Shadow Chaser InW	2908,3,0,0,0
-que_san04,0,0,0,0	monster	Sura InW	2909,3,0,0,0
-que_san04,0,0,0,0	monster	Sorcerer InW	2910,3,0,0,0
-que_san04,0,0,0,0	monster	Genetic InW	2911,3,0,0,0
-
