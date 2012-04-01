@@ -3406,7 +3406,7 @@ static void script_attach_state(struct script_state* st)
 		sd->st = st;
 		sd->npc_id = st->oid;
 		if( sd->npc_idle_timer == INVALID_TIMER )
-			sd->npc_idle_timer = add_timer(gettick() + (SECURE_NPCTIMEOUT_INTERVAL*1000),npc_rr_secure_timeout_timer,sd->bl.id,0);
+			sd->npc_idle_timer = add_timer(gettick() + (battle_config.npc_timeout_interval*1000),npc_rr_secure_timeout_timer,sd->bl.id,0);
 		sd->npc_idle_tick = gettick();
 	}
 }

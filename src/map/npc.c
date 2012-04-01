@@ -212,7 +212,7 @@ int npc_rr_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t dat
 		if( sd ) sd->npc_idle_timer = INVALID_TIMER;
 		return 0;//Not logged in anymore OR no longer attached to a npc
 	}
-	if( DIFF_TICK(tick,sd->npc_idle_tick) > (SECURE_NPCTIMEOUT*1000) ) {
+	if( DIFF_TICK(tick,sd->npc_idle_tick) > (battle_config.npc_timeout*1000) ) {
 		/**
 		 * If we still have the NPC script attached, tell it to stop.
 		 **/
@@ -224,7 +224,7 @@ int npc_rr_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t dat
 		clif_scriptclose(sd,sd->npc_id);
 		sd->npc_idle_timer = INVALID_TIMER;
 	} else //Create a new instance of ourselves to continue
-		sd->npc_idle_timer = add_timer(gettick() + (SECURE_NPCTIMEOUT_INTERVAL*1000),npc_rr_secure_timeout_timer,sd->bl.id,0);
+		sd->npc_idle_timer = add_timer(gettick() + (battle_config.npc_timeout_interval*1000),npc_rr_secure_timeout_timer,sd->bl.id,0);
 	return 0;
 }
 /*==========================================
