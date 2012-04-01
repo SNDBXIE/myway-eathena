@@ -9331,6 +9331,28 @@ ACMD_FUNC(afk)
 		clif_displaymessage(fd, "AFK is not allowed on this map.");
 	return 0;
 }
+/*==========================================
+* @breakguild by Jaypee
+*——————————————*/
+ACMD_FUNC(guildbreak)
+{
+	struct guild *g;
+	nullpo_retr(-1,sd);
+	g=guild_search(sd->status.guild_id);
+	if(g==NULL)
+	{
+	  clif_displaymessage(fd, "You dont have a guild.");
+	  return -1;
+	}
+	if (strcmp(g->master, sd->status.name) != 0)
+	{
+	  clif_displaymessage(fd, "Only the guild master can break this guild.");
+	  return -1;
+	}
+	//Verified that the player is the guild master.
+	guild_broken(g->guild_id,0);
+	return 0;
+}
 
 /**
  * Fills the reference of available commands in atcommand DBMap
@@ -9584,6 +9606,7 @@ void atcommand_basecommands(void) {
 		{ "itemmap",           90,99,    atcommand_itemmap },
 		{ "seehp",              1,99,     atcommand_seehp },
 		{ "afk",				1,1,	 atcommand_afk },
+		{ "guildbreak",				0,99,	 atcommand_guildbreak },
 		/**
 		 * For Testing Purposes, not going to be here after we're done.
 		 **/

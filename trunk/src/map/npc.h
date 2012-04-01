@@ -11,9 +11,6 @@ struct block_list;
 struct npc_data;
 struct view_data;
 
-#define SECURE_NPCTIMEOUT 0
-#define SECURE_NPCTIMEOUT_INTERVAL 1
-
 struct npc_timerevent_list {
 	int timer,pos;
 };

@@ -9157,7 +9157,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 	if( sd->pd )
 	{
 		// Guildwar Observe by Mr.Postman
-		if( battle_config.pet_no_gvg && map_flag_gvg(sd->bl.m) || !sd->sc.data[SC_AUDIENCE] )
+		if( (battle_config.pet_no_gvg && map_flag_gvg(sd->bl.m)) || sd->sc.data[SC_AUDIENCE] )
 		{	//Return the pet to egg. [Skotlex]
 			clif_displaymessage(sd->fd, "Pets are not allowed in Guild Wars.");
 			pet_menu(sd, 3); //Option 3 is return to egg.

@@ -522,7 +522,9 @@ extern struct Battle_Config
 	int exp_penalty;
 	int drop_penalty;
 	int edp_renewal;
-	
+	int npc_timeout;
+	int npc_timeout_interval;
+
 	// Party Increased Drop Rate [WiseWarrior]
     int party_drop_bonus;
 
