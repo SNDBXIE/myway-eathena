@@ -1,0 +1,615 @@
+-	script	questcreate	-1,{
+	deletearray @item;
+	deletearray @useitem;
+	deletearray @countitem;
+	deletearray @rate;
+	set @zeny,0;
+	set @set,0;
+	
+	mes "[^FF4107นักประดิษฐ์^000000]";
+	mes "ข้าสามารถนำสิ่งของต่างๆมาประดิษฐ์ เป็นของใหม่ได้";
+	mes "ไม่ว่าจะเป็นเกราะหรืออาวุธ ข้าก็สามารถทำให้ท่านได้";
+	mes "ท่านต้องการให้ช้าช่วยอะไรหรือไม่";
+	next;
+	menu	"โอ้ ข้าอยากได้อาวุธ LV4 มาใช้งาน",L_WeaponCreate,"โอ้ ข้าอยากเพิ่มช่องใส่การ์ดให้กับของของข้า",L_Socket,"โอ้ ข้าอยากเพิ่มประสิทธิภาพของที่ใช้อยู่",L_Refine,"ไม่ละขอบคุณ",Lno;
+	
+L_WeaponCreate:
+	set @set,0;
+	mes "[^FF4107นักประดิษฐ์^000000]";
+	mes "ข้าสามารถสร้างอาวุธพิเศษให้แก่ท่านได้ จงบอกข้ามาว่าท่านต้องการสิ่งใด";
+	mes "ข้าขอเตือนท่านว่า^FF0000ของที่มีมากกว่า1 อย่างในช่องเดียวกันคือของที่สุ่มว่าจะได้ชิ้นใดในบรรทัดนั้นๆ ^000000";
+	next;
+	menu	"Immaterial Sword",Lwea4_1,
+		"Slash",Lwea4_2,
+		"Quadrille",Lwea4_3,
+		"Mailbreaker",Lwea4_4,
+		"Swordbreaker",Lwea4_5,
+		"Slaughter",Lwea4_6,
+		"Caesar's Sword",Lwea4_7,
+		"Talefing",Lwea4_8,
+		"Sabbath",Lwea4_9,
+		"Great Axe, Longinus's Spear",Lwea4_set1,
+		"Guillotine, Brionac",Lwea4_set2,
+		"Berserk, Tjungkuletti",Lwea4_set3,
+		"Rudra's Bow, Brocca",Lwea4_set4,
+		"Edge, Dragon Slayer",Lwea4_set5,
+		"Excalibur, Schweizersabel",Lwea4_set6,
+		"Byeollungum, Exorciser",Lwea4_set7,
+		"Combat Knife, Grand Cross",Lwea4_set8,
+		"Grimtooth,Mysteltainn,Executioner",Lwea5_set1,
+		"Violet Fear",Lwea6_set1,
+		"ไม่ละขอบใจ",Lno;
+		
+Lwea4_1:
+	setarray @item[0],1141;
+	setarray @useitem[0],7295,969,999,714;
+	setarray @countitem[0],30,10,50,10;
+	goto L_Make;
+
+Lwea4_2:
+	setarray @item[0],1526;
+	setarray @useitem[0],7294,969,999,714;
+	setarray @countitem[0],30,10,50,10;
+	goto L_Make;
+
+Lwea4_3:
+	setarray @item[0],1527;
+	setarray @useitem[0],7291,969,999,714;
+	setarray @countitem[0],30,10,50,10;
+	goto L_Make;
+
+Lwea4_4:
+	setarray @item[0],1225;
+	setarray @useitem[0],7292,969,999,714;
+	setarray @countitem[0],30,10,50,10;
+	goto L_Make;
+	
+Lwea4_5:
+	setarray @item[0],1224;
+	setarray @useitem[0],7297,969,999,714;
+	setarray @countitem[0],30,10,50,10;
+	goto L_Make;
+
+Lwea4_6:
+	setarray @item[0],1367;
+	setarray @useitem[0],7296,969,999,714;
+	setarray @countitem[0],30,10,50,10;
+	goto L_Make;
+
+Lwea4_7:
+	setarray @item[0],1134;
+	setarray @useitem[0],7290,969,999,714;
+	setarray @countitem[0],30,10,50,10;
+	goto L_Make;
+
+Lwea4_8:
+	setarray @item[0],1139;
+	setarray @useitem[0],7289,969,999,714;
+	setarray @countitem[0],30,10,50,10;
+	goto L_Make;
+
+Lwea4_9:
+	setarray @item[0],1365;
+	setarray @useitem[0],7293,969,999,714;
+	setarray @countitem[0],30,10,50,10;
+	goto L_Make;
+	
+Lwea4_set1:
+	setarray @item[0],1364,1469;
+	setarray @useitem[0],7289,7294,7291,1005,988,710,969;
+	setarray @countitem[0],30,30,30,2,1,10,20;
+	goto L_Make;
+
+Lwea4_set2:
+	setarray @item[0],1369,1470;
+	setarray @useitem[0],7290,7296,7293,1005,988,710,969;
+	setarray @countitem[0],30,30,30,2,1,10,20;
+	goto L_Make;
+
+Lwea4_set3:
+	setarray @item[0],1814,1416;
+	setarray @useitem[0],7292,7293,7289,1005,988,710,969;
+	setarray @countitem[0],30,30,30,2,1,10,20;
+	goto L_Make;
+
+Lwea4_set4:
+	setarray @item[0],1720,1415;
+	setarray @useitem[0],7297,7291,7295,1005,988,710,969;
+	setarray @countitem[0],30,30,30,2,1,10,20;
+	goto L_Make;
+
+Lwea4_set5:
+	setarray @item[0],1132,1166;
+	setarray @useitem[0],7294,7297,7293,1005,988,710,969;
+	setarray @countitem[0],30,30,30,2,1,10,20;
+	goto L_Make;
+
+Lwea4_set6:
+	setarray @item[0],1137,1167;
+	setarray @useitem[0],7295,7296,7290,1005,988,710,969;
+	setarray @countitem[0],30,30,30,2,1,10,20;
+	goto L_Make;
+
+Lwea4_set7:
+	setarray @item[0],1140,1233;
+	setarray @useitem[0],7292,7291,7295,1005,988,710,969;
+	setarray @countitem[0],30,30,30,2,1,10,20;
+	goto L_Make;
+
+Lwea4_set8:
+	setarray @item[0],1228,1528;
+	setarray @useitem[0],7296,7294,7290,1005,988,710,969;
+	setarray @countitem[0],30,30,30,2,1,10,20;
+	goto L_Make;
+	
+Lwea5_set1:
+	setarray @item[0],1237,1138,1169;
+	setarray @useitem[0],7024,7023,724,7019,7110,7021,7002,714,609,1008;
+	setarray @countitem[0],20,15,20,5,10,5,100,5,50,5;
+	goto L_Make;
+
+Lwea6_set1:
+	setarray @item[0],1185;
+	setarray @useitem[0],13412,13413;
+	setarray @countitem[0],1,1;
+	goto L_Make;
+
+L_Socket:
+	set @set,1;
+	mes "[^FF4107นักประดิษฐ์^000000]";
+	mes "ข้าสามารถเพิ่มช่องสำหรับใส่การ์ดให้กับของบางอย่างได้";
+	mes "เพียงแต่ท่านนำของที่ท่านต้องการเพิ่มช่องมาให้ข้า ข้าจะสกัดช่องให้ท่าน";
+	mes "แต่มันมีโอกาสที่จะล้มเหลว ของที่นำมาก็จะแตกสลายไป";
+	menu "จริงหรือนั้น ข้าสนใจมาก",-,"ไม่ละ ขอบคุณ",Lno;
+	mes "เจ้าต้องการให้ข้าเจาะรูสิ่งของชิ้นไหนละ";
+	next;
+	switch( select( "อาวุธ","เกราะ","ข้าลืมเตรียมของมา" ) )
+	{
+		case 1:
+			mes "[^FF4107นักประดิษฐ์^000000]";
+			mes "ข้าได้แบ่งระดับของอาวุธออกเป็น 4 ระดับ คือ ";
+			mes "C Class อาวุธระดับเบื้องต้น";
+			mes "B Class อาวุธระดับกลาง";
+			mes " A Class อาวุธระดับสูง";
+			mes "และ S Class อาวุธระดับพิเศษ";
+			mes "ท่านลองค้นหาดูว่าอาวุธของท่านอยู่ในระดับใด";
+			mes "ระดับของอาวุธ ระดับยิ่งสูง ยิ่งมีโอกาสเพิ่มช่องยากเท่านั้น";
+			next;
+			switch( select( "C Class","B Class","A Class","S Class") )
+			{
+				case 1:
+					switch( select( "Trident","Rope","Violin","Book of Billows","Book of Mother Earth","Book of the Blazing Sun","Book of Gust of Wind"))
+					{
+						case 1: callfunc "Func_Socket",1460,1461,40,66,200,1010,10;
+						case 2: callfunc "Func_Socket",1950,1951,40,66,200,1010,10;
+						case 3: callfunc "Func_Socket",1901,1902,40,66,200,1010,10;
+						case 4: callfunc "Func_Socket2",1554,1569,40,66,200,1010,10;
+						case 5: callfunc "Func_Socket2",1553,1568,40,66,200,1010,10;
+						case 6: callfunc "Func_Socket2",1556,1571,40,66,200,1010,10;
+						case 7: callfunc "Func_Socket2",1555,1570,40,66,200,1010,10;
+					}
+					break;
+				case 2:
+					switch( select( "Chain","Gladius","Gakkung Bow","Pike","Haedonggum","Lute","Wire","Waghnakh","Arbalest Bow","Orcish Axe","Scimitar","Spike" ) )
+					{
+						case 1: callfunc "Func_Socket",1519,1520,40,61,300,1010,10;
+						case 2: callfunc "Func_Socket",1219,1220,40,61,300, 984, 1,999,5;
+						case 3: callfunc "Func_Socket",1714,1716,40,61,300, 984, 2,999,5;
+						case 4: callfunc "Func_Socket",1407,1408,40,61,200,1010,10;
+						case 5: callfunc "Func_Socket",1123,1128,40,61,300, 984, 2,999,5;
+						case 6: callfunc "Func_Socket",1905,1906,40,61,300,1011,10;
+						case 7: callfunc "Func_Socket",1954,1955,40,61,300,1011,10;
+						case 8: callfunc "Func_Socket",1801,1802,40,61,300,1010,10;
+						case 9: callfunc "Func_Socket",1713,1715,40,61,300, 984, 2,999,5;
+						case 10: callfunc "Func_Socket2",1304,1309,40,66,200,984,1;
+						case 11: callfunc "Func_Socket2",1113,1114,40,66,200,984,1;
+						case 12: callfunc "Func_Socket2",1523,1538,40,61,300,984,1;
+					}
+					break;
+				case 3:
+					switch( select( "Hunter Bow","Survivor's Rod(INT)","Zweihander","Flamberge","Infiltrator","Ballista","Stunner","Berserk","Claymore","Dragon Killer","Katar of Frozen Icicle","Katar of Quaking","Katar of Raging Blaze","Katar of Piercing Wind","Golden Mace","Oriental Lute","Queen's Whip","Phantom Spear","Gae Bolg","Schweizersabel" ) )
+					{
+						case 1: callfunc "Func_Socket",1718,1726,40,61,500,984,2,999,10;
+						case 2: callfunc "Func_Socket",1619,1620,40,61,500,984,5,999,10;
+						case 3: callfunc "Func_Socket",1168,1171,40,61,800,984,5,999,10;
+						case 4: callfunc "Func_Socket",1129,1149,40,61,500,984,2,999,10;
+						case 5: callfunc "Func_Socket",1261,1266,40,61,700,984,5,999,10;
+						case 6: callfunc "Func_Socket",1722,1727,40,61,500,984,5,999,10;
+						case 7: callfunc "Func_Socket",1522,1532,40,61,500,984,2,999,10;
+						case 8: callfunc "Func_Socket",1814,1816,40,61,500,984,5,999,10;
+						case 9: callfunc "Func_Socket",1163,1172,40,61,500,984,2,999,10;
+						case 10:  callfunc "Func_Socket2",13001,13030,40,61,500,984,2;
+						case 11:  callfunc "Func_Socket2", 1257, 1276,40,66,500,984,2;
+						case 12:  callfunc "Func_Socket2", 1258, 1277,40,66,500,984,2;
+						case 13:  callfunc "Func_Socket2", 1256, 1275,40,66,500,984,2;
+						case 14:  callfunc "Func_Socket2", 1259, 1278,40,66,500,984,2;
+						case 15:  callfunc "Func_Socket2", 1524, 1539,40,61,500,984,2;
+						case 16:  callfunc "Func_Socket2", 1918, 1922,40,61,500,984,2;
+						case 17:  callfunc "Func_Socket2", 1970, 1976,40,61,500,984,2;
+						case 18:  callfunc "Func_Socket2", 1477, 1479,40,56,500,984,2;
+						case 19: callfunc "Func_Socket2", 1474, 1480,40,56,500,984,2;
+						case 20: callfunc "Func_Socket2", 1167, 1178,40,61,500,984,2;
+					}
+					break;
+						
+				case 4:
+					setarray @useitem[0],0,1010,999,984;
+					setarray @countitem[0],1,50,100,10;
+					setarray @rate[0],40,51;
+					set @zeny,1500000;
+					switch( select( "Gungnir","Poison Knife","Ice Pick","Sucsamad","Ginnungagap","Cutlas","Crescent Scythe","Survivor's Rod(DEX)","Zephyrus","Mailbreaker","Dragon Slayer","Swordbreaker","Assassin Dagger","Grand Cross","Executioner" ) )
+					{
+						case 1: callfunc "Func_Socket", 1413, 1418,40,51,1000,984,5,999,10;
+						case 2: callfunc "Func_Socket", 1239,13016,40,51,1000,984,5,999,10;
+						case 3: callfunc "Func_Socket", 1230,13017,40,51,2000,984,5,999,10;
+						case 4: callfunc "Func_Socket", 1236,13018,40,51,1000,984,5,999,10;
+						case 5: callfunc "Func_Socket",13002,13019,40,51,1000,984,5,999,10;
+						case 6: callfunc "Func_Socket", 1135,13400,40,51,1000,984,5,999,10;
+						case 7: callfunc "Func_Socket", 1466, 1476,40,51,1000,984,5,999,10;
+						case 8: callfunc "Func_Socket", 1617, 1618,40,51,2000,984,5,999,10;
+						case 9: callfunc "Func_Socket2",1468, 1481,40,51,1000,984,5,999,10;
+						case 10: callfunc "Func_Socket2",1225,13032,40,51,1000,984,5,999,10;
+						case 11: callfunc "Func_Socket2",1166, 1180,40,51,1000,984,5,999,10;
+						case 12: callfunc "Func_Socket2",1224,13031,40,51,1000,984,5,999,10;
+						case 13: callfunc "Func_Socket2",1232,13033,40,51,1000,984,5,999,10;
+						case 14: callfunc "Func_Socket2",1528, 1540,40,51,1000,984,5,999,10;
+						case 15: callfunc "Func_Socket2",1169, 1179,40,51,1000,984,5,999,10;
+					}
+					break;
+			}
+			break;
+		case 2:
+			mes "[^FF4107นักประดิษฐ์^000000]";
+			mes "ข้าได้แบ่งระดับของเกราะออกเป็น 4 ระดับ คือ ";
+			mes "C Class เกราะระดับเบื้องต้น";
+			mes "B Class เกราะระดับกลาง";
+			mes " A Class เกราะระดับสูง";
+			mes "และ S Class เกราะระดับพิเศษ";
+			mes "ท่านลองค้นหาดูว่าอาวุธของท่านอยู่ในระดับใด";
+			mes "ระดับของอาวุธ ระดับยิ่งสูง ยิ่งมีโอกาสเพิ่มช่องยากเท่านั้น";
+			next;
+			switch( select( "C Class","B Class","A Class","S Class") )
+			{
+				case 1:
+					switch( select( "Mantle","Coat","Circlet","Biretta","Sunflower","Ph.D Hat","Big Ribbon","Boys Cap" ) )
+					{
+						case 1: callfunc "Func_Socket",2307,2308,40,66,200,999,3;
+						case 2: callfunc "Func_Socket",2309,2310,40,66,200,999,3;
+						case 3: callfunc "Func_Socket",2232,2233,40,66,200,999,3;
+						case 4: callfunc "Func_Socket",2216,2217,40,66,200,999,3;
+						case 5: callfunc "Func_Socket2",2253,5351,40,66,100,999,3;
+						case 6: callfunc "Func_Socket2",5012,5347,40,66,100,999,3;
+						case 7: callfunc "Func_Socket2",2244,5348,40,66,100,999,5;
+						case 8: callfunc "Func_Socket2",5016,5349,40,66,100,999,5;
+					}
+					break;
+				case 2:
+					switch( select( "Mirror Shield","Chain Mail","Saint Robe","Silk Robe","Boots","Shoes","Muffler","Guard","Buckler","Shield","Bongun Hat","Skull Ring","High Heels" ) )
+					{
+						case 1:  callfunc "Func_Socket",2107,2108,40,61,250,999,5;
+						case 2:  callfunc "Func_Socket",2314,2315,40,61,250,999,5;
+						case 3:  callfunc "Func_Socket",2325,2326,40,61,300,999,5;
+						case 4:  callfunc "Func_Socket",2321,2322,40,61,300,999,5;
+						case 5:  callfunc "Func_Socket",2405,2406,40,61,300,999,5;
+						case 6:  callfunc "Func_Socket",2403,2404,40,61,300,999,5;
+						case 7:  callfunc "Func_Socket",2503,2504,40,61,300,999,5;
+						case 8:  callfunc "Func_Socket",2101,2102,40,61,300,999,5;
+						case 9:  callfunc "Func_Socket",2103,2104,40,61,300,999,5;
+						case 10: callfunc "Func_Socket",2105,2106,40,61,250,999,5;
+						case 11: callfunc "Func_Socket",5046,5168,40,61,250,999,5;
+						case 12: callfunc "Func_Socket2",2609,2715,40,61,300,999,5;
+						case 13: callfunc "Func_Socket2",2409,2432,40,61,300,999,5;
+					}
+					break;
+				case 3:
+				switch( select( "Gemmed Sallet","Bucket Hat","Memory Book","Tights","Legion Plate Armor","Full Plate","Thief Clothes","Greaves","Coif","Manteau","Helm","Ninja Suit","Orc Helm","Ancient Cape","Monk Hat","Golden Gear","Brooch","Munak Hat","Pirate Bandana","Black Leather Boots" ) )
+					{
+						case 1:  callfunc "Func_Socket",2230,2231,40,61,400,985,1;
+						case 2:  callfunc "Func_Socket",5114,5120,40,61,400,985,1;
+						case 3:  callfunc "Func_Socket",2109,2121,40,61,400,985,1;
+						case 4:  callfunc "Func_Socket",2330,2331,40,61,400,985,1;
+						case 5:  callfunc "Func_Socket",2341,2342,40,61,400,985,1;
+						case 6:  callfunc "Func_Socket",2316,2317,40,61,400,985,1;
+						case 7:  callfunc "Func_Socket",2335,2336,40,61,400,985,1;
+						case 8:  callfunc "Func_Socket",2411,2412,40,61,400,985,1;
+						case 9:  callfunc "Func_Socket",5092,5093,40,61,400,985,1;
+						case 10: callfunc "Func_Socket",2505,2506,40,61,400,985,1;
+						case 11: callfunc "Func_Socket",2228,2229,40,61,400,985,1;
+						case 12: callfunc "Func_Socket",2337,2359,40,61,400,985,1;
+						case 13: callfunc "Func_Socket",2299,5157,40,61,400,985,1;
+						case 14: callfunc "Func_Socket",2507,2525,40,61,400,985,1;
+						case 15: callfunc "Func_Socket",2251,5158,40,61,400,985,1;
+						case 16: callfunc "Func_Socket",2246,5159,40,61,400,985,1;
+						case 17: callfunc "Func_Socket",2605,2625,40,61,400,985,1;
+						case 18: callfunc "Func_Socket",2264,5167,40,61,300,985,1;
+						case 19: callfunc "Func_Socket2",2287,5350,40,51,500,985,1;
+						case 20: callfunc "Func_Socket2",2425,2434,40,51,500,985,1;
+					}
+					break;
+				case 4:
+					switch( select( "Majestic Goat","Spiky Band","Bone Helm","Corsair","Crown","Tiara","Sphinx Hat","Robe of Cast","Earring","Ring","Bow Thimble","Mage Coat","Holy Robe","Sacred Mission","Undershirt","Pantie","Helmet of Orc Hero","Hat of the Sun God") )
+					{
+						case 1:  callfunc "Func_Socket",2256,5160,40,51,2000,985,2;
+						case 2:  callfunc "Func_Socket",2258,5161,40,51,2000,985,2;
+						case 3:  callfunc "Func_Socket",5017,5162,40,51,2000,985,2;
+						case 4:  callfunc "Func_Socket",5019,5163,40,51,2000,985,2;
+						case 5:  callfunc "Func_Socket",2235,5165,40,51,2000,985,2;
+						case 6:  callfunc "Func_Socket",2234,5164,40,51,2000,985,2;
+						case 7:  callfunc "Func_Socket",5053,5166,40,51,1000,985,2;
+						case 8:  callfunc "Func_Socket",2343,2360,40,51,1000,985,2;
+						case 9:  callfunc "Func_Socket",2602,2622,40,51,1000,985,2;
+						case 10: callfunc "Func_Socket",2601,2621,40,51,1000,985,2;
+						case 11: callfunc "Func_Socket",2619,2671,40,51,1000,985,2;
+						case 12: callfunc "Func_Socket2",2334,2372,45,51,1000,985,1;
+						case 13: callfunc "Func_Socket2",2327,2373,45,51,1000,985,1;
+						case 14: callfunc "Func_Socket2",2111,2128,45,51,1000,985,1;
+						case 15: callfunc "Func_Socket2",2522,2523,45,51,1000,985,1;
+						case 16: callfunc "Func_Socket2",2339,2371,45,51,1000,985,1;
+						case 17: callfunc "Func_Socket",5094,5095,40,66,200000,969,2;
+						case 18: callfunc "Func_Socket",5022,5353,40,66,200000,969,2;
+					}
+					break;
+			}
+			break;
+		case 3:
+			goto Lno;
+	}
+
+L_Refine:
+	mes "[^FF4107นักประดิษฐ์^000000]";
+	mes "ข้าสามารถเพิ่มประสิทธิภาพของบางอย่างได้";
+	mes "แต่มันมีโอกาสที่จะเพิ่มประสิทธิภาพผิดพลาดและสูญสลายได้";
+	mes "ท่านต้องการเพิ่มประสิทธิภาพของชนิดใด";
+	next;
+	Menu_main:
+	switch(select("หมวก","เกราะป้องกัน","อาวุธ","เครื่องประดับ")){
+		case 1:
+			deletearray @bought_nameid;
+			close2;
+			callshop "RefHat",1;
+			npcshopattach "RefHat";
+			break;
+		case 2:
+			deletearray @bought_nameid;
+			close2;
+			callshop "RefArmor",1;
+			npcshopattach "RefArmor";
+			break;
+		case 3:
+			deletearray @bought_nameid;
+			close2;
+			callshop "RefWeapon",1;
+			npcshopattach "RefWeapon";
+			break;
+		case 4:
+			deletearray @bought_nameid;
+			close2;
+			callshop "RefAcc",1;
+			npcshopattach "RefAcc";
+			break;
+	}
+	close;
+	
+OnBuyItem:
+	if(getarraysize(@bought_nameid)==1){
+		setarray @rate[0],22,42;
+		set @zeny,1000000;
+		set @set,1;
+		switch(@bought_nameid[0]){
+			case 5265:	set @useitem[0],2285;	break;
+			case 5266:	set @useitem[0],2214;	break;
+			case 5267:	set @useitem[0],2280;	break;
+			case 5268:	set @useitem[0],5007;	break;
+			case 5280:	set @useitem[0],2256;	break;
+			case 5281:	set @useitem[0],5038;	break;
+			case 5326:	set @useitem[0],2291;	break;
+			case 5327:	set @useitem[0],5094;	break;
+			case 5328:	set @useitem[0],5044;	break;
+			case 5329:	set @useitem[0],5104;	break;
+			case 5330:	set @useitem[0],5058;	break;
+			case 5331:	set @useitem[0],5019;	break;
+			case 2686:	set @useitem[0],2286;	break;
+			case 2687:	set @useitem[0],2269;	break;
+			case 2390:	set @useitem[0],2331;	break;
+			case 2535:	set @useitem[0],2509;	break;
+			case 2688:	set @useitem[0],2616;	break;
+			case 2689:	set @useitem[0],2622;	break;
+			case 2690:	set @useitem[0],2621;	break;
+			case 2691:	set @useitem[0],2623;	break;
+			case 2692:	set @useitem[0],2624;	break;
+			case 2693:	set @useitem[0],2625;	break;
+			case 2694:	set @useitem[0],2626;	break;
+			case 2695:	set @useitem[0],2615;	break;
+			case 2696:	set @useitem[0],2659;	break;
+			case 2697:	set @useitem[0],2660;	break;
+			case 2698:	set @useitem[0],2661;	break;
+			case 2699:	set @useitem[0],2662;	break;
+			case 2710:	set @useitem[0],2655;	break;
+			case 2711:	set @useitem[0],2677;	break;
+			case 1173:	set @useitem[0],1164;	break;
+			case 1174:	set @useitem[0],1169;	break;
+			case 1267:	set @useitem[0],1261;	break;
+			case 1273:	set @useitem[0],1265;	break;
+			case 1274:	set @useitem[0],1263;	break;
+			case 1372:	set @useitem[0],1366;	break;
+			case 1373:	set @useitem[0],1363;	break;
+			case 1374:	set @useitem[0],1368;	break;
+			case 1378:	set @useitem[0],1364;	break;
+			case 1419:	set @useitem[0],1417;	break;
+			case 1424:	set @useitem[0],1415;	break;
+			case 1534:	set @useitem[0],1531;	break;
+			case 1537:	set @useitem[0],1527;	break;
+			case 1563:	set @useitem[0],1560;	break;
+			case 1567:	set @useitem[0],1561;	break;
+			case 1623:	set @useitem[0],1613;	break;
+			case 1628:	set @useitem[0],1620;	break;
+			case 1728:	set @useitem[0],1722;	break;
+			case 1729:	set @useitem[0],1720;	break;
+			case 1817:	set @useitem[0],1813;	break;
+			case 13021:	set @useitem[0],1228;	break;
+			case 13022:	set @useitem[0],1242;	break;
+			case 13023:	set @useitem[0],13011;	break;
+			case 13024:	set @useitem[0],1224;	break;
+			case 13025:	set @useitem[0],1225;	break;
+			case 13026:	set @useitem[0],1234;	break;
+			case 13402:	set @useitem[0],1135;	break;
+			case 13401:	set @useitem[0],1137;	break;
+			case 13403:	set @useitem[0],1136;	break;
+			case 13407:	set @useitem[0],1130;	break;
+			case 13408:	set @useitem[0],1133;	break;
+			case 13409:	set @useitem[0],1141;	break;
+		}
+		if(@useitem[0]==0){
+			mes "[^FF4107นักประดิษฐ์^000000]";
+			mes "สิ่งของที่ท่านต้องการแลกมีปัญหา กรุณาติดต่อ GM";
+			close;
+		}
+		set @item[0],@bought_nameid[0];		
+		if(getiteminfo(@item[0],2) !=4){
+			setarray @useitem[1],999,985,714;
+			setarray @countitem[0],1,50,20,5;
+		} else {
+			setarray @useitem[1],999,984,714;
+			setarray @countitem[0],1,25,10,1;
+		}
+		goto L_Make;
+	}
+	mes "[^FF4107นักประดิษฐ์^000000]";
+	mes "ท่านสามารถเลือกของที่จะเพิ่มประสิทธิภาพ ได้แค่ครั้งละ 1 ชิ้นเท่านั้น";
+	close;
+
+L_Make:
+	if(getarraysize(@countitem) != getarraysize(@useitem)){
+		mes "[^FF4107นักประดิษฐ์^000000]";
+		mes "เควสนี้มีข้อผิดพลาด กรุณาติดต่อผู้ดูแลระบบ";
+		close;
+	}
+	
+	mes "[^FF4107นักประดิษฐ์^000000]";
+	if (@set==0){
+		if(getarraysize(@item) == 3){
+			mes "ท่านมีโอกาสได้สิ่งของทั้ง 3 แบบ คือ ^FF0000"+getitemname(@item[0])+"^000000, ^FF0000"+getitemname(@item[1])+"^000000 หรือ ^FF0000"+getitemname(@item[2])+"^000000";
+		} else if(getarraysize(@item) == 2){
+			mes "ท่านมีโอกาสได้สิ่งของทั้ง 2 แบบ คือ ^FF0000"+getitemname(@item[0])+"^000000 หรือ ^FF0000"+getitemname(@item[1])+"^000000";
+		} else {
+			mes "ท่านต้องการให้ข้าทำ^FF0000"+getitemname(@item[0])+"^000000";
+		}
+	}
+	if (@set==1){
+		mes "ท่านต้องการให้ข้าเพิ่มประสิทธิภาพ";
+		mes "ให้เป็น^0000FF "+getitemname(@item[0])+"^000000";
+		mes "หากมีช่องใส่การ์ด เมื่อผ่านการเพิ่มประสิทธิภาพแล้ว ช่องใส่การ์ดจะหายไป และไม่สามารถตีบวกได้อีก";
+	}
+	next;
+	mes "ข้าต้องการสิ่งของต่อไปนี้";
+	for( set @i,0; @i < getarraysize(@useitem); set @i,@i+1){
+		mes "^0000FF"+@countitem[@i]+" "+getitemname(@useitem[@i])+"["+getitemslots(@useitem[@i])+"] ^000000";
+	}
+		
+	if(@zeny > 0) {
+		mes "และเงินค่าแรงของข้าอีก";
+		mes "^0000FF"+@zeny+" Zeny^000000";
+	}
+	mes "จงนำสิ่งของที่ข้าต้องการมา แล้วข้าจะทำตามความต้องการของเจ้า";
+	next;
+	menu	"ข้าเตรียมของมาพร้อมแล้ว",-,"ขอข้ากลับไปหาก่อน",Lno;
+	
+	for( set @i,0; @i < getarraysize(@useitem); set @i,@i+1){
+		if (countitem(@useitem[@i]) < @countitem[@i]) goto L_NoItems;
+	}
+	
+	if(Zeny < @zeny) goto L_NoZeny;
+	
+	for( set @i,0; @i < getarraysize(@useitem); set @i,@i+1){
+		delitem @useitem[@i],@countitem[@i];
+	}
+	
+	if(@zeny > 0) set Zeny,Zeny - @Zeny;
+
+	if(@set==0){
+		mes "[^FF4107นักประดิษฐ์^000000]";
+		switch(getarraysize(@item)){
+			case 1:
+				set @itemid,@item[0];
+				break;
+			case 2:
+				mes "ท่านมีโอกาสได้สิ่งของทั้ง 2 แบบ คือ "+getitemname(@item[0])+" หรือ "+getitemname(@item[1]);
+				next;
+				switch( rand(0,1) ) {
+					case 0:
+						set @itemid,@item[0];
+						break;
+					case 1:
+						set @itemid,@item[1];
+						break;
+				}
+			case 3:
+				mes "ท่านมีโอกาสได้สิ่งของทั้ง 3 แบบ คือ "+getitemname(@item[0])+", "+getitemname(@item[1])+" หรือ "+getitemname(@item[2]);
+				next;
+				switch( rand(0,3) ) {
+					case 0:
+						set @itemid,@item[0];
+						break;
+					case 1:
+						set @itemid,@item[1];
+						break;
+					case 2:
+						set @itemid,@item[2];
+						break;
+					case 3:
+						set @itemid,@item[0];
+						break;
+				}
+		}
+		mes "นี่คือ ^FF0000"+getitemname(@item[0])+"^000000 ที่ท่านต้องการ";
+		getitem @itemid,1;
+		close;
+	if(@set==1){
+		set @ramdom,rand(0,100);
+		if(@ramdom > @rate[0]) && (@ramdom < @rate[1])
+		{
+			mes "[^FF4107นักประดิษฐ์^000000]";
+			specialeffect 154;
+			mes "ข้าได้เพิ่มประสิทธิภาพสำเร็จแล้ว!!!";
+			mes "ท่านจงรับของของท่านคืนไปเสีย";
+			getitem @item[0],1;
+			next;
+			goto Lno;
+		} else {
+			mes "[^FF4107นักประดิษฐ์^000000]";
+			specialeffect 155;
+			mes "โอ้ ข้าขอโทษ มันแตกไปแล้ว";
+			mes "ข้าเสียใจด้วย";
+			next;
+			goto Lno;
+		}
+	}
+	
+L_NoItems:
+	mes "[^FF4107นักประดิษฐ์^000000]";
+	mes "ท่านมีของที่ข้าต้องการไม่ครบ";
+	mes "เชิญท่านกลับออกไป";
+	close;
+
+L_NoZeny:
+	mes "[^FF4107นักประดิษฐ์^000000]";
+	mes "ท่านมีเงินที่ข้าต้องการไม่ครบ";
+	mes "เชิญท่านกลับออกไป";
+	close;
+
+Lno:
+	mes "[^FF4107นักประดิษฐ์^000000]";
+	mes "เมื่อใดที่ท่านต้องการให้ข้าช่วยเหลือ";
+	mes "เมื่อนั้นจงกลับมาหาข้า";
+	mes "ข้าพร้อมจะช่วยเหลือเจ้าเสมอ";
+	close;
+
+OnInit:
+	waitingroom "รับจ้างทำของ(แหก)ทุกอย่าง",0;
+	end;
+}
+
+-	shop	RefHat	-1,5265:-1,5266:-1,5267:-1,5268:-1,5280:-1,5281:-1,5326:-1,5327:-1,5328:-1,5329:-1,5330:-1,5331:-1,2686:-1,2687:-1
+-	shop	RefArmor	-1,2390:-1,2535:-1
+-	shop	RefWeapon	-1,1173:-1,1174:-1,1267:-1,1273:-1,1274:-1,1372:-1,1373:-1,1374:-1,1378:-1,1419:-1,1424:-1,1534:-1,1537:-1,1563:-1,1567:-1,1623:-1,1628:-1,1728:-1,1729:-1,1817:-1,13021:-1,13022:-1,13023:-1,13024:-1,13025:-1,13026:-1,13402:-1,13401:-1,13403:-1,13407:-1,13408:-1,13409:-1
+-	shop	RefAcc	-1,2688:-1,2689:-1,2690:-1,2691:-1,2692:-1,2693:-1,2694:-1,2695:-1,2696:-1,2697:-1,2698:-1,2699:-1,2710:-1,2711:-1

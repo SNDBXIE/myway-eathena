@@ -921,45 +921,89 @@ int party_send_xy_clear(struct party_data *p)
 /**
  * Renewal Drop Modifier
  **/
-int party_renewal_drop_mod(int diff) {
-	if( diff >= -10 && diff <= 5 )
-		return 100;//no change.
-	if( diff > 0 ) {
-		if( diff > 5 && diff < 10 )
-			return 90;
-		if( diff > 9 && diff < 15 )
-			return 75;
-		if( diff > 14 && diff < 30 )
-			return 60;
+int party_renewal_drop_mod(int diff, struct map_session_data *sd) {
+	int exdiff = sd->special_state.exdropdiff;
+
+	if(exdiff != 0){
+		if( diff >= -10 && diff <= 5 )
+			return 100 + (exdiff * 6);
+		else {
+			if( diff > 0 ) {
+				if( diff > 5 && diff < 10 )
+					return 100 + (exdiff * 5);
+				if( diff > 9 && diff < 15 )
+					return 100 + (exdiff * 4);
+				if( diff > 14 && diff < 30 )
+					return 100 + (exdiff * 3);
+			} else {
+				if( diff <= -10 && diff <= -14 )
+					return 100 + (exdiff * 2);
+			}
+			return 100;
+		}
 	} else {
-		if( diff <= -10 && diff <= -14 )
-			return 75;//75%
+		if( diff >= -10 && diff <= 5 )
+			return 100;//no change.
+		else {
+			if( diff > 0 ) {
+				if( diff > 5 && diff < 10 )
+					return 90;
+				if( diff > 9 && diff < 15 )
+					return 75;
+				if( diff > 14 && diff < 30 )
+					return 60;
+			} else {
+				if( diff <= -10 && diff <= -14 )
+					return 75;//75%
+			}
+			//other chances: 50%
+			return 50;
+		}
 	}
-	//other chances: 50%
-	return 50;
 }
 
 /**
  * Renewal Experience Earning Mode
  **/
-void party_renewal_exp_mod(unsigned int *base_exp, unsigned int *job_exp, int lvl, int moblvl) {
-	int diff = lvl - moblvl, boost = 0;
-	//-2 ~ +5: 100%
-	if( diff >= -2 && diff <= 5 )
-		return;//we don't change anything, it's 100% boost
-	//-3 ~ -10: +5% boost for each
-	if( diff >= -10 && diff <= -3 )
-		boost = 100 + (( -diff * 5 ) - 15 );
-	// 40% boost if difference is <= -10
-	else if ( diff <= -10 )
-		boost = 40;
-	else {
-		boost = ( diff > 5 && diff < 11 ) ? 95 :
-				( diff > 10 && diff < 16 ) ? 90 :
-				( diff > 15 && diff < 21 ) ? 85 :
-				( diff > 20 && diff < 26 ) ? 60 :
-				( diff > 25 && diff < 31 ) ? 35 :
-				10;
+void party_renewal_exp_mod(unsigned int *base_exp, unsigned int *job_exp, int lvl, int moblvl, struct map_session_data *sd) {
+	int diff = lvl - moblvl, boost = 0, exdiff = sd->special_state.exexpdiff;
+
+	if(exdiff != 0){
+		//-2 ~ +5: 100%
+		if( diff >= -2 && diff <= 7 )
+			boost = 100 + (exdiff * 8);//we don't change anything, it's 100% boost
+		//-3 ~ -10: +5% boost for each
+		if( diff >= -10 && diff <= -3 )
+			boost = 100 + (( -diff * 5 ) - 10 ) + (exdiff *	8);
+		// 40% boost if difference is <= -10
+		else if ( diff <= -10 )
+			boost = 100 + (exdiff * 2);
+		else {
+			boost = ( diff > 5 && diff < 11 ) ? 100 + (exdiff * 6) :
+					( diff > 10 && diff < 16 ) ? 100 + (exdiff * 5) :
+					( diff > 15 && diff < 21 ) ? 100 + (exdiff * 4) :
+					( diff > 20 && diff < 26 ) ? 100 + (exdiff * 3) :
+					( diff > 25 && diff < 31 ) ? 100 + (exdiff * 1) :
+					100;
+		}	
+	} else {
+		//-2 ~ +5: 100%
+		if( diff >= -2 && diff <= 5 )
+			return;//we don't change anything, it's 100% boost
+		//-3 ~ -10: +5% boost for each
+		if( diff >= -10 && diff <= -3 )
+			boost = 100 + (( -diff * 5 ) - 15 );
+		// 40% boost if difference is <= -10
+		else if ( diff <= -10 )
+			boost = 40;
+		else {
+			boost = ( diff > 5 && diff < 11 ) ? 95 :
+					( diff > 10 && diff < 16 ) ? 90 :
+					( diff > 15 && diff < 21 ) ? 85 :
+					( diff > 20 && diff < 26 ) ? 60 :
+					( diff > 25 && diff < 31 ) ? 35 :
+					10;
+		}
 	}
 	if( *base_exp )
 		*base_exp = (unsigned int)cap_value(*base_exp * boost / 100, 1, UINT_MAX);

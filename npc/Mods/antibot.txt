@@ -1,0 +1,478 @@
+payon,0,0,0	script	Antiscript	-1,{
+	end;
+OnPCLoginEvent:
+	if (strcharinfo(3) == "sec_pri.gat" )	end;
+	setoption 0x40,1;
+	pcblockmove getcharid(3),1;
+	sc_start SC_ROKISWEIL,6000000,1;
+	set at,0;
+	initnpctimer "AntibotTimer",1;
+	stopnpctimer "AntibotTimer";
+	startnpctimer "AntibotTimer";
+	set @checkbot,callfunc("Antibot");
+	pcblockmove getcharid(3),0;
+	if(@checkbot!=1) atcommand "@kick "+strcharinfo(0);
+	set provider$,"";
+	set provider,0;
+	initnpctimer "OnlineTimer",1;
+	stopnpctimer "OnlineTimer";
+	startnpctimer "OnlineTimer";
+	close;
+	end;
+}
+
+function	script	Antibot	{
+	set @checkbot,0;
+	if (failedbotcheck > 5) goto BANTHEBOTER;
+	set @numfake,20;
+	setarray @color$[0],"^FF0000","^00FF00","^0000FF","^000000","^00FFFF","^800000","^008000","^000080","^800080","^808000","^008080";
+	set @Antibot_code$,(rand (0,9)*10000)+(rand (0,9)*1000)+(rand (0,9)*100)+(rand (0,9)*10)+(rand (0,9)*1);
+			set @i,0;
+			Fakeloop:
+				set @Fake_code$[@i],(rand (0,9)*10000)+(rand (0,9)*1000)+(rand (0,9)*100)+(rand (0,9)*10)+(rand (0,9)*1);
+				if(@Fake_code$[@i]==@Antibot_code$){
+					set @i,@i-1;
+				}
+				set @i,@i+1;
+				if(@i < @numfake) goto Fakeloop;
+				set @numcolor,getarraysize(@color$);
+				set @use,rand(0,@numcolor-1);
+				set @coloruse$,@color$[@use];
+				copyarray @colorfake$[0],@color$[0],@numcolor;
+				deletearray @colorfake$[@use],1;
+				switch(rand(0,3)){
+					case 0:
+						set @row,1;
+						switch(rand(0,5)){
+							case 0:
+								mes @coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 1:
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 2:
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 3:
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 4:
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 5:
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+						}
+						break;
+					case 1:
+						set @row,2;
+						switch(rand(0,5)){
+							case 0:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 1:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 2:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 3:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 4:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 5:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+						}
+						break;
+					case 2:
+						set @row,3;
+						switch(rand(0,5)){
+							case 0:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 1:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 2:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 3:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 4:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 5:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+						}
+						break;
+					case 3:
+						set @row,4;
+						switch(rand(0,5)){
+							case 0:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$;
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 1:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$;
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 2:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$;
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 3:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$;
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 4:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$;
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								break;
+							case 5:
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@colorfake$[rand(0,@numcolor-2)]+@Fake_code$[rand(0,@numfake-1)];
+								mes @color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@color$[rand(0,@numcolor-1)]+@Fake_code$[rand(0,@numfake-1)]+"^FFFFFF   "+@coloruse$+@Antibot_code$;
+								break;
+						}
+						break;							
+				}
+				switch(rand(0,6)){
+					case 0:
+						mes @color$[rand(0,@numcolor-1)]+"จงใส่ตัวเลข^FFFFFF"+@coloruse$+"สีนี้แถวตั้งที่ "+@row+"^FFFFFF"+@color$[rand(0,@numcolor-1)]+" เป็นคำตอบ";
+						break;
+					case 1:
+						mes @color$[rand(0,@numcolor-1)]+"่ตัวเลขที่ใช้^FFFFFF"+@coloruse$+"สีนี้แถวตั้งที่ "+@row+"^FFFFFF"+@color$[rand(0,@numcolor-1)]+" เป็นคำตอบ";
+						break;
+					case 2:
+						mes @color$[rand(0,@numcolor-1)]+"จงใส่ตัวเลข^FFFFFF"+@coloruse$+"สีแบบนี้แถวตั้งที่ "+@row+"^FFFFFF"+@color$[rand(0,@numcolor-1)]+" เป็นคำตอบ";
+						break;
+					case 3:
+						mes @color$[rand(0,@numcolor-1)]+"ตัวเลข^FFFFFF"+@coloruse$+"สีนี้แถวตั้งที่ "+@row+"^FFFFFF"+@color$[rand(0,@numcolor-1)]+" เป็นคำตอบที่ถูกต้อง";
+						break;
+					case 4:
+						mes @color$[rand(0,@numcolor-1)]+"นำตัวเลข^FFFFFF"+@coloruse$+"สีแบบนี้แถวตั้งที่ "+@row+"^FFFFFF"+@color$[rand(0,@numcolor-1)]+" ไปใส่ในช่องว่าง";
+						break;
+					case 5:
+						mes @coloruse$+"สีที่ท่านเห็นอยู่นี้แถวตั้งที่ "+@row+"^FFFFFF"+@color$[rand(0,@numcolor-1)]+" เป็นคำตอบ";
+						break;
+					case 6:
+						mes @coloruse$+"ตัวเลขสีนี้แถวตั้งที่ "+@row+"^FFFFFF"+@color$[rand(0,@numcolor-1)]+" เป็นคำตอบ";
+						break;
+				}
+			deletearray @nvwcolor$;
+			deletearray @color$;
+			deletearray @realnum;
+			deletearray  @fakenum;
+			deletearray @Fake_code$;
+			deletearray @colorfake$;
+			input @mynum$;
+			if(@mynum$ < @Antibot_code$ || @mynum$ > @Antibot_code$) goto LOG_FAIL;
+			setoption 0x40,0;
+			set failedbotcheck,0;
+			sc_end SC_ROKISWEIL;
+			stopnpctimer "AntibotTimer";
+			return 1;
+			end;
+
+LOG_FAIL:
+	set failedbotcheck,failedbotcheck+1;
+	next;
+	mes "^000066[Bot Check]:^FFFFFF";
+	mes "^990000คุณใส่ผิดหมายเลขผิด^FFFFFF";
+	mes "^990000กรุณาออกเพื่อเลือกตัวละครแล้วเข้าใหม่อีกครั้ง^FFFFFF";
+	close2;
+	if (failedbotcheck > 10) goto BANTHEBOT;
+	atcommand "@kick "+strcharinfo(0);
+	close;
+
+BANTHEBOT:
+	announce "[Bot Check]: "+strcharinfo(0)+" ถูกระบบลงโทษเป็นเวลา 99 ปี",0;
+	query_sql "update login set state=5 where account_id="+getcharid(3);
+	announce "[Bot Check]: "+strcharinfo(0)+" ถูกระบบปฏิเสธการเชื่อมต่อเนื่องจากไม่สามารถผ่านการตรวจสอบของระบบได้",0;
+	set failedbotcheck,0;
+	atcommand "@kick "+strcharinfo(0);
+	close;
+	
+BANTHEBOTER:
+	announce "[Bot Check]: "+strcharinfo(0)+" ไม่สามารถเข้าเล่นได้เนื่องจากถูกแบนโดยระบบแล้ว",0;
+	query_sql "update login set state=5 where account_id="+getcharid(3);
+	set failedbotcheck,0;
+	atcommand "@kick "+strcharinfo(0);
+	close;
+}
+
+-	script	support	856,{
+	if(Class < 4008 || (Class > 4022 && Class < 4054)){
+		percentheal 100,100;	
+	} else{
+		if((MaxSP - (MaxSP/10)) >= SP){
+			set @sp,MaxSP-SP;
+			switch(spcash){
+				case 0:
+					mes "[Kafra Support]";
+					mes "ท่านต้องการเติม SP หรือไม่ ค่าใช้จ่าย 1zeny ต่อ sp 1 หน่วย";
+					switch(select("ข้าไม่ต้องการเติม","เสียเงิน - "+@sp+" zeny")){
+						case 1:
+							break;
+						case 2:
+							if(zeny < @sp){
+								dispbottom "ท่านไม่มีเงินจะเติม SP";
+							} else {
+								dispbottom "เสียค่าเติม SP "+@sp+" zeny";
+								specialeffect2 309;
+								set zeny,zeny-@sp;
+								set SP,SP+@sp;
+							}
+							break;
+					}
+					close2;
+					break;
+				case 1:
+					if(zeny < @sp){
+						dispbottom "ท่านไม่มีเงินจะเติม SP";
+					} else {
+						dispbottom "เสียค่าเติม SP "+@sp+" zeny";
+						specialeffect2 309;
+						set zeny,zeny-@sp;
+						set SP,SP+@sp;
+					}
+					break;
+				case 2:
+				default:
+					break;
+			}
+		}
+	}
+	sc_end SC_Poison; sc_end SC_Silence; sc_end SC_Blind; sc_end SC_Confusion; sc_end SC_Curse; sc_end SC_Hallucination; sc_end SC_STONE; sc_end SC_FREEZE; sc_end SC_STUN; sc_end SC_Sleep; sc_end SC_BLEEDING; sc_end SC_STRIPWEAPON; sc_end SC_STRIPSHIELD; sc_end SC_STRIPARMOR; sc_end SC_STRIPHELM;
+	specialeffect2 320;
+	percentheal 100,0;
+	if(class <= 25 || (class >= 4023 && class <= 4048)){
+		dispbottom "ผู้เล่นที่ไม่ใช่ High Class และ Class3 จะได้รับโบนัส EXP +100% เป็นเวลา 10 นาที";
+		sc_start SC_EXPBOOST,600000,100;
+	}
+	sc_start SC_LIFEINSURANCE,1800000,0;
+	sc_start SC_ANGELUS,180000,10;
+	sc_start SC_BLESSING,1800000,10;
+	sc_start SC_GLORIA,180000,5;
+	sc_start SC_INCREASEAGI,1800000,10;
+	sc_start SC_MAGNIFICAT,360000,5;	
+
+	if (getgmlevel() >= 40) end;
+		set antibotbuf,antibotbuf+1;
+		if(antibotbuf>=rand(500,1000)){
+			pcblockmove getcharid(3),1;
+			sc_start SC_ROKISWEIL,6000000,1;
+			mes "นี้คือระบบ Antibot Buf กรุณาใส่คำตอบของโจทย์ที่แสดงไว้";
+			switch(rand(1,9)){
+				case 1:
+					set @question$,"สาม ร้อย ห้า สิบ สี่";
+					set @corret,354;
+					break;
+				case 2:
+					set @question$,"หนึ่ง พัน สิบ หนึ่ง";
+					set @corret,1011;
+					break;
+				case 3:
+					set @question$,"สาม ร้อย ยี่ สิบ เก้า";
+					set @corret,329;
+					break;
+				case 4:
+					set @question$,"หก ร้อย เจ็ด สิบ หก";
+					set @corret,676;
+					break;
+				case 5:
+					set @question$,"สี่ สิบ สอง คูณ สอง ร้อย";
+					set @corret,8400;
+					break;
+				case 6:
+					set @question$,"พัน สาม บวก สิบ สอง";
+					set @corret,1015;
+					break;
+				case 7:
+					set @question$,"ห้า สิบ ลบ สิบ ห้า";
+					set @corret,35;
+					break;
+				case 8:
+					set @question$,"ร้อย ยี่ สิบ หนึ่ง หาร สิบ เอ็ด";
+					set @corret,11;
+					break;
+				case 9:
+					set @question$,"เศษ หนึ่ง ส่วน สอง คูณ สอง";
+					set @corret,1;
+					break;
+			}
+			mes @question$;
+			initnpctimer "AntibotTimer",1;
+			stopnpctimer "AntibotTimer";
+			startnpctimer "AntibotTimer";
+			set @checkbot,0;
+			input @answer;
+			if(@answer==@corret) {
+				close2;
+				stopnpctimer "AntibotTimer";
+				pcblockmove getcharid(3),0;				
+				sc_end SC_ROKISWEIL;
+				set antibotbuf,0;
+				set failedbotcheck,0;
+				set @checkbot,1;
+			} else {
+				close2;
+				stopnpctimer "AntibotTimer";
+				set failedbotcheck,failedbotcheck+1;
+				atcommand "@kick "+strcharinfo(0);
+			}
+			close;
+		}
+		end;
+OnInit:
+	waitingroom "แจก Buff เติม HP",0;
+	end;
+}
+
+-	script	AntibotTimer	-1,{
+OnTimer60000:
+	stopnpctimer "AntibotTimer";
+	if(@checkbot==0) {
+		if(strcharinfo(3) == "que_moon") set failedbotcheck,failedbotcheck+1;
+		atcommand "@kick "+strcharinfo(0);
+	}
+	end;
+}
+
+// Online ได้ Point
+-	script	OnlineTimer	-1,{
+	OnTimer3600000:
+		stopnpctimer "OnlineTimer";
+		if(checkvending() >= 1 || checkchatting() == 1 || at ==1) {
+			dispbottom "ท่านตั้งห้องขายหรือตั้งห้องพูดคุย ไม่สามารถได้รับ Point จากการออนไลน์ได้";
+			dispbottom "หากท่านต้องการ Point กรุณา Login ใหม่อีกครั้งหรือคุยกับ NPC ผู้ให้บริการ";
+			stopnpctimer "OnlineTimer";
+			end;
+		} else {
+			set #Point,#Point+1;
+			dispbottom "ท่านออนไลน์ครบ 1 ชั่วโมง ได้รับ Point จำนวน 1 แต้ม ตอนนี้มีแต้ม Point ทั้งสิ้น "+#Point+" แต้ม";
+		}
+		initnpctimer "OnlineTimer",1;
+		stopnpctimer "OnlineTimer";
+		startnpctimer "OnlineTimer";
+		end;
+		
+}

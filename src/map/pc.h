@@ -199,6 +199,9 @@ struct map_session_data {
 		unsigned char skill_time;
 		unsigned char no_single_magic, no_area_magic;
 
+		unsigned int exexpdiff;
+		unsigned int exdropdiff;
+
 		unsigned int checkshieldmdef : 1;
 	} special_state;
 	int login_id1, login_id2;

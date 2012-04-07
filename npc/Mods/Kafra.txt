@@ -1,0 +1,1526 @@
+//====================================================
+//--------------------------------Kafra Function-------------------------------------------
+//====================================================
+//+++++++++++++++++++++++++++++++KafraTown++++++++++++++++++++++++++++++++++
+//callfunc "KafraTown","izlude","150","129";
+function	script	KafraTown	{
+	mes "[Kafra Service]";
+	mes "ยินดีต้อนรับค่ะ";
+	if(@lastmap$ != ""){
+		menu "Last Map Warp ["+@lastmap$+"]",maplast,"Save",SaveFunction,"Storage",StorageFunction,"Guild Storage",stog1,"Teleport",WarpFunction,"ซ่อมของ",M_Repair,"รับโอนเงินระหว่างตัวละครในไอดี",Banker,"ห้องประมูล",Pramool,"Mail Inbox",Mail,"ตั้งค่าเติม SP",spsetting;
+	} else {
+		menu "Save",SaveFunction,"Storage",StorageFunction,"Guild Storage",stog1,"Teleport",WarpFunction,"ซ่อมของ",M_Repair,"รับโอนเงินระหว่างตัวละครในไอดี",Banker,"ห้องประมูล",Pramool,"Mail Inbox",Mail,"ตั้งค่าเติม SP",spsetting;
+	}
+	close;
+	
+spsetting:
+	mes "[Kafra Service]";
+	mes "เนื่องจากการเติม SP ต้องเสียเงินจำนวนเท่ากับ SP ที่หายไป";
+	mes "เพื่อความสะดวกรวดเร็วในการเล่น";
+	mes "ท่านสามารถตั้งค่าการแสดงผลได้";
+	next;
+	switch(select("ตั้งการจ่ายเงินอัตโนมัติ","ให้ถามทุกครั้งที่มีการจ่ายเงิน","ไม่ต้องถามเพราะไม่มีตังจ่าย")){
+		case 1:
+			set spcash,1;
+			break;
+		case 2:
+			set spcash,0;
+			break;
+		case 3:
+			set spcash,2;
+			break;
+	}
+	mes "[Kafra Service]";
+	mes "ท่านได้เลือกการตั้งค่า คือ";
+	switch(spcash){
+		case 0:
+			mes "ให้ถามทุกครั้งที่มีการจ่ายเงิน";
+			break;
+		case 1:
+			mes "ตั้งค่าจ่ายเงินอัตโนมัติแล้ว";
+			break;
+		case 2:
+			mes "ไม่ต้องถามเพราะไม่มีตังจ่าย";
+			break;
+	}
+	close;
+	
+SaveFunction:
+	savepoint getarg(0),getarg(1),getarg(2);
+	mes "ท่านได้บันทึกจุดเกิดเรียบร้อยแล้ว";
+	close;
+
+StorageFunction:
+	if(basicskillcheck() && getskilllv("NV_BASIC") < 6){
+		mes "ท่านไม่สามารถเปิดคลังสินค้าได้เนื่องจากไม่มีสกิลที่ต้องการ";
+		close;
+	}
+	if(Zeny< 50){
+		mes "เจ้าไม่สามารถเปิดคลังได้ เจ้ามีเงินไม่ถึง 50 zeny";
+		close;
+	}
+	set zeny,zeny-50;
+	close2;
+	openstorage;
+	cutin "", 255;
+	end;
+	
+WarpFunction:
+	callfunc "WarpKafra",0;
+	close;
+
+Banker:
+	mes "ข้ารับฝากโอนเงินเฉพาะภายในไอดีเดียวกันเท่านั้น";
+	if(#bank>0){
+		mes "ท่านต้องการนำเงินจำนวน "+#bank+" zeny";
+		mes "ที่ฝากไว้กับข้าคืนไปหรือไม่";
+		switch(select("ข้าต้องการเอาคืนแล้ว","ข้ายังไม่ต้องการ")){
+			case 1:
+				if(#bank+@zeny > 1000000000){
+					mes "ท่านมีเงินในตัวเยอะเกินไป ไม่สามารถโอนได้";
+					close;
+				}
+				set zeny,zeny+#bank;
+				set #bank,0;
+				mes "ท่านได้รับเงินเรียบร้อยแล้ว";
+				break;
+			case 2:
+				mes "ขอบคุณที่ใช้บริการ";
+				break;
+		}
+		close;
+	} else {
+		mes "ท่านต้องการฝากเงินจำนวนเท่าใด";
+		next;
+		input @zeny;
+		if(@zeny > zeny){
+			mes "ท่านมีเงินไม่พอที่จะฝาก กรุณาใส่ใหม่ให้ถูกต้อง";
+			close;
+		}
+		if(@zeny>1000000000){
+			mes "เงินที่ท่านฝากมากเกินกว่าจะรับได้";
+			close;
+		}
+		set zeny,zeny-@zeny;
+		set #bank,@zeny;
+		mes "ข้าได้รับเงินฝากจากเจ้าจำนวน "+#bank+" Zeny แล้ว";
+		close;
+	}
+	
+Ann:
+	if(getgmlevel() >=20){
+		mes "ท่านต้องการประกาศหรือไม่";
+		set $delay,0;
+		next;
+		menu "ข้าต้องการประกาศ",-;
+		if($delay==0 && agitcheck()==0 && agitcheck2()==0){
+			mes "เจ้าต้องการประกาศว่าอะไร";
+			input @text$;
+			if(@text$==""){
+				mes "ท่านไม่ได้ประกาศอะไรทั้งสิ้น";
+				close;
+			}
+			if(getcharid(2)==0){
+				announce strcharinfo(0)+" ได้ประกาศว่า '"+@text$+"'",bc_all,0xCC66FF;
+			} else {
+				announce strcharinfo(0)+"["+strcharinfo(2)+"] ได้ประกาศว่า '"+@text$+"'",bc_all,0xCC66FF;
+			}
+			close2;
+			set $delay,1;
+			sleep 30000;
+			set $delay,0;
+			end;
+		} else {
+			if(agitcheck()==1 || agitcheck2()==1){
+				mes "ระหว่างสงครามกิลวอ ห้ามทำการประกาศ";
+				close;	
+			} else {
+				mes "ระบบป้องกันการฟลัดข้อความทำงาน กรุณารอสักครู่ค่อยใช้งานใหม่";
+				close;	
+			}
+		}
+	}
+	mes "ท่านสามารถประกาศข้อความไปทั้ง Server ได้ โดยเสีย Point เป็นจำนวน 1 แต้ม";
+	mes "เมื่อมีการประกาศแล้ว อีก 30 วินาทีจึงจะสามารถประกาศอีกครั้งได้";
+	mes "และไม่สามารถประกาศในช่วงเวลากิลวอได้";
+	next;
+	menu "ข้าต้องการประกาศ",-;
+	mes "หากมีข้อความหยาบคาย ผิดกฎของ Server";
+	mes "หรือตามแต่ GM จะพิจารณา จะมีบทลงโทษตามแต่สมควร";
+	mes "ทั้งผู้ที่ประกาศ ผู้ที่ให้เงินประกาศ (ในกรณีสร้างตัวมาเพื่อการนี้โดยเฉพาะ)";
+	mes "และหัวหน้ากิลของผู้ประกาศนั้นๆ จะได้รับโทษลดหลั่นกันไป";
+	next;
+	if(#Point <= 0){
+		mes "เจ้าไม่สามารถประกาศได้ เจ้าไม่มี Point สำหรับประกาศ";
+		close;
+	}
+	next;
+	if($delay==0 && agitcheck()==0 && agitcheck2()==0){
+		mes "เจ้าต้องการประกาศว่าอะไร";
+		input @text$;
+		if(@text$==""){
+			mes "ท่านไม่ได้ประกาศอะไรทั้งสิ้น";
+			close;
+		}
+		set #Point,#Point-1;
+		if(getcharid(2)==0){
+			announce strcharinfo(0)+" ได้ประกาศว่า '"+@text$+"'",bc_all,0xCC66FF;
+		} else {
+			announce strcharinfo(0)+"["+strcharinfo(2)+"] ได้ประกาศว่า '"+@text$+"'",bc_all,0xCC66FF;
+		}
+		close2;
+		set $delay,1;
+		sleep 30000;
+		set $delay,0;
+		end;
+	} else {
+		if(agitcheck()==1 || agitcheck2()==1){
+			mes "ระหว่างสงครามกิลวอ ห้ามทำการประกาศ";
+		} else {
+			mes "ระบบป้องกันการฟลัดข้อความทำงาน กรุณารอสักครู่ค่อยใช้งานใหม่";
+		}
+	}
+	close;	
+	
+Pramool:
+	mes "เมื่อท่านประมูลได้ หรือยกเลิกการประมูล";
+	mes "ท่านสามารถรับสิ่งของได้ที่ Mail ของท่าน";
+	close2;
+	OpenAuction;
+	cutin "", 255;
+	end;
+	
+Mail:
+	close2;
+	openmail;
+	cutin "", 255;
+	end;
+	
+
+maplast:
+	set @warpparty,0;
+	if( getcharid(1) != 0 && getcharid(0) == getpartyleader(getcharid(1),2)){
+		mes "ท่านต้องการพาปาร์ตี้ของท่านไปหรือไม่";
+		switch(select("ไปคนเดียว","วาร์ปทั้งปาร์ตี้")){
+			case 1:
+				set @warpparty,0;
+				break;
+			case 2:
+				set @warpparty,1;
+				break;
+		}
+	} else {
+		set @warpparty,0;
+	}
+	warp @lastmap$,0,0;
+	if(@warpparty == 1){
+		sleep2 500;
+		getmapxy(@map$,@x,@y, 0);
+		warpparty @map$,@x,@y, getcharid(1);
+	}
+	close;
+	
+stog1:
+	if(getcharid(2)==0) close;
+	close2;
+	guildopenstorage();
+	end;
+	
+M_Repair:
+	callfunc "repairmain","DwarfSmith";
+	end;
+	
+}
+
+//+++++++++++++++++++++++++++++++++KafraGuild+++++++++++++++++++++++++++++
+function	script	KafraGuild	{
+	mes "[Kafra Guild]";
+	if((MaxSP - (MaxSP/10)) >= SP){
+		set @sp,MaxSP-SP;
+		switch(spcash){
+			case 0:
+				mes "ท่านต้องการเติม SP หรือไม่ ค่าใช้จ่าย 1zeny ต่อ sp 1 หน่วย";
+				switch(select("ข้าไม่ต้องการเติม","เสียเงิน - "+@sp+" zeny")){
+					case 1:
+						break;
+					case 2:
+						if(zeny < @sp){
+							dispbottom "ท่านไม่มีเงินจะเติม SP";
+						} else {
+							dispbottom "เสียค่าเติม SP "+@sp+" zeny";
+							specialeffect2 309;
+							set zeny,zeny-@sp;
+							set SP,SP+@sp;
+						}
+						break;
+				}
+				break;
+			case 1:
+				if(zeny < @sp){
+					dispbottom "ท่านไม่มีเงินจะเติม SP";
+				} else {
+					dispbottom "เสียค่าเติม SP "+@sp+" zeny";
+					specialeffect2 309;
+					set zeny,zeny-@sp;
+					set SP,SP+@sp;
+				}
+				break;
+			case 2:
+				break;
+		}
+	}
+	percentheal 100,0;	
+	sc_start 32,240000,10;
+	sc_start 30,240000,10;
+	set @castle$[0],"payg_cas04";
+	set @castle$[1],"gefg_cas04";
+	set @castle$[2],"prtg_cas05";
+	//set @castle$[3],"prtg_cas04";
+	//set @castle$[4],"schg_cas03";
+	set @cat$[0],getguildname(GetCastleData(@castle$[0],1));
+	set @cat$[1],getguildname(GetCastleData(@castle$[1],1));
+	set @cat$[2],getguildname(GetCastleData(@castle$[2],1));
+	//set @cat$[3],getguildname(GetCastleData(@castle$[3],1));
+	//set @cat$[4],getguildname(GetCastleData(@castle$[4],1));
+	set @count[0],getmapguildusers(@castle$[0],getcharid(2))+getmapguildusers("pay_gld",getcharid(2));
+	set @count[1],getmapguildusers(@castle$[1],getcharid(2))+getmapguildusers("gef_fild13",getcharid(2));
+	set @count[2],getmapguildusers(@castle$[2],getcharid(2))+getmapguildusers("prt_gld",getcharid(2));
+	//set @count[3],getmapguildusers(@castle$[3],getcharid(2))+getmapguildusers("prt_gld",getcharid(2));
+	//set @count[4],getmapguildusers(@castle$[4],getcharid(2))+getmapguildusers("sch_gld",getcharid(2));
+	for( set @i,0; @i < getarraysize(@cat$); set @i,@i+1){
+		if(@cat$[@i]=="null"){
+			set @cat$[@i],"ไม่มีผู้ครอบครอง";
+		}
+	}
+	mes "^0000FFPayon^000000 ^FF00FF["+getcastlename(@castle$[0])+"]^000000";
+	mes " = {^FF0000"+@cat$[0]+"^000000} =";
+	mes "^0000FFGeffen^000000 ^FF00FF["+getcastlename(@castle$[1])+"]^000000";
+	mes " = {^FF0000"+@cat$[1]+"^000000} =";
+	mes "^0000FFProntera[Mini Guild]^000000 ^FF00FF["+getcastlename(@castle$[2])+"]^000000";
+	mes " = {^FF0000"+@cat$[2]+"^000000} =";
+	//mes "^0000FFPayon^000000 ^FF00FF["+getcastlename(@castle$[3])+"]^000000";
+	//mes " = {^FF0000"+@cat$[3]+"^000000} =";
+	//mes "^0000FFAdvance War^000000 ^FF00FF["+getcastlename(@castle$[4])+"]^000000";
+	//mes " = {^FF0000"+@cat$[4]+"^000000} =";
+	mes "ตัวเลขด้านหลังคือจำนวนสมาชิกกิลที่อยู่ในบ้านนั้นๆ";
+	next;
+	menu "Save Point",save1,"Storage",storage1,"Guild Storage",gstorage1,getcastlename(@castle$[0])+"] ("+@count[0]+")",payon,getcastlename(@castle$[1])+"] ("+@count[1]+")",geffen,getcastlename(@castle$[2])+"-Mini Guild ("+@count[2]+")",prontera,"ซ่อมของ",M_Repair,"เช่าของ",L_Rent,"กลับเมือง",town,"ไม่ไปล่ะ",-;
+	close;
+	
+	save1:
+		savepoint getarg(0),getarg(1),getarg(2);
+		mes "ท่านได้บันทึกจุดเกิดเรียบร้อยแล้ว";
+		close;
+	storage1:
+		if(basicskillcheck() && getskilllv("NV_BASIC") < 6){
+			mes "ท่านไม่สามารถเปิดคลังสินค้าได้เนื่องจากไม่มีสกิลที่ต้องการ";
+			close;
+		}
+		if(Zeny< 50){
+			mes "เจ้าไม่สามารถเปิดคลังได้ เจ้ามีเงินไม่ถึง 50 zeny";
+			close;
+		}
+		set zeny,zeny-50;
+		close2;
+		openstorage;
+		cutin "", 255;
+		end;
+	gstorage1:
+		if(getcharid(2)==0) close;
+		close2;
+		guildopenstorage();
+		end;
+	aldebaran:
+		warp "alde_gld",270,105;
+		close;
+	geffen:
+		warp "gef_fild13",197,269;
+		close;
+	payon:
+		warp "pay_gld",141,169;
+		close;
+	prontera:
+		warp "prt_gld",193,238;
+		close;
+	advwar:
+		warp "sch_gld",97,196;
+		close;
+	town:
+		savepoint "izlude",128,106;
+		warp "izlude",128,106;
+		close;
+
+M_Repair:
+	callfunc "repairmain","DwarfSmith";
+	end;
+
+L_Rent:
+	callfunc "Renter";
+	end;
+}
+
+//====================================================
+//--------------------------------Warp Function-------------------------------------------
+//====================================================
+function	script	WarpKafra	{
+	callfunc "F_ClearGarbage";
+	mes "สวัสดี";
+	mes "เราสามารถพาคุณไปได้ทุกที่จะเมือง	หรือดันเจี้ยน!";
+	mes "คุณต้องการไปหรือเปล่าละ";
+	next;
+	menu	"Towns",town,"Field",field,"Dungeons",dungeon,"PvP ["+getmapusers("pvp_y_1-2")+"]",pvp,"หักไม้ผีและทดสอบตีหิน",branch,"InW Dungeons",inw,"Guild Dungeons",gvgdun;
+
+gvgdun:
+	switch(select("Al De Baran","Geffen","Payon","Prontera","Schwaltzvalt","Arunafeltz")){
+		case 1:
+			warp "gld_dun02.gat",0,0;
+			break;
+		case 2:
+			warp "gld_dun04.gat",0,0;
+			break;
+		case 3:
+			warp "gld_dun01.gat",0,0;
+			break;
+		case 4:
+			warp "gld_dun03.gat",0,0;
+			break;
+		case 5:
+			warp "schg_dun01.gat",0,0;
+			break;
+		case 6:
+			warp "arug_dun01.gat",0,0;
+			break;
+	}
+	close;
+
+pvp:
+	announce "PvP : "+strcharinfo(0)+" ได้เข้าสู่ห้อง PvP",bc_all,0xFF0000;
+	warp "pvp_y_1-2",0,0;
+	close;
+
+gvg:
+	warp "guild_vs3",0,0;
+	close;	
+
+branch:
+	switch(select("ห้อง 1","ห้อง 2","ห้อง 3","ห้องทดสอบตีหิน")){
+		case 1:
+			warp "06guild_01",0,0;
+			break;
+		case 2:
+			warp "06guild_02",0,0;
+			break;
+		case 3:
+			warp "06guild_03",0,0;
+			break;
+		case 4:
+			warp "06guild_r",99,177;
+			break;
+	}
+	close;
+
+town:
+menu 
+	"Izlude",wizlude,
+	"Alberta",walberta,
+	"Aldebaran",waldebaran,
+	"Amatsu",wamatsu,
+	"Ayothaya",wayot,
+	"Comodo",wcomodo,
+	"Dewata",dewata,
+	"Einbech (Mining Village)",weinbech,
+	"Einbroch",weinbroch,
+	"El Dicastes",weldicastes,
+	"Geffen",wgeffen,
+	"Gonryun",wgonryun,
+	"Hugel",whugel,
+	"Jawaii",wjawaii,
+	"Lighthalzen",wlighthalzen,
+	"Louyang",wlouyang,
+	"Lutie",wxmas,	
+	"Mora",mora,
+	"Morroc",wmorroc,
+	"Niflheim",wniflheim,
+	"Payon",wpayon,
+	"Prontera",wprontera,
+	"Rachel",wafeltz,
+	"Splendide",wsplendide,
+	"Thor Camp",wthorcamp,
+	"Umbala",wumbala,
+	"Veins",wveins,
+	"Yuno",wyuno;
+
+dungeon:
+menu 	"Abbey, Cursed Monastery",wabbey,
+	"Abyss Lakes",wabyss,
+	"Airplane",wairp,
+	"Amatsu Dungeon",ama,
+	"Anthell",ant,
+	"Ayothaya Dungeons",wayodun,
+	"Beach Dungeon",beach,
+	"Brasilia Dungeon",bradun,
+	"Byalan Dungeon",byalan,
+	"Cave",wcave,
+	"Clock Tower",clock,
+	"Coal Mines",coal,
+	"Culverts",culvert,
+	"Dewata Dungeons",ddewata,
+	"Dimensional Gorge",dimen,
+	"Einbroch Dungeons",weindun,
+	"El Dicastes Dungeons",eldun,
+	"Endless Tower",endless,
+	"Farm",wfarm,
+	"Gefenia",gefenia,
+	"Geffen Dungeon",geffen,
+	"Glast Heim",glast,
+	"Gonryun Dungeon",gon,
+	"Hidden Dungeon",hidden,
+	"Ice Dungeon",iced,
+	"Juperos Dungeons",wjuper,
+	"Kiel Dungeons",wkieldun,
+	"Lighthalzen Dungeon",wlhzdun,
+	"Louyang Dungeons",wloudun,
+	"Malangdo",wmalangdo,
+	"Manuk Field",manuk,
+	"Magma Dungeon",magma,
+	"Mora Dungeon",wmora,
+	"Moscovia Dungeon",wmoscovia,
+	"Nidhoggur",wnidhoggur,
+	"Orc Dungeon",orc,
+	"Odin Temple",wodint,
+	"Payon Dungeon",payon,
+	"Pyramids Dungeon",pyramids,
+	"Rachel Sanctuary",rachels,
+	"Sealed Shrine",seal,
+	"Sphinx",sphinx,
+	"Splendid Field",splendid,
+	"Sunken Ship",sunken,
+	"Thanatos Tower",wthat,
+	"Thor Volcano",wthor,
+	"Toy Factory",toy,
+	"Turtle Dungeon",turtle,
+	"Umbala Dungeons",wumdun;
+	
+field:
+	menu 	"Amatsu Fields",wamafild,
+	"Ayothaya Fields",wayofild,
+	"Comodo Fields",wcmdfild,
+	"Einbroch Fields",weinfild,
+	"Geffen Fields",wgeffild,
+	"Gonryun Fields",wgonfild,
+	"Hugel Fields",whufild,
+	"Lighthalzen Fields",wlhzfild,
+	"Louyang Field",wloufild,
+	"Lutie Field",wxmasfild,
+	"Manuk Fields",wmanfild,
+	"Mjolnir Fields",wmjolnir,
+	"Moscovia Fields",wmoscoviafild,
+	"Niflheim Fields",wniffild,
+	"Payon Forests",wpayfor,
+	"Prontera Fields",wprtfild,
+	"Rachel Fields",warunfild,
+	"Sograt Deserts",wmocfild,
+	"Splendide Fields",wsplfild,
+	"Umbala Fields",wumfild,
+	"Veins Fields",wveinsfild,
+	"Yuno Fields",wyunofild;
+//-------------------------------
+//          Dungeons
+//-------------------------------
+
+ddewata:	
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",ddewata1,
+	"Level 2",ddewata2;
+	
+wjuper:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",djuperos1,
+	"Level 2",djuperos3,
+	"Core",djuperos2;
+
+wumdun:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Carpenter's Shop in the Tree",dumdun1,
+	"Passage to a Foreign World",dumdun2;
+
+wloudun:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"The Royal Tomb",dloudun1,
+	"Inside the Royal Tomb",dloudun2,
+	"Suei Long Gon",dloudun3;
+
+wayodun:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Ancient Shrine Maze",dayodun1,
+	"Inside Ancient Shrine",dayodun2;
+
+weindun:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",deindun1,
+	"Level 2",deindun2;
+
+wlhzdun:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dlhzdun1,
+	"Level 2",dlhzdun2,
+	"Level 3",dlhzdun3;
+
+wabyss:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dabyss1,
+	"Level 2",dabyss2,
+	"Level 3",dabyss3;
+
+wthat:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+	next;
+menu 	"Level 1",dthat1,
+	"Level 2",dthat2,
+	"Level 3",dthat3,
+	"Level 4",dthat4,
+	"Level 5",dthat5,
+	"Level 6",dthat6,
+	"Level 7",dthat7,
+	"Level 8",dthat8,
+	"Level 9",dthat9,
+	"Level 10",dthat10,
+	"Level 11",dthat11,
+	"Level 12",dthat12;
+
+wkieldun:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dkieldun1,
+	"Level 2",dkieldun2;
+
+ant:
+	mes "[Warp NPC]";
+	mes "กรุณาเลือกสถานที่ค่ะ";
+	next;
+menu 	"Level 1",danthell1,
+	"Level 2",danthell2;
+
+beach:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dbeach1,
+	"Level 2",dbeach2,
+	"Level 3",dbeach3;
+
+byalan:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dbyalan1,
+	"Level 2",dbyalan2,
+	"Level 3",dbyalan3,
+	"Level 4",dbyalan4,
+	"Level 5",dbyalan5;
+clock:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dclock1,
+	"Level 2",dclock2,
+	"Level 3",dclock3,
+	"Level 4",dclock4,
+	"Basement 1",dalde1,
+	"Basement 2",dalde2,
+	"Basement 3",dalde3,
+	"Basement 4",dalde4;
+
+coal:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dcoal1,
+	"Level 2",dcoal2,
+	"Level 3",dcoal3;
+
+culvert:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dculvert1,
+	"Level 2",dculvert2,
+	"Level 3",dculvert3,
+	"Level 4",dculvert4;
+
+geffen:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dgeffen1,
+	"Level 2",dgeffen2,
+	"Level 3",dgeffen3,
+	"Level 4",dgeffen4;
+
+glast:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Entrance",dglastent,
+	"Castle 1",dglastcast1,
+	"Castle 2",dglastcast2,
+	"Chivalry 1",dglastchiv1,
+	"Chivalry 2",dglastchiv2,
+	"Churchyard",dglastyard,
+	"Culvert 1",dglastcul1,
+	"Culvert 2",dglastcul2,
+	"Culvert 3",dglastcul3,
+	"Culvert 4",dglastcul4,
+	"St.Abbey",dglastchur,
+	"Staircase Dungeon",dglaststep,
+	"Underground Cave 1",dglastcave1,
+	"Underground Cave 2",dglastcave2,
+	"Underground Prison 1",dglastpris1,
+	"Underground Prison 2",dglastpris2;
+
+hidden:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dhidden1,
+	"Level 2",dhidden2,
+	"Level 3",dhidden3;
+
+iced:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",diced1,
+	"Level 2",diced2,
+	"Level 3",diced3,
+	"Level 4",diced4;
+
+magma:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dmagma1,
+	"Level 2",dmagma2;
+
+orc:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dorc1,
+	"Level 2",dorc2;
+
+payon:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dpayon1,
+	"Level 2",dpayon2,
+	"Level 3",dpayon3,
+	"Level 4",dpayon4,
+	"Level 5",dpayon5;
+
+pyramids:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dpyramids1,
+	"Level 2",dpyramids2,
+	"Level 3",dpyramids3,
+	"Level 4",dpyramids4,
+	"Basement 1",dpyramidsb1,
+	"Basement 2",dpyramidsb2;
+
+sphinx:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dsphinx1,
+	"Level 2",dsphinx2,
+	"Level 3",dsphinx3,
+	"Level 4",dsphinx4,
+	"Level 5",dsphinx5;
+
+sunken:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dsunken1,
+	"Level 2",dsunken2;
+
+toy:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dtoy1,
+	"Level 2",dtoy2;
+
+turtle:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Entrance",dturtleent,
+	"Level 1",dturtle1,
+	"Level 2",dturtle2,
+	"Level 3",dturtle3;
+
+ama:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dama1,
+	"Level 2",dama2,
+	"Level 3",dama3;
+
+gon:
+mes "[BWarp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dgon1,
+	"Level 2",dgon2,
+	"Level 3",dgon3;
+
+gefenia:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dgefenia1,
+	"Level 2",dgefenia2,
+	"Level 3",dgefenia3,
+	"Level 4",dgefenia4;
+
+wthor:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dthor1,
+	"Level 2",dthor2,
+	"Level 3",dthor3;
+
+rachels:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",drachel1,
+	"Level 2",drachel2,
+	"Level 3",drachel3,
+	"Level 4",drachel4,	
+	"Level 5",drachel5;
+
+wabbey:
+mes "[Warp NPC]";
+mes "กรุณาเลือกสถานที่ค่ะ";
+next;
+menu 	"Level 1",dabbey1,
+	"Level 2",dabbey2,
+	"Level 3",dabbey3;
+
+wodint:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Level 1",dodtemp1,
+	"Level 2",dodtemp2,
+	"Level 3",dodtemp3;
+
+wmoscovia:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Level 1",dmoscovia1,
+	"Level 2",dmoscovia2,
+	"Level 3",dmoscovia3;
+
+seal:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Level 1",dseal1,
+	"Level 2",dseal2;
+
+wnidhoggur:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Level 1",dnidhoggur1,
+	"Level 2",dnidhoggur2;
+
+bradun:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Brasilia Field",fbra,
+	"Level 1",dbradun1,
+	"Level 2",dbradun2;
+
+eldun:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"El Dicastes Field",fel,
+	"Level 1",deldun1,
+	"Level 2",deldun2;
+
+//-------------------------------
+//          Fields
+//-------------------------------
+
+warunfild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Rachel Field 1",drunfild1,
+	"Rachel Field 2",drunfild2,
+	"Rachel Field 3",drunfild3,
+	"Rachel Field 4",drunfild4,
+	"Rachel Field 5",drunfild5,
+	"Rachel Field 6",drunfild6,
+	"Rachel Field 7",drunfild7,
+	"Rachel Field 8",drunfild8,
+	"Rachel Field 9",drunfild9,
+	"Rachel Field 10",drunfild10,
+	"Rachel Field 11",drunfild11,
+	"Rachel Field 12",drunfild12,
+	"Rachel Field 13",drunfild13;
+
+wgeffild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	//"Geffen Field 0",dgeffild00,
+	"Geffen Field 1",dgeffild01,
+	"Geffen Field 2",dgeffild02,
+	"Geffen Field 3",dgeffild03,
+	"Geffen Field 4",dgeffild04,
+	"Geffen Field 5",dgeffild05,
+	"Geffen Field 6",dgeffild06,
+	"Geffen Field 7",dgeffild07,
+	"Geffen Field 8",dgeffild08,
+	"Geffen Field 9",dgeffild09,
+	"Geffen Field 10",dgeffild10,
+	"Geffen Field 11",dgeffild11,
+	"Geffen Field 12",dgeffild12,
+	"Geffen Field 13",dgeffild13,
+	"Geffen Field 14",dgeffild14;
+
+wmanfild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu	"Manuk Field 1",dmanfild1,
+	"Manuk Field 2",dmanfild2;
+
+wmjolnir:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu	"Mjolnir Field 1",dmjolnir1,
+	"Mjolnir Field 2",dmjolnir2,
+	"Mjolnir Field 3",dmjolnir3,
+	"Mjolnir Field 4",dmjolnir4,
+	"Mjolnir Field 5",dmjolnir5,
+	"Mjolnir Field 6",dmjolnir6,
+	"Mjolnir Field 7",dmjolnir7,
+	"Mjolnir Field 8",dmjolnir8,
+	"Mjolnir Field 9",dmjolnir9,
+	"Mjolnir Field 10",dmjolnir10,
+	"Mjolnir Field 11",dmjolnir11,
+	"Mjolnir Field 12",dmjolnir12;
+
+wmoscoviafild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu	"Okrestnosti of Moscovia Field 1",dmoskfild1,
+	"Okrestnosti of Moscovia 2",dmoskfild2;
+
+wmocfild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Sograt Desert 1",dmocfild1,
+	"Sograt Desert 2",dmocfild2,
+	"Sograt Desert 3",dmocfild3,
+	"Sograt Desert 4",dmocfild4,
+	"Sograt Desert 5",dmocfild5,
+	"Sograt Desert 6",dmocfild6,
+	"Sograt Desert 7",dmocfild7,
+	"Sograt Desert 8",dmocfild8,
+	"Sograt Desert 9",dmocfild9,
+	"Sograt Desert 10",dmocfild10,
+	"Sograt Desert 11",dmocfild11,
+	"Sograt Desert 12",dmocfild12,
+	"Sograt Desert 13",dmocfild13,
+	"Sograt Desert 14",dmocfild14,
+	"Sograt Desert 15",dmocfild15,
+	"Sograt Desert 16",dmocfild16,
+	"Sograt Desert 17",dmocfild17,
+	"Sograt Desert 18",dmocfild18,
+	"Sograt Desert 19",dmocfild19,
+	"Sograt Desert 20",dmocfild20,
+	"Sograt Desert 21",dmocfild21,
+	"Sograt Desert 22",dmocfild22;
+
+wsplfild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Splendide Field 1",dsplfild1,
+	"Splendide Field 2",dsplfild2,
+	"Splendide Field 3",dsplfild3;
+
+wpayfor:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Payon Forest 1",dpayfild1,
+	"Payon Forest 2",dpayfild2,
+	"Payon Forest 3",dpayfild3,
+	"Payon Forest 4",dpayfild4,
+	"Payon Forest 5",dpayfild5,
+	"Payon Forest 6",dpayfild6,
+	"Payon Forest 7",dpayfild7,
+	"Payon Forest 8",dpayfild8,
+	"Payon Forest 9",dpayfild9,
+	"Payon Forest 10",dpayfild10,
+	"Payon Forest 11",dpayfild11;
+
+wprtfild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Prontera Field 1",dprtfild1,
+	"Prontera Field 2",dprtfild2,
+	"Prontera Field 3",dprtfild3,
+	"Prontera Field 4",dprtfild4,
+	"Prontera Field 5",dprtfild5,
+	"Prontera Field 6",dprtfild6,
+	"Prontera Field 7",dprtfild7,
+	"Prontera Field 8",dprtfild8,
+	"Prontera Field 9",dprtfild9,
+	"Prontera Field 10",dprtfild10,
+	"Prontera Field 11",dprtfild11;
+
+wxmasfild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Lutie Field 1",dxmasfild1;
+
+wcmdfild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Comodo Field 1",dcmdfild1,
+	"Comodo Field 2",dcmdfild2,
+	"Comodo Field 3",dcmdfild3,
+	"Comodo Field 4",dcmdfild4,
+	"Comodo Field 5",dcmdfild5,
+	"Comodo Field 6",dcmdfild6,
+	"Comodo Field 7",dcmdfild7,
+	"Comodo Field 8",dcmdfild8,
+	"Comodo Field 9",dcmdfild9;
+
+wyunofild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Yuno Field 1",dyunofild1,
+	"Yuno Field 2",dyunofild2,
+	"Yuno Field 3",dyunofild3,
+	"Yuno Field 4",dyunofild4,
+	"Yuno Field 5",dyunofild5,
+	"Yuno Field 6",dyunofild6,
+	"Yuno Field 7",dyunofild7,
+	"Yuno Field 8",dyunofild8,
+	"Yuno Field 9",dyunofild9,
+	"Yuno Field 10",dyunofild10,
+	"Yuno Field 11",dyunofild11,
+	"Yuno Field 12",dyunofild12;
+
+wamafild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Amatsu Field 1",damafild1;
+
+wgonfild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Gonryun Field 1",dgonfild1;
+
+wumfild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Umbala Field 1",dumfild1,
+	"Umbala Field 2",dumfild2,
+	"Umbala Field 3",dumfild3,
+	"Umbala Field 4",dumfild4;
+
+wniffild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Niflheim Field 1",dniffild1,
+	"Niflheim Field 2",dniffild2;
+
+wloufild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Louyang Field 1",dloufild1;
+
+wayofild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Ayothaya Field 1",dayofild1,
+	"Ayothaya Field 2",dayofild2;
+
+weinfild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Einbroch Field 1",deinfild1,
+	"Einbroch Field 2",deinfild2,
+	"Einbroch Field 3",deinfild3,
+	"Einbroch Field 4",deinfild4,
+	"Einbroch Field 5",deinfild5,
+	"Einbroch Field 6",deinfild6,
+	"Einbroch Field 7",deinfild7,
+	"Einbroch Field 8",deinfild8,
+	"Einbroch Field 9",deinfild9,
+	"Einbroch Field 10",deinfild10;
+
+wlhzfild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Lighthalzen Field 1",dlhzfild1,
+	"Lighthalzen Field 2",dlhzfild2,
+	"Lighthalzen Field 3",dlhzfild3;
+
+whufild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu 	"Hugel Field 1",dhufild1,
+	"Hugel Field 2",dhufild2,
+	"Hugel Field 3",dhufild3,
+	"Hugel Field 4",dhufild4,
+	"Hugel Field 5",dhufild5,
+	"Hugel Field 6",dhufild6,
+	"Hugel Field 7",dhufild7;
+
+wveinsfild:
+mes "[Warp NPC]";
+mes "Please select a Field. You will be warped to the center of that map.";
+next;
+menu	"Veins Field 1",dvfild1,
+	"Veins Field 2",dvfild2,
+	"Veins Field 3",dvfild3,
+	"Veins Field 4",dvfild4,
+	"Veins Field 5",dvfild5,
+	"Veins Field 6",dvfild6,
+	"Veins Field 7",dvfild7;
+
+//-------------------------------
+//          Town Warps
+//-------------------------------
+
+	wafeltz:	warp "rachel.gat",130,137;		close;
+	walberta:	warp "alberta.gat",28,234;		close;
+	waldebaran:	warp "aldebaran.gat",140,131;		close;
+	wamatsu:	warp "amatsu.gat",198,84;		close;
+	wayot:	warp "ayothaya.gat",150,163;		close;
+	wcomodo:	warp "comodo.gat",209,143;		close;
+	weinbech:	warp "einbech.gat",70,95;		close;
+	weinbroch:	warp "einbroch.gat",64,200;		close;
+	whugel:	warp "hugel.gat",124,131;		close;
+	wlighthalzen:	warp "lighthalzen.gat",158,92;		close;
+	wgonryun:	warp "gonryun.gat",160,121;		close;
+	wgeffen:	warp "geffen.gat",119,59;		close;
+	wizlude:	warp "izlude.gat",128,114;		close;
+	wxmas:	warp "xmas.gat",147,134;		close;
+	wjawaii:	warp "jawaii.gat",213,230;		close;
+	wmorroc:	warp "morocc.gat",156,93;		close;
+	wnameless:	warp	"nameless_n.gat",256,215;	close;
+	wniflheim:	warp "niflheim.gat",35,156;		close;
+	wpayon:	warp "payon.gat",152,75;		close;
+	wprontera:	warp "prontera.gat",155,183;		close;
+	wyuno:	warp "yuno.gat",157,183;			close;
+	wumbala:	warp "umbala.gat",126,129;		close;
+	wlouyang:	warp "louyang.gat",210,108;		close;
+	wthorcamp:	warp "thor_camp.gat",254,90;		close;
+	wveins:	warp "veins.gat",216,123;		close;
+	wsplendide:	warp "splendide",198,170;	close;
+	endless:	warp "e_tower",75,111;	close;
+	weldicastes:	warp "dicastes01",197,187;	close;
+	mora:	warp "mora",111,84;	close;
+	dewata:	warp "dewata",199,179;	close;
+
+//-------------------------------
+//        Dungeon Warps
+//-------------------------------
+	dkieldun1:	set @lastmap$,"kh_dun01.gat";	goto warpgo;
+	dkieldun2:	set @lastmap$,"kh_dun02.gat";	goto warpgo;
+	djuperos1:	set @lastmap$,"juperos_01.gat";	goto warpgo;
+	djuperos3:	set @lastmap$,"juperos_02.gat";	goto warpgo;
+	djuperos2:	set @lastmap$,"jupe_core.gat";	goto warpgo;
+	dumdun1:	set @lastmap$,"um_dun01.gat";	goto warpgo;
+	dumdun2:	set @lastmap$,"um_dun02.gat";	goto warpgo;
+	dloudun1:	set @lastmap$,"lou_dun01.gat";	goto warpgo;
+	dloudun2:	set @lastmap$,"lou_dun02.gat";	goto warpgo;
+	dloudun3:	set @lastmap$,"lou_dun03.gat";	goto warpgo;
+	dayodun1:	set @lastmap$,"ayo_dun01.gat";	goto warpgo;
+	dayodun2:	set @lastmap$,"ayo_dun02.gat";	goto warpgo;
+	deindun1:	set @lastmap$,"ein_dun01.gat";	goto warpgo;
+	deindun2:	set @lastmap$,"ein_dun02.gat";	goto warpgo;
+	dlhzdun1:	set @lastmap$,"lhz_dun01.gat";	goto warpgo;
+	dlhzdun2:	set @lastmap$,"lhz_dun02.gat";	goto warpgo;
+	dlhzdun3:	set @lastmap$,"lhz_dun03.gat";	goto warpgo;
+	dabyss1:	set @lastmap$,"abyss_01.gat";	goto warpgo;
+	dabyss2:	set @lastmap$,"abyss_02.gat";	goto warpgo;
+	dabyss3:	set @lastmap$,"abyss_03.gat";	goto warpgo;
+	dthat1:	set @lastmap$,"tha_t01.gat";	goto warpgo;
+	dthat2:	set @lastmap$,"tha_t02.gat";	goto warpgo;
+	dthat3:	set @lastmap$,"tha_t03.gat";	goto warpgo;
+	dthat4:	set @lastmap$,"tha_t04.gat";	goto warpgo;
+	dthat5:	set @lastmap$,"tha_t05.gat";	goto warpgo;
+	dthat6:	set @lastmap$,"tha_t06.gat";	goto warpgo;
+	dthat7:	set @lastmap$,"tha_t07.gat";	goto warpgo;
+	dthat8:	set @lastmap$,"tha_t08.gat";	goto warpgo;
+	dthat9:	set @lastmap$,"tha_t09.gat";	goto warpgo;
+	dthat10:	set @lastmap$,"tha_t10.gat";	goto warpgo;
+	dthat11:	set @lastmap$,"tha_t11.gat";	goto warpgo;
+	dthat12:	set @lastmap$,"tha_t12.gat";	goto warpgo;
+	danthell1:	set @lastmap$,"anthell01.gat";	goto warpgo;
+	danthell2:	set @lastmap$,"anthell02.gat";	goto warpgo;
+	dbeach1:	set @lastmap$,"beach_dun.gat";	goto warpgo;
+	dbeach2:	set @lastmap$,"beach_dun2.gat";	goto warpgo;
+	dbeach3:	set @lastmap$,"beach_dun3.gat";	goto warpgo;
+	dbyalan1:	set @lastmap$,"iz_dun00.gat";	goto warpgo;
+	dbyalan2:	set @lastmap$,"iz_dun01.gat";	goto warpgo;
+	dbyalan3:	set @lastmap$,"iz_dun02.gat";	goto warpgo;
+	dbyalan4:	set @lastmap$,"iz_dun03.gat";	goto warpgo;
+	dbyalan5:	set @lastmap$,"iz_dun04.gat";	goto warpgo;
+	dalde1:	set @lastmap$,"alde_dun01.gat";	goto warpgo;
+	dalde2:	set @lastmap$,"alde_dun02.gat";	goto warpgo;
+	dalde3:	set @lastmap$,"alde_dun03.gat";	goto warpgo;
+	dalde4:	set @lastmap$,"alde_dun04.gat";	goto warpgo;
+	dclock1:	set @lastmap$,"c_tower1.gat";	goto warpgo;
+	dclock2:	set @lastmap$,"c_tower2.gat";	goto warpgo;
+	dclock3:	set @lastmap$,"c_tower3.gat";	goto warpgo;
+	dclock4:	set @lastmap$,"c_tower4.gat";	goto warpgo;
+	dcoal1:	set @lastmap$,"mjo_dun01.gat";	goto warpgo;
+	dcoal2:	set @lastmap$,"mjo_dun02.gat";	goto warpgo;
+	dcoal3:	set @lastmap$,"mjo_dun03.gat";	goto warpgo;
+	dculvert1:	set @lastmap$,"prt_sewb1.gat";	goto warpgo;
+	dculvert2:	set @lastmap$,"prt_sewb2.gat";	goto warpgo;
+	dculvert3:	set @lastmap$,"prt_sewb3.gat";	goto warpgo;
+	dculvert4:	set @lastmap$,"prt_sewb4.gat";	goto warpgo;
+	dgeffen1:	set @lastmap$,"gef_dun00.gat";	goto warpgo;
+	dgeffen2:	set @lastmap$,"gef_dun01.gat";	goto warpgo;
+	dgeffen3:	set @lastmap$,"gef_dun02.gat";	goto warpgo;
+	dgeffen4:	set @lastmap$,"gef_dun03.gat";	goto warpgo;
+	dglastent:	set @lastmap$,"glast_01.gat";	goto warpgo;
+	dglastcast1:	set @lastmap$,"gl_cas01.gat";	goto warpgo;
+	dglastcast2:	set @lastmap$,"gl_cas02.gat";	goto warpgo;
+	dglastchiv1:	set @lastmap$,"gl_knt01.gat";	goto warpgo;
+	dglastchiv2:	set @lastmap$,"gl_knt02.gat";	goto warpgo;
+	dglastyard:	set @lastmap$,"gl_chyard.gat";	goto warpgo;
+	dglastcul1:	set @lastmap$,"gl_sew01.gat";	goto warpgo;
+	dglastcul2:	set @lastmap$,"gl_sew02.gat";	goto warpgo;
+	dglastcul3:	set @lastmap$,"gl_sew03.gat";	goto warpgo;
+	dglastcul4:	set @lastmap$,"gl_sew04.gat";	goto warpgo;
+	dglastchur:	set @lastmap$,"gl_church.gat";	goto warpgo;
+	dglaststep:	set @lastmap$,"gl_step.gat";	goto warpgo;
+	dglastcave1:	set @lastmap$,"gl_dun01.gat";	goto warpgo;
+	dglastcave2:	set @lastmap$,"gl_dun02.gat";	goto warpgo;
+	dglastpris1:	set @lastmap$,"gl_prison.gat";	goto warpgo;
+	dglastpris2:	set @lastmap$,"gl_prison1.gat";	goto warpgo;
+	dhidden1:	set @lastmap$,"prt_maze01.gat";	goto warpgo;
+	dhidden2:	set @lastmap$,"prt_maze02.gat";	goto warpgo;
+	dhidden3:	set @lastmap$,"prt_maze03.gat";	goto warpgo;
+	diced1:	set @lastmap$,"ice_dun01.gat";	goto warpgo;
+	diced2:	set @lastmap$,"ice_dun02.gat";	goto warpgo;
+	diced3:	set @lastmap$,"ice_dun03.gat";	goto warpgo;
+	diced4:	set @lastmap$,"ice_dun04.gat";	goto warpgo;
+	dmagma1:	set @lastmap$,"mag_dun01.gat";	goto warpgo;
+	dmagma2:	set @lastmap$,"mag_dun02.gat";	goto warpgo;
+	dorc1:	set @lastmap$,"orcsdun01.gat";	goto warpgo;
+	dorc2:	set @lastmap$,"orcsdun02.gat";	goto warpgo;
+	dpayon1:	set @lastmap$,"pay_dun00.gat";	goto warpgo;
+	dpayon2:	set @lastmap$,"pay_dun01.gat";	goto warpgo;
+	dpayon3:	set @lastmap$,"pay_dun02.gat";	goto warpgo;
+	dpayon4:	set @lastmap$,"pay_dun03.gat";	goto warpgo;
+	dpayon5:	set @lastmap$,"pay_dun04.gat";	goto warpgo;
+	dpyramids1:	set @lastmap$,"moc_pryd01.gat";	goto warpgo;
+	dpyramids2:	set @lastmap$,"moc_pryd02.gat";	goto warpgo;
+	dpyramids3:	set @lastmap$,"moc_pryd03.gat";	goto warpgo;
+	dpyramids4:	set @lastmap$,"moc_pryd04.gat";	goto warpgo;
+	dpyramidsb1:	set @lastmap$,"moc_pryd05.gat";	goto warpgo;
+	dpyramidsb2:	set @lastmap$,"moc_pryd06.gat";	goto warpgo;
+	dsphinx1:	set @lastmap$,"in_sphinx1.gat";	goto warpgo;
+	dsphinx2:	set @lastmap$,"in_sphinx2.gat";	goto warpgo;
+	dsphinx3:	set @lastmap$,"in_sphinx3.gat";	goto warpgo;
+	dsphinx4:	set @lastmap$,"in_sphinx4.gat";	goto warpgo;
+	dsphinx5:	set @lastmap$,"in_sphinx5.gat";	goto warpgo;
+	dsunken1:	set @lastmap$,"treasure01.gat";	goto warpgo;
+	dsunken2:	set @lastmap$,"treasure02.gat";	goto warpgo;
+	dtoy1:	set @lastmap$,"xmas_dun01.gat";	goto warpgo;
+	dtoy2:	set @lastmap$,"xmas_dun02.gat";	goto warpgo;
+	dturtleent:	set @lastmap$,"tur_dun01.gat";	goto warpgo;
+	dturtle1:	set @lastmap$,"tur_dun02.gat";	goto warpgo;
+	dturtle2:	set @lastmap$,"tur_dun03.gat";	goto warpgo;
+	dturtle3:	set @lastmap$,"tur_dun04.gat";	goto warpgo;
+	dama1:	set @lastmap$,"ama_dun01.gat";	goto warpgo;
+	dama2:	set @lastmap$,"ama_dun02.gat";	goto warpgo;
+	dama3:	set @lastmap$,"ama_dun03.gat";	goto warpgo;
+	dgon1:	set @lastmap$,"gon_dun01.gat";	goto warpgo;
+	dgon2:	set @lastmap$,"gon_dun02.gat";	goto warpgo;
+	dgon3:	set @lastmap$,"gon_dun03.gat";	goto warpgo;
+	dgefenia1:	set @lastmap$,"gefenia01.gat";	goto warpgo;
+	dgefenia2:	set @lastmap$,"gefenia02.gat";	goto warpgo;
+	dgefenia3:	set @lastmap$,"gefenia03.gat";	goto warpgo;
+	dgefenia4:	set @lastmap$,"gefenia04.gat";	goto warpgo;
+	casino:	set @lastmap$,"cmd_in02.gat";	goto warpgo;
+	dthor1:	set @lastmap$,"thor_v01.gat";	goto warpgo;
+	dthor2:	set @lastmap$,"thor_v02.gat";	goto warpgo;
+	dthor3:	set @lastmap$,"thor_v03.gat";	goto warpgo;
+	drachel1:	set @lastmap$,"ra_san01.gat";	goto warpgo;
+	drachel2:	set @lastmap$,"ra_san02.gat";	goto warpgo;
+	drachel3:	set @lastmap$,"ra_san03.gat";	goto warpgo;
+	drachel4:	set @lastmap$,"ra_san04.gat";	goto warpgo;
+	drachel5:	set @lastmap$,"ra_san05.gat";	goto warpgo;
+	dabbey1:	set @lastmap$,"abbey01.gat";	goto warpgo;
+	dabbey2:	set @lastmap$,"abbey02.gat";	goto warpgo;
+	dabbey3:	set @lastmap$,"abbey03.gat";	goto warpgo;
+	dodtemp1:	set @lastmap$,"odin_tem01.gat";	goto warpgo;
+	dodtemp2:	set @lastmap$,"odin_tem02.gat";	goto warpgo;
+	dodtemp3:	set @lastmap$,"odin_tem03.gat";	goto warpgo;
+	dmoscovia1:	set @lastmap$,"mosk_dun01.gat";	goto warpgo;
+	dmoscovia2:	set @lastmap$,"mosk_dun02.gat";	goto warpgo;
+	dmoscovia3:	set @lastmap$,"mosk_dun03.gat";	goto warpgo;
+	dimen:	set @lastmap$,"moc_fild21.gat";	goto warpgo;
+	manuk:	set @lastmap$,"man_fild01";	goto warpgo;
+	splendid:	set @lastmap$,"spl_fild02";	goto warpgo;
+	dseal1:	set @lastmap$,"1@cata";	goto warpgo;
+	dseal2:	set @lastmap$,"2@cata";	goto warpgo;
+	dnidhoggur1:	set @lastmap$,"nyd_dun01";	goto warpgo;
+	dnidhoggur2:	set @lastmap$,"nyd_dun02";	goto warpgo;
+	fbra:	set @lastmap$,"bra_fild01";	goto warpgo;
+	dbradun1:	set @lastmap$,"bra_dun01";	goto warpgo;
+	dbradun2:	set @lastmap$,"bra_dun02";	goto warpgo;
+	fel:	set @lastmap$,"dic_fild01";	goto warpgo;
+	deldun1:	set @lastmap$,"dic_dun01";	goto warpgo;
+	deldun2:	set @lastmap$,"dic_dun02";	goto warpgo;
+	wcave:	set @lastmap$,"cave";	goto warpgo;
+	wairp:	set @lastmap$,"airplane_01";	goto warpgo;
+	wfarm:	set @lastmap$,"sec_in02";	goto warpgo;
+	wmora:	set @lastmap$,"1@mist";	goto warpgo;
+	ddewata1:	set @lastmap$,"dew_dun01";	goto warpgo; 
+	ddewata2:	set @lastmap$,"dew_dun02";	goto warpgo;
+	wmalangdo:	set @lastmap$,"mal_dun01";	goto warpgo;
+
+//-------------------------------
+//         Field Warps
+//-------------------------------
+	drunfild1:	set @lastmap$,"ra_fild01.gat";	goto warpgo;
+	drunfild2:	set @lastmap$,"ra_fild02.gat";	goto warpgo;
+	drunfild3:	set @lastmap$,"ra_fild03.gat";	goto warpgo;
+	drunfild4:	set @lastmap$,"ra_fild04.gat";	goto warpgo;
+	drunfild5:	set @lastmap$,"ra_fild05.gat";	goto warpgo;
+	drunfild6:	set @lastmap$,"ra_fild06.gat";	goto warpgo;
+	drunfild7:	set @lastmap$,"ra_fild07.gat";	goto warpgo;
+	drunfild8:	set @lastmap$,"ra_fild08.gat";	goto warpgo;
+	drunfild9:	set @lastmap$,"ra_fild09.gat";	goto warpgo;
+	drunfild10:	set @lastmap$,"ra_fild10.gat";	goto warpgo;
+	drunfild11:	set @lastmap$,"ra_fild11.gat";	goto warpgo;
+	drunfild12:	set @lastmap$,"ra_fild12.gat";	goto warpgo;
+	drunfild13:	set @lastmap$,"ra_fild13.gat";	goto warpgo;
+	dgeffild00:	set @lastmap$,"gef_fild00.gat";	goto warpgo;
+	dgeffild01:	set @lastmap$,"gef_fild01.gat";	goto warpgo;
+	dgeffild02:	set @lastmap$,"gef_fild02.gat";	goto warpgo;
+	dgeffild03:	set @lastmap$,"gef_fild03.gat";	goto warpgo;
+	dgeffild04:	set @lastmap$,"gef_fild04.gat";	goto warpgo;
+	dgeffild05:	set @lastmap$,"gef_fild05.gat";	goto warpgo;
+	dgeffild06:	set @lastmap$,"gef_fild06.gat";	goto warpgo;
+	dgeffild07:	set @lastmap$,"gef_fild07.gat";	goto warpgo;
+	dgeffild08:	set @lastmap$,"gef_fild08.gat";	goto warpgo;
+	dgeffild09:	set @lastmap$,"gef_fild09.gat";	goto warpgo;
+	dgeffild10:	set @lastmap$,"gef_fild10.gat";	goto warpgo;
+	dgeffild11:	set @lastmap$,"gef_fild11.gat";	goto warpgo;
+	dgeffild12:	set @lastmap$,"gef_fild12.gat";	goto warpgo;
+	dgeffild13:	set @lastmap$,"gef_fild13.gat";	goto warpgo;
+	dgeffild14:	set @lastmap$,"gef_fild14.gat";	goto warpgo;
+	dmjolnir1:	set @lastmap$,"mjolnir_01.gat";	goto warpgo;
+	dmjolnir2:	set @lastmap$,"mjolnir_02.gat";	goto warpgo;
+	dmjolnir3:	set @lastmap$,"mjolnir_03.gat";	goto warpgo;
+	dmjolnir4:	set @lastmap$,"mjolnir_04.gat";	goto warpgo;
+	dmjolnir5:	set @lastmap$,"mjolnir_05.gat";	goto warpgo;
+	dmjolnir6:	set @lastmap$,"mjolnir_06.gat";	goto warpgo;
+	dmjolnir7:	set @lastmap$,"mjolnir_07.gat";	goto warpgo;
+	dmjolnir8:	set @lastmap$,"mjolnir_08.gat";	goto warpgo;
+	dmjolnir9:	set @lastmap$,"mjolnir_09.gat";	goto warpgo;
+	dmjolnir10:	set @lastmap$,"mjolnir_10.gat";	goto warpgo;
+	dmjolnir11:	set @lastmap$,"mjolnir_11.gat";	goto warpgo;
+	dmjolnir12:	set @lastmap$,"mjolnir_12.gat";	goto warpgo;
+	dmoskfild1:	set @lastmap$,"mosk_fild01.gat";	goto warpgo;
+	dmoskfild2:	set @lastmap$,"mosk_fild02.gat";	goto warpgo;
+	dmocfild1:	set @lastmap$,"moc_fild01.gat";	goto warpgo;
+	dmocfild2:	set @lastmap$,"moc_fild02.gat";	goto warpgo;
+	dmocfild3:	set @lastmap$,"moc_fild03.gat";	goto warpgo;
+	dmocfild4:	set @lastmap$,"moc_fild04.gat";	goto warpgo;
+	dmocfild5:	set @lastmap$,"moc_fild05.gat";	goto warpgo;
+	dmocfild6:	set @lastmap$,"moc_fild06.gat";	goto warpgo;
+	dmocfild7:	set @lastmap$,"moc_fild07.gat";	goto warpgo;
+	dmocfild8:	set @lastmap$,"moc_fild08.gat";	goto warpgo;
+	dmocfild9:	set @lastmap$,"moc_fild09.gat";	goto warpgo;
+	dmocfild10:	set @lastmap$,"moc_fild10.gat";	goto warpgo;
+	dmocfild11:	set @lastmap$,"moc_fild11.gat";	goto warpgo;
+	dmocfild12:	set @lastmap$,"moc_fild12.gat";	goto warpgo;
+	dmocfild13:	set @lastmap$,"moc_fild13.gat";	goto warpgo;
+	dmocfild14:	set @lastmap$,"moc_fild14.gat";	goto warpgo;
+	dmocfild15:	set @lastmap$,"moc_fild15.gat";	goto warpgo;
+	dmocfild16:	set @lastmap$,"moc_fild16.gat";	goto warpgo;
+	dmocfild17:	set @lastmap$,"moc_fild17.gat";	goto warpgo;
+	dmocfild18:	set @lastmap$,"moc_fild18.gat";	goto warpgo;
+	dmocfild19:	set @lastmap$,"moc_fild19.gat";	goto warpgo;
+	dmocfild20:	set @lastmap$,"moc_fild20.gat";	goto warpgo;
+	dmocfild21:	set @lastmap$,"moc_fild21.gat";	goto warpgo;
+	dmocfild22:	set @lastmap$,"moc_fild22.gat";	goto warpgo;
+	dpayfild1:	set @lastmap$,"pay_fild01.gat";	goto warpgo;
+	dpayfild2:	set @lastmap$,"pay_fild02.gat";	goto warpgo;
+	dpayfild3:	set @lastmap$,"pay_fild03.gat";	goto warpgo;
+	dpayfild4:	set @lastmap$,"pay_fild04.gat";	goto warpgo;
+	dpayfild5:	set @lastmap$,"pay_fild05.gat";	goto warpgo;
+	dpayfild6:	set @lastmap$,"pay_fild06.gat";	goto warpgo;
+	dpayfild7:	set @lastmap$,"pay_fild07.gat";	goto warpgo;
+	dpayfild8:	set @lastmap$,"pay_fild08.gat";	goto warpgo;
+	dpayfild9:	set @lastmap$,"pay_fild09.gat";	goto warpgo;
+	dpayfild10:	set @lastmap$,"pay_fild10.gat";	goto warpgo;
+	dpayfild11:	set @lastmap$,"pay_fild11.gat";	goto warpgo;
+	dprtfild0:	set @lastmap$,"prt_fild00.gat";	goto warpgo;
+	dprtfild1:	set @lastmap$,"prt_fild01.gat";	goto warpgo;
+	dprtfild2:	set @lastmap$,"prt_fild02.gat";	goto warpgo;
+	dprtfild3:	set @lastmap$,"prt_fild03.gat";	goto warpgo;
+	dprtfild4:	set @lastmap$,"prt_fild04.gat";	goto warpgo;
+	dprtfild5:	set @lastmap$,"prt_fild05.gat";	goto warpgo;
+	dprtfild6:	set @lastmap$,"prt_fild06.gat";	goto warpgo;
+	dprtfild7:	set @lastmap$,"prt_fild07.gat";	goto warpgo;
+	dprtfild8:	set @lastmap$,"prt_fild08.gat";	goto warpgo;
+	dprtfild9:	set @lastmap$,"prt_fild09.gat";	goto warpgo;
+	dprtfild10:	set @lastmap$,"prt_fild10.gat";	goto warpgo;
+	dprtfild11:	set @lastmap$,"prt_fild11.gat";	goto warpgo;
+	dxmasfild1:	set @lastmap$,"xmas_fild01.gat";	goto warpgo;
+	dcmdfild1:	set @lastmap$,"cmd_fild01.gat";	goto warpgo;
+	dcmdfild2:	set @lastmap$,"cmd_fild02.gat";	goto warpgo;
+	dcmdfild3:	set @lastmap$,"cmd_fild03.gat";	goto warpgo;
+	dcmdfild4:	set @lastmap$,"cmd_fild04.gat";	goto warpgo;
+	dcmdfild5:	set @lastmap$,"cmd_fild05.gat";	goto warpgo;
+	dcmdfild6:	set @lastmap$,"cmd_fild06.gat";	goto warpgo;
+	dcmdfild7:	set @lastmap$,"cmd_fild07.gat";	goto warpgo;
+	dcmdfild8:	set @lastmap$,"cmd_fild08.gat";	goto warpgo;
+	dcmdfild9:	set @lastmap$,"cmd_fild09.gat";	goto warpgo;
+	dyunofild1:	set @lastmap$,"yuno_fild01.gat";	goto warpgo;
+	dyunofild2:	set @lastmap$,"yuno_fild02.gat";	goto warpgo;
+	dyunofild3:	set @lastmap$,"yuno_fild03.gat";	goto warpgo;
+	dyunofild4:	set @lastmap$,"yuno_fild04.gat";	goto warpgo;
+	dyunofild5:	set @lastmap$,"yuno_fild05.gat";	goto warpgo;
+	dyunofild6:	set @lastmap$,"yuno_fild06.gat";	goto warpgo;
+	dyunofild7:	set @lastmap$,"yuno_fild07.gat";	goto warpgo;
+	dyunofild8:	set @lastmap$,"yuno_fild08.gat";	goto warpgo;
+	dyunofild9:	set @lastmap$,"yuno_fild09.gat";	goto warpgo;
+	dyunofild10:	set @lastmap$,"yuno_fild10.gat";	goto warpgo;
+	dyunofild11:	set @lastmap$,"yuno_fild11.gat";	goto warpgo;
+	dyunofild12:	set @lastmap$,"yuno_fild12.gat";	goto warpgo;
+	damafild1:	set @lastmap$,"ama_fild01.gat";	goto warpgo;
+	dgonfild1:	set @lastmap$,"gon_fild01.gat";	goto warpgo;
+	dumfild1:	set @lastmap$,"um_fild01.gat";	goto warpgo;
+	dumfild2:	set @lastmap$,"um_fild02.gat";	goto warpgo;
+	dumfild3:	set @lastmap$,"um_fild03.gat";	goto warpgo;
+	dumfild4:	set @lastmap$,"um_fild04.gat";	goto warpgo;
+	dniffild1:	set @lastmap$,"nif_fild01.gat";	goto warpgo;
+	dniffild2:	set @lastmap$,"nif_fild02.gat";	goto warpgo;
+	dyggdrasil1:	set @lastmap$,"yggdrasil01.gat";	goto warpgo;
+	dloufild1:	set @lastmap$,"lou_fild01.gat";	goto warpgo;
+	dayofild1:	set @lastmap$,"ayo_fild01.gat";	goto warpgo;
+	dayofild2:	set @lastmap$,"ayo_fild02.gat";	goto warpgo;
+	deinfild1:	set @lastmap$,"ein_fild01.gat";	goto warpgo;
+	deinfild2:	set @lastmap$,"ein_fild02.gat";	goto warpgo;
+	deinfild3:	set @lastmap$,"ein_fild03.gat";	goto warpgo;
+	deinfild4:	set @lastmap$,"ein_fild04.gat";	goto warpgo;
+	deinfild5:	set @lastmap$,"ein_fild05.gat";	goto warpgo;
+	deinfild6:	set @lastmap$,"ein_fild06.gat";	goto warpgo;
+	deinfild7:	set @lastmap$,"ein_fild07.gat";	goto warpgo;
+	deinfild8:	set @lastmap$,"ein_fild08.gat";	goto warpgo;
+	deinfild9:	set @lastmap$,"ein_fild09.gat";	goto warpgo;
+	deinfild10:	set @lastmap$,"ein_fild10.gat";	goto warpgo;
+	dlhzfild1:	set @lastmap$,"lhz_fild01.gat";	goto warpgo;
+	dlhzfild2:	set @lastmap$,"lhz_fild02.gat";	goto warpgo;
+	dlhzfild3:	set @lastmap$,"lhz_fild03.gat";	goto warpgo;
+	dhufild1:	set @lastmap$,"hu_fild01.gat";	goto warpgo;
+	dhufild2:	set @lastmap$,"hu_fild02.gat";	goto warpgo;
+	dhufild3:	set @lastmap$,"hu_fild03.gat";	goto warpgo;
+	dhufild4:	set @lastmap$,"hu_fild04.gat";	goto warpgo;
+	dhufild5:	set @lastmap$,"hu_fild05.gat";	goto warpgo;
+	dhufild6:	set @lastmap$,"hu_fild06.gat";	goto warpgo;
+	dhufild7:	set @lastmap$,"hu_fild07.gat";	goto warpgo;
+	dvfild1:	set @lastmap$,"ve_fild01";	goto warpgo;
+	dvfild2:	set @lastmap$,"ve_fild02";	goto warpgo;
+	dvfild3:	set @lastmap$,"ve_fild03";	goto warpgo;
+	dvfild4:	set @lastmap$,"ve_fild04";	goto warpgo;
+	dvfild5:	set @lastmap$,"ve_fild05";	goto warpgo;
+	dvfild6:	set @lastmap$,"ve_fild06";	goto warpgo;
+	dvfild7:	set @lastmap$,"ve_fild07";	goto warpgo;
+	dmanfild1:	set @lastmap$,"man_fild01";	goto warpgo;
+	dmanfild2:	set @lastmap$,"man_fild02";	goto warpgo;
+	dsplfild1:	set @lastmap$,"spl_fild01";	goto warpgo;
+	dsplfild2:	set @lastmap$,"spl_fild02";	goto warpgo;
+	dsplfild3:	set @lastmap$,"spl_fild03";	goto warpgo;
+	inw:	set @lastmap$,"que_san04";	goto warpgo;
+
+warpgo:
+	set @warpparty,0;
+	if( getcharid(1) != 0 && getcharid(0) == getpartyleader(getcharid(1),2)){
+		mes "ท่านต้องการพาปาร์ตี้ของท่านไปหรือไม่";
+		switch(select("ไปคนเดียว","วาร์ปทั้งปาร์ตี้")){
+			case 1:
+				set @warpparty,0;
+				break;
+			case 2:
+				set @warpparty,1;
+				break;
+		}
+	} else {
+		set @warpparty,0;
+	}
+	warp @lastmap$,0,0;
+	if(@warpparty == 1){
+		sleep2 750;
+		getmapxy(@map$,@x,@y, 0);
+		warpparty @map$,@x,@y, getcharid(1);
+	}
+	end;
+}
+

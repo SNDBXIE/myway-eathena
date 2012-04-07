@@ -1993,7 +1993,7 @@ void mob_damage(struct mob_data *md, struct block_list *src, int damage)
 	if (battle_config.show_mob_info&3)
 		clif_charnameack (0, &md->bl);
 
-	if (battle_config.mob_display_hpmeter)
+	if (!md->state.boss)
 		map_foreachinarea(clif_hpmeter_mob, md->bl.m, md->bl.x-AREA_SIZE, md->bl.y-AREA_SIZE, md->bl.x+AREA_SIZE, md->bl.y+AREA_SIZE, BL_PC, md);
 	
 	if (!src)
@@ -2231,7 +2231,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			{
 				if( md->dmglog[i].flag != 2 || battle_config.pet_attack_exp_to_master )
 				{
-						party_renewal_exp_mod(&base_exp,&job_exp,tmpsd[i]->status.base_level,md->level);
+						party_renewal_exp_mod(&base_exp,&job_exp,tmpsd[i]->status.base_level,md->level, tmpsd[i]);
 						pc_gainexp(tmpsd[i], &md->bl, base_exp, job_exp, false);
 				}
 			}
@@ -2255,9 +2255,9 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 		struct item_drop *ditem;
 		struct item_data* it = NULL;
 		int drop_rate,temp_rate;
-		int drop_modifier = mvp_sd ? party_renewal_drop_mod(mvp_sd->status.base_level - md->level) :
-							second_sd ? party_renewal_drop_mod(second_sd->status.base_level - md->level) :
-							third_sd ? party_renewal_drop_mod(third_sd->status.base_level - md->level) : 100;
+		int drop_modifier = mvp_sd ? party_renewal_drop_mod(mvp_sd->status.base_level - md->level, mvp_sd) :
+							second_sd ? party_renewal_drop_mod(second_sd->status.base_level - md->level, second_sd) :
+							third_sd ? party_renewal_drop_mod(third_sd->status.base_level - md->level, third_sd) : 100;
 		dlist->m = md->bl.m;
 		dlist->x = md->bl.x;
 		dlist->y = md->bl.y;
@@ -2599,7 +2599,7 @@ void mob_revive(struct mob_data *md, unsigned int hp)
 	if (battle_config.show_mob_info&3)
 		clif_charnameack (0, &md->bl);
 
-	if (battle_config.mob_display_hpmeter)
+	if (!md->state.boss)
 		map_foreachinarea(clif_hpmeter_mob, md->bl.m, md->bl.x-AREA_SIZE, md->bl.y-AREA_SIZE, md->bl.x+AREA_SIZE, md->bl.y+AREA_SIZE, BL_PC, md);
 }
 
@@ -2741,7 +2741,7 @@ int mob_class_change (struct mob_data *md, int class_)
 	clif_charnameack(0, &md->bl);
 	status_change_end(&md->bl,SC_KEEPING,INVALID_TIMER);
 
-	if (battle_config.mob_display_hpmeter)
+	if (!md->state.boss)
 		map_foreachinarea(clif_hpmeter_mob, md->bl.m, md->bl.x-AREA_SIZE, md->bl.y-AREA_SIZE, md->bl.x+AREA_SIZE, md->bl.y+AREA_SIZE, BL_PC, md);
 
 	return 0;
@@ -2755,7 +2755,7 @@ void mob_heal(struct mob_data *md,unsigned int heal)
 	if (battle_config.show_mob_info&3)
 		clif_charnameack (0, &md->bl);
 
-	if (battle_config.mob_display_hpmeter)
+	if (!md->state.boss)
 		map_foreachinarea(clif_hpmeter_mob, md->bl.m, md->bl.x-AREA_SIZE, md->bl.y-AREA_SIZE, md->bl.x+AREA_SIZE, md->bl.y+AREA_SIZE, BL_PC, md);
 }
 
