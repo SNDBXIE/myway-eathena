@@ -628,8 +628,10 @@ bFullDodge	3075
 bLastStand	3076
 bIgnoreGTB	3077
 bMagicDamageReturn2	3078
-bSPCostRate 3079
+bSPCostRate	3079
 bSPCost	3080
+bExpDiff	3081
+bDropDiff	3082
 
 NC_SKILL	0x1
 NC_ATTACK	0x2

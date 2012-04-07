@@ -8,7 +8,7 @@
 		menu "ระบบเช่า",LRent,"สกิลเสริม",LPlatinum,"Reset",LReset;
 	} else {
 		switch(select("เปลี่ยนอาชีพ:ระบบเช่า:สกิลเสริม:Reset")){
-			case1:
+			case 1:
 				if(class == 0)
 					menu "1st Class",LFirstClass,"Baby Class",LBabyClass;
 				if((class >= 1 && class <=6) || class == 23 || class == 4046)
@@ -21,23 +21,23 @@
 					goto LThirdClass;
 				if(class >= 4023 && class <= 4045)
 					goto LBabyClass;
-				close;
+				break;
 			case 2:
 				callfunc "Renter";
-				close;
+				break;
 			case 3:
 				goto LPlatinum;
-				close;
+				break;
 			case 4:
 				switch(select("Reset Status:Reset Skill")){
 					case 1:
 						goto LRestat;
-						close;
+						break;
 					case 2:
 						goto LReskill;
-						close;
+						break;
 				}
-				close;
+				break;
 		}
 	}
 	
@@ -224,7 +224,7 @@ LRent:
 		goto Classchange_sure;
 
 // ------------------------------------------ High Class ------------------------------------------
-	LHigh:
+	LHighClass:
 		if((Class >= Job_Knight) && (Class <= Job_Crusader2)) {
 			if(checkfalcon() || checkcart() || checkriding()) goto L_remove;
 			if(SkillPoint != 0) goto L_LastSkillpoint;
@@ -342,7 +342,7 @@ LRent:
 
 // ------------------------------------------ Third Class ------------------------------------------
 
-LClass3:
+LThirdClass:
 	mes "[ ^0065DFพนักงานเปลี่ยนอาชีพ^000000 ]";
 	set @target_job,0;
 	if((Class >= Job_Knight) && (Class <= Job_Crusader2)) {
@@ -942,7 +942,7 @@ LBabyclass:
 		}
 		close;
 
-ReStats:
+LRestat:
 	mes "ท่านสามารถรีสเตตัสได้โดยเสียค่าใช้จ่าย 1.5M";
 	if(zeny < 1500000) {
 		mes "ท่านมีเงินไม่พอ กรุณามาใหม่";
@@ -966,7 +966,7 @@ ReStats:
 	}
 	close;
 	
-ReSkill:
+LReSkill:
 	mes "ท่าานสามารถรีสกิลได้โดยไม่เสียค่าใช้จ่ายใดๆทั้งสิ้น";
 	switch(select("ข้าต้องการ Re","ข้าไม่สนใจ")){
 		case 1:

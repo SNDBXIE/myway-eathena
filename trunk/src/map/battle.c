@@ -5677,9 +5677,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 			if(s_party && s_party == status_get_party_id(t_bl))
 				state |= BCT_PARTY;
 		}
-		
-		//PVP Area by Mr.Postman
-		if( flag&BCT_GUILD || state&BCT_ENEMY && !((TBL_PC*)s_bl)->pvp)
+		if( flag&BCT_GUILD || state&BCT_ENEMY )
 		{
 			int s_guild = status_get_guild_id(s_bl);
 			int t_guild = status_get_guild_id(t_bl);
@@ -6115,7 +6113,6 @@ static const struct _battle_data {
 	{ "eq_single_target_reflectable",       &battle_config.eq_single_target_reflectable,    1,      0,      1,              },
 	{ "invincible.nodamage",                &battle_config.invincible_nodamage,             0,      0,      1,              },
 	{ "mob_slave_keep_target",              &battle_config.mob_slave_keep_target,           0,      0,      1,              },
-	{ "mob_display_hpmeter",                &battle_config.mob_display_hpmeter,             0,      0,      1,				},
 	{ "autospell_check_range",              &battle_config.autospell_check_range,           0,      0,      1,              },
 	{ "client_reshuffle_dice",              &battle_config.client_reshuffle_dice,           0,      0,      1,              },
 	{ "client_sort_storage",                &battle_config.client_sort_storage,             0,      0,      1,              },
@@ -6137,22 +6134,22 @@ static const struct _battle_data {
 	{ "bg_misc_attack_damage_rate",         &battle_config.bg_misc_damage_rate,             60,     0,      INT_MAX,        },
 	{ "bg_flee_penalty",                    &battle_config.bg_flee_penalty,                 20,     0,      INT_MAX,        },
 // Misc Setting
-	{ "max_highlvl_nerf",                   &battle_config.max_highlvl_nerf,               100,   0,      INT_MAX,        },
-	{ "max_joblvl_nerf",                    &battle_config.max_joblvl_nerf,                100,   0,      INT_MAX,        },
-	{ "max_joblvl_nerf_misc",               &battle_config.max_joblvl_nerf_misc,           100,   0,      INT_MAX,        },
+	{ "max_highlvl_nerf",                   &battle_config.max_highlvl_nerf,                 100,   0,      INT_MAX,        },
+	{ "max_joblvl_nerf",                    &battle_config.max_joblvl_nerf,                  100,   0,      INT_MAX,        },
+	{ "max_joblvl_nerf_misc",               &battle_config.max_joblvl_nerf_misc,             100,   0,      INT_MAX,        },
 	{ "skillsbonus_maxhp_RK",               &battle_config.skillsbonus_maxhp_RK,             0,     0,      INT_MAX,        },
 	{ "skillsbonus_maxhp_SR",               &battle_config.skillsbonus_maxhp_SR,             0,     0,      INT_MAX,        },
-	{ "metallicsound_spburn_rate",          &battle_config.metallicsound_spburn_rate,      100,   0,      INT_MAX,        },
-	{ "active_mvp_tombstone",               &battle_config.active_mvp_tombstone,             1,    0,      1,              },
-	{ "atcommand_max_stat_bypass",          &battle_config.atcommand_max_stat_bypass,        0,      0,      100,            },			{ "warg_can_falcon",                    &battle_config.warg_can_falcon,                  0,     0,      1,		        }, 
+	{ "metallicsound_spburn_rate",          &battle_config.metallicsound_spburn_rate,        100,   0,      INT_MAX,        },
+	{ "active_mvp_tombstone",               &battle_config.active_mvp_tombstone,              1,    0,      1,              },
+	{ "atcommand_max_stat_bypass",          &battle_config.atcommand_max_stat_bypass,       0,      0,      100,            },			{ "warg_can_falcon",                    &battle_config.warg_can_falcon,                  0,     0,            1,        }, 
 	{ "skill_amotion_leniency",             &battle_config.skill_amotion_leniency,          90,     0,      100				},
 // Renewal Setting
 	{ "renewal_cast_setting",               &battle_config.renewal_cast_setting,               2,	0,      2,              },
 	{ "exp_penalty",						&battle_config.exp_penalty,                        1,   0,      1,              },
 	{ "drop_penalty",						&battle_config.drop_penalty,                       1,   0,      1,              },
 	{ "edp_renewal",						&battle_config.edp_renewal,                        1,	0,		1,				},
-	{ "warg_can_falcon",                    &battle_config.warg_can_falcon,					   0,   0,      1,		        },
-	{ "mado_skills",						&battle_config.mado_skills,             0,      0,      1,              },
+	{ "warg_can_falcon",                    &battle_config.warg_can_falcon,                  0,     0,            1,        },
+	{ "mado_skills",                &battle_config.mado_skills,             0,      0,      1,              },
     { "party_drop_bonus",                    &battle_config.party_drop_bonus,               0,     0,      INT_MAX,        },
 	{ "asura_absorb_cast_cancel",           &battle_config.asura_absorb_cast_cancel,         1,     0,      1,              },
 	{ "guardianguild",           &battle_config.guardianguild,         1,     0,      1,              },

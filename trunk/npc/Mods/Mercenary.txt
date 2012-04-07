@@ -1,0 +1,1933 @@
+//===========================================================
+//== Prontera Mercenary Guild
+//===========================================================
+-	script	SpearMercenary	-1,{
+    mes "[Mercenary Manager]";
+    mes "Welcome to the";
+    mes "Spear Mercenary Guild.";
+    mes "What can I do for you?";
+    next;
+    switch(select("Hire Mercenary","Mercenary Info","Nothing","10th Grade Mercenaries")){
+	case 1:
+		mes "[Mercenary Manager]";
+		mes "You want to hire a";
+		mes "Spear Mercenary?";
+		mes "Which Grade were you";
+		mes "interested in hiring?";
+		next;
+		switch(select("1st Grade Spear Mercenary","2nd Grade Spear Mercenary","3rd Grade Spear Mercenary","4th Grade Spear Mercenary","5th Grade Spear Mercenary","6th Grade Spear Mercenary","7th Grade Spear Mercenary","8th Grade Spear Mercenary","9th Grade Spear Mercenary")){
+		case 1:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 1st";
+			mes "Grade Spear Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 15 or higher, and";
+			mes "must pay the 10,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 15 && zeny > 10000)
+				{
+					getitem 12173,1;
+					set zeny,zeny-10000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 15)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 15.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 10,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 2:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 2nd";
+			mes "Grade Spear Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 25 or higher, and";
+			mes "must pay the 20,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 25 && zeny > 20000)
+				{
+					getitem 12174,1;
+					set zeny,zeny-10000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 25)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 25.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 20,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 3:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 3rd";
+			mes "Grade Spear Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 35 or higher, and";
+			mes "must pay the 30,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 35 && zeny > 30000)
+				{
+					getitem 12175,1;
+					set zeny,zeny-30000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 35)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 35.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 30,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 4:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 4th";
+			mes "Grade Spear Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 45 or higher, and";
+			mes "must pay the 40,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 45 && zeny > 40000)
+				{
+					getitem 12176,1;
+					set zeny,zeny-40000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 45)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 45.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 40,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 5:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 5th";
+			mes "Grade Spear Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 55 or higher, and";
+			mes "must pay the 50,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 55 && zeny > 50000)
+				{
+					getitem 12177,1;
+					set zeny,zeny-50000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 55)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 55.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 50,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 6:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 6th";
+			mes "Grade Spear Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 65 or higher, and";
+			mes "must pay the 60,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 65 && zeny > 60000)
+				{
+					getitem 12178,1;
+					set zeny,zeny-60000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 65)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 65.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 60,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 7:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 7th";
+			mes "Grade Spear Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 75 or higher, and";
+			mes "must pay the 70,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 75 && zeny > 70000 && mercenary_get_faith(SPEAR_MERC_GUILD) > 50)
+				{
+					getitem 12179,1;
+					set zeny,zeny-70000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 75)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 75.";
+					close;	
+				}
+				else if(mercenary_get_faith(SPEAR_MERC_GUILD) < 50)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your";
+					mes "Loyalty rating is too";
+					mes "low to hire this Spear";
+					mes "Mercenary. Come back";
+					mes "again when you have";
+					mes "50 Loyalty or more.";
+					close;
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 70,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 8:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 8th";
+			mes "Grade Spear Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 85 or higher, and";
+			mes "must pay the 80,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 85 && zeny > 80000 && mercenary_get_faith(SPEAR_MERC_GUILD) > 100)
+				{
+					getitem 12180,1;
+					set zeny,zeny-80000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 85)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 85.";
+					close;	
+				}
+				else if(mercenary_get_faith(SPEAR_MERC_GUILD) < 100)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your";
+					mes "Loyalty rating is too";
+					mes "low to hire this Spear";
+					mes "Mercenary. Come back";
+					mes "again when you have";
+					mes "100 Loyalty or more.";
+					close;
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 80,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 9:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 9th";
+			mes "Grade Spear Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 90 or higher, and";
+			mes "must pay the 90,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 90 && zeny > 90000 && mercenary_get_faith(SPEAR_MERC_GUILD) > 300)
+				{
+					getitem 12181,1;
+					set zeny,zeny-90000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 90)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 90.";
+					close;	
+				}
+				else if(mercenary_get_faith(SPEAR_MERC_GUILD) < 300)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your";
+					mes "Loyalty rating is too";
+					mes "low to hire this Spear";
+					mes "Mercenary. Come back";
+					mes "again when you have";
+					mes "300 Loyalty or more.";
+					close;
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 90,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		}
+	
+	case 2:
+		mes "[Mercenary Manager]";
+		mes "Mercenaries are soldiers";
+		mes "that will fight at your side";
+		mes "on the battlefield, but there";
+		mes "are a few terms and conditions";
+		mes "you must fulfill to hire them.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "You must fulfill a level";
+		mes "requirement and pay a zeny";
+		mes "fee to hire a Mercenary.";
+		mes "Higher grade Mercenaries";
+		mes "will also require that you";
+		mes "build a Loyalty rating with us.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "Mercenary contracts can't be";
+		mes "transferred to other people,";
+		mes "and we only allow a 5 Base Level";
+		mes "difference between the Mercenary";
+		mes "and client so you can't hire one";
+		mes "much stronger than you.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "Well, you can figure out the";
+		mes "details when you actually form";
+		mes "a contract with one of our";
+		mes "Mercenaries, and recieve";
+		mes "the Summon Scroll that will";
+		mes "call a Mercenary to your side";
+		next;
+		mes "[Mercenary Manager]";
+		mes "You can't give this scroll";
+		mes "to anyone else, and the";
+		mes "Mercenary will only remain";
+		mes "with you for 30 minutes after";
+		mes "you summon him. Don't forget";
+		mes "about the time limit, okay?";
+		close;
+
+	case 3:
+		mes "[Mercenary Manager]";
+		mes "No? You didn't need any";
+		mes "help? Well, feel free to";
+		mes "ask me if you have any";
+		mes "questions about Mercenaries.";
+		close;
+	case 4:
+		mes "[Mercenary Manager]";
+		mes "10th Grade Mercenaries are";
+		mes "the best we have to offer,";
+		mes "and we use different criteria";
+		mes "for our clients to hire them.";
+		mes "There's no zeny fee, but you";
+		mes "must have 500 Loyalty.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "Once you make a contract";
+		mes "with a 10th Grade Mercenary,";
+		mes "your Loyalty rating will be";
+		mes "decreased by 400. In other";
+		mes "words, you pay 400 Loyalty";
+		mes "to hire a 10th Grade Mercenary.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "You must also be at";
+		mes "Base Level 90 or higher to";
+		mes "hire a 10th Grade Mercenary.";
+		mes "Are you still interested in";
+		mes "forming this contract?";
+		next;
+		switch(select("Yes","No"))
+		{
+			case 1:
+				if(mercenary_get_faith(SPEAR_MERC_GUILD) < 500)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your";
+					mes "Loyalty rating is too";
+					mes "low to hire this 10th Grade";
+					mes "Mercenary. You must have";
+					mes "500 or more Loyalty to";
+					mes "form a contract with one.";
+					close;
+				}
+				else if(baselevel < 90)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 90.";
+					close;	
+				}
+				else
+				{
+					getitem 12182,1;
+					//mercenary_set_faith(SPEAR_MERC_GUILD,-400);
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "I understand.. It takes";
+				mes "hard work and sacrifice to";
+				mes "even reach the point where";
+				mes "you can hire a 10th Grade";
+				mes "Mercenary. Have you cosidered";
+				mes "hiring a lower grade Mercenary?";
+				close;
+		}
+	}
+}
+//===========================================================
+//== Izlude Mercenary Guild
+//===========================================================
+
+-	script	SwordMercenary	-1,{
+    mes "[Mercenary Manager]";
+    mes "Welcome to the";
+    mes "Sword Mercenary Guild.";
+    mes "What can I do for you?";
+    next;
+    switch(select("Hire Mercenary","Mercenary Info","Nothing","10th Grade Mercenaries")){
+	case 1:
+		mes "[Mercenary Manager]";
+		mes "You want to hire a";
+		mes "Sword Mercenary?";
+		mes "Which Grade were you";
+		mes "interested in hiring?";
+		next;
+		switch(select("1st Grade Sword Mercenary","2nd Grade Sword Mercenary","3rd Grade Sword Mercenary","4th Grade Sword Mercenary","5th Grade Sword Mercenary","6th Grade Sword Mercenary","7th Grade Sword Mercenary","8th Grade Sword Mercenary","9th Grade Sword Mercenary")){
+		case 1:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 1st";
+			mes "Grade Sword Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 15 or higher, and";
+			mes "must pay the 10,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 15 && zeny > 10000)
+				{
+					getitem 12163,1;
+					set zeny,zeny-10000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 15)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 15.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 10,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 2:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 2nd";
+			mes "Grade Sword Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 25 or higher, and";
+			mes "must pay the 20,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 25 && zeny > 20000)
+				{
+					getitem 12164,1;
+					set zeny,zeny-10000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 25)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 25.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 20,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 3:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 3rd";
+			mes "Grade Sword Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 35 or higher, and";
+			mes "must pay the 30,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 35 && zeny > 30000)
+				{
+					getitem 12165,1;
+					set zeny,zeny-30000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 35)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 35.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 30,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 4:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 4th";
+			mes "Grade Sword Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 45 or higher, and";
+			mes "must pay the 40,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 45 && zeny > 40000)
+				{
+					getitem 12166,1;
+					set zeny,zeny-40000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 45)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 45.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 40,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 5:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 5th";
+			mes "Grade Sword Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 55 or higher, and";
+			mes "must pay the 50,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 55 && zeny > 50000)
+				{
+					getitem 12167,1;
+					set zeny,zeny-50000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 55)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 55.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 50,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 6:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 2nd";
+			mes "Grade Sword Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 65 or higher, and";
+			mes "must pay the 60,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 65 && zeny > 60000)
+				{
+					getitem 12168,1;
+					set zeny,zeny-60000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 65)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 65.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 60,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 7:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 7th";
+			mes "Grade Sword Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 75 or higher, and";
+			mes "must pay the 70,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 75 && zeny > 70000 && mercenary_get_faith(SWORD_MERC_GUILD) > 50)
+				{
+					getitem 12169,1;
+					set zeny,zeny-70000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 75)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 75.";
+					close;	
+				}
+				else if(mercenary_get_faith(SWORD_MERC_GUILD) < 50)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your";
+					mes "Loyalty rating is too";
+					mes "low to hire this Sword";
+					mes "Mercenary. Come back";
+					mes "again when you have";
+					mes "50 Loyalty or more.";
+					close;
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 70,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 8:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 8th";
+			mes "Grade Sword Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 85 or higher, and";
+			mes "must pay the 80,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 85 && zeny > 80000 && mercenary_get_faith(SWORD_MERC_GUILD) > 100)
+				{
+					getitem 12170,1;
+					set zeny,zeny-80000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 85)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 85.";
+					close;	
+				}
+				else if(mercenary_get_faith(SWORD_MERC_GUILD) < 100)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your";
+					mes "Loyalty rating is too";
+					mes "low to hire this Sword";
+					mes "Mercenary. Come back";
+					mes "again when you have";
+					mes "100 Loyalty or more.";
+					close;
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 80,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 9:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 9th";
+			mes "Grade Sword Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 90 or higher, and";
+			mes "must pay the 90,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 90 && zeny > 90000 && mercenary_get_faith(SWORD_MERC_GUILD) > 300)
+				{
+					getitem 12171,1;
+					set zeny,zeny-90000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 90)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 90.";
+					close;	
+				}
+				else if(mercenary_get_faith(SWORD_MERC_GUILD) < 300)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your";
+					mes "Loyalty rating is too";
+					mes "low to hire this Sword";
+					mes "Mercenary. Come back";
+					mes "again when you have";
+					mes "300 Loyalty or more.";
+					close;
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 90,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		}
+	
+	case 2:
+		mes "[Mercenary Manager]";
+		mes "Mercenaries are soldiers";
+		mes "that will fight at your side";
+		mes "on the battlefield, but there";
+		mes "are a few terms and conditions";
+		mes "you must fulfill to hire them.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "You must fulfill a level";
+		mes "requirement and pay a zeny";
+		mes "fee to hire a Mercenary.";
+		mes "Higher grade Mercenaries";
+		mes "will also require that you";
+		mes "build a Loyalty rating with us.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "Mercenary contracts can't be";
+		mes "transferred to other people,";
+		mes "and we only allow a 5 Base Level";
+		mes "difference between the Mercenary";
+		mes "and client so you can't hire one";
+		mes "much stronger than you.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "Well, you can figure out the";
+		mes "details when you actually form";
+		mes "a contract with one of our";
+		mes "Mercenaries, and recieve";
+		mes "the Summon Scroll that will";
+		mes "call a Mercenary to your side";
+		next;
+		mes "[Mercenary Manager]";
+		mes "You can't give this scroll";
+		mes "to anyone else, and the";
+		mes "Mercenary will only remain";
+		mes "with you for 30 minutes after";
+		mes "you summon him. Don't forget";
+		mes "about the time limit, okay?";
+		close;
+
+	case 3:
+		mes "[Mercenary Manager]";
+		mes "No? You didn't need any";
+		mes "help? Well, feel free to";
+		mes "ask me if you have any";
+		mes "questions about Mercenaries.";
+		close;
+	case 4:
+		mes "[Mercenary Manager]";
+		mes "10th Grade Mercenaries are";
+		mes "the best we have to offer,";
+		mes "and we use different criteria";
+		mes "for our clients to hire them.";
+		mes "There's no zeny fee, but you";
+		mes "must have 500 Loyalty.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "Once you make a contract";
+		mes "with a 10th Grade Mercenary,";
+		mes "your Loyalty rating will be";
+		mes "decreased by 400. In other";
+		mes "words, you pay 400 Loyalty";
+		mes "to hire a 10th Grade Mercenary.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "You must also be at";
+		mes "Base Level 90 or higher to";
+		mes "hire a 10th Grade Mercenary.";
+		mes "Are you still interested in";
+		mes "forming this contract?";
+		next;
+		switch(select("Yes","No"))
+		{
+			case 1:
+				if(mercenary_get_faith(SWORD_MERC_GUILD) < 500)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your";
+					mes "Loyalty rating is too";
+					mes "low to hire this 10th Grade";
+					mes "Mercenary. You must have";
+					mes "500 or more Loyalty to";
+					mes "form a contract with one.";
+					close;
+				}
+				else if(baselevel < 90)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 90.";
+					close;	
+				}
+				else
+				{
+					getitem 12172,1;
+					//mercenary_set_faith(SWORD_MERC_GUILD,-400);
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "I understand.. It takes";
+				mes "hard work and sacrifice to";
+				mes "even reach the point where";
+				mes "you can hire a 10th Grade";
+				mes "Mercenary. Have you cosidered";
+				mes "hiring a lower grade Mercenary?";
+				close;
+		}
+	}
+
+	OnInt:
+		waitingroom "เช่าทหารรับจ้างได้บริเวณนี้",0;
+		end;
+}
+//===========================================================
+//== payon Archer Mercenary Guild
+//===========================================================
+
+-	script	ArcherMercenary	-1,{
+    mes "[Mercenary Manager]";
+    mes "Welcome to the";
+    mes "Bow Mercenary Guild.";
+    mes "What can I do for you?";
+    next;
+    switch(select("Hire Mercenary","Mercenary Info","Nothing","10th Grade Mercenaries")){
+	case 1:
+		mes "[Mercenary Manager]";
+		mes "You want to hire a";
+		mes "Sword Mercenary?";
+		mes "Which Grade were you";
+		mes "interested in hiring?";
+		next;
+		switch(select("1st Grade Bow Mercenary","2nd Grade Bow Mercenary","3rd Grade Bow Mercenary","4th Grade Bow Mercenary","5th Grade Bow Mercenary","6th Grade Bow Mercenary","7th Grade Bow Mercenary","8th Grade Bow Mercenary","9th Grade Bow Mercenary")){
+		case 1:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 1st";
+			mes "Grade Bow Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 15 or higher, and";
+			mes "must pay the 10,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 15 && zeny > 10000)
+				{
+					getitem 12153,1;
+					set zeny,zeny-10000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 15)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 15.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 10,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 2:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 2nd";
+			mes "Grade Bow Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 25 or higher, and";
+			mes "must pay the 20,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 25 && zeny > 20000)
+				{
+					getitem 12154,1;
+					set zeny,zeny-10000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 25)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 25.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 20,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 3:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 3rd";
+			mes "Grade Bow Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 35 or higher, and";
+			mes "must pay the 30,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 35 && zeny > 30000)
+				{
+					getitem 12155,1;
+					set zeny,zeny-30000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 35)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 35.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 30,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 4:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 4th";
+			mes "Grade Bow Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 45 or higher, and";
+			mes "must pay the 40,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 45 && zeny > 40000)
+				{
+					getitem 12156,1;
+					set zeny,zeny-40000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 45)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 45.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 40,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 5:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 5th";
+			mes "Grade Bow Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 55 or higher, and";
+			mes "must pay the 50,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 55 && zeny > 50000)
+				{
+					getitem 12157,1;
+					set zeny,zeny-50000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 55)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 55.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 50,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 6:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 2nd";
+			mes "Grade Bow Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 65 or higher, and";
+			mes "must pay the 60,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 65 && zeny > 60000)
+				{
+					getitem 12158,1;
+					set zeny,zeny-60000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 65)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 65.";
+					close;	
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 60,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 7:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 7th";
+			mes "Grade Bow Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 75 or higher, and";
+			mes "must pay the 70,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 75 && zeny > 70000 && mercenary_get_faith(BOW_MERC_GUILD) > 50)
+				{
+					getitem 12159,1;
+					set zeny,zeny-70000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 75)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 75.";
+					close;	
+				}
+				else if(mercenary_get_faith(BOW_MERC_GUILD) < 50)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your";
+					mes "Loyalty rating is too";
+					mes "low to hire this Bow";
+					mes "Mercenary. Come back";
+					mes "again when you have";
+					mes "50 Loyalty or more.";
+					close;
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 70,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 8:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 8th";
+			mes "Grade Bow Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 85 or higher, and";
+			mes "must pay the 80,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 85 && zeny > 80000 && mercenary_get_faith(BOW_MERC_GUILD) > 100)
+				{
+					getitem 12160,1;
+					set zeny,zeny-80000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 85)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 85.";
+					close;	
+				}
+				else if(mercenary_get_faith(BOW_MERC_GUILD) < 100)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your";
+					mes "Loyalty rating is too";
+					mes "low to hire this Bow";
+					mes "Mercenary. Come back";
+					mes "again when you have";
+					mes "100 Loyalty or more.";
+					close;
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 80,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		case 9:
+			mes "[Mercenary Manager]";
+			mes "So you want to hire 9th";
+			mes "Grade Bow Mercenary?";
+			mes "You need to have attained";
+			mes "Base Level 90 or higher, and";
+			mes "must pay the 90,000 zeny fee.";
+			next;
+			switch(select("Yes","No")){
+			case 1:
+				if(baselevel > 90 && zeny > 90000 && mercenary_get_faith(BOW_MERC_GUILD) > 300)
+				{
+					getitem 12161,1;
+					set zeny,zeny-90000;
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+				else if(baselevel < 90)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 90.";
+					close;	
+				}
+				else if(mercenary_get_faith(BOW_MERC_GUILD) < 300)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your";
+					mes "Loyalty rating is too";
+					mes "low to hire this Bow";
+					mes "Mercenary. Come back";
+					mes "again when you have";
+					mes "300 Loyalty or more.";
+					close;
+				}
+				else
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry. but you";
+					mes "don't have enough zeny";
+					mes "to hire this Mercenary.";
+					mes "The hiring fee is 90,000 zeny.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "Oh, really?Well, now";
+				mes "might not be a good time";
+				mes "for you to consider hiring";
+				mes "a Mercenary, but please feel";
+				mes "free to come back if your";
+				mes "needs change. Thank you~";
+				close;
+			}
+		}
+	
+	case 2:
+		mes "[Mercenary Manager]";
+		mes "Mercenaries are soldiers";
+		mes "that will fight at your side";
+		mes "on the battlefield, but there";
+		mes "are a few terms and conditions";
+		mes "you must fulfill to hire them.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "You must fulfill a level";
+		mes "requirement and pay a zeny";
+		mes "fee to hire a Mercenary.";
+		mes "Higher grade Mercenaries";
+		mes "will also require that you";
+		mes "build a Loyalty rating with us.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "Mercenary contracts can't be";
+		mes "transferred to other people,";
+		mes "and we only allow a 5 Base Level";
+		mes "difference between the Mercenary";
+		mes "and client so you can't hire one";
+		mes "much stronger than you.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "Well, you can figure out the";
+		mes "details when you actually form";
+		mes "a contract with one of our";
+		mes "Mercenaries, and recieve";
+		mes "the Summon Scroll that will";
+		mes "call a Mercenary to your side";
+		next;
+		mes "[Mercenary Manager]";
+		mes "You can't give this scroll";
+		mes "to anyone else, and the";
+		mes "Mercenary will only remain";
+		mes "with you for 30 minutes after";
+		mes "you summon him. Don't forget";
+		mes "about the time limit, okay?";
+		close;
+
+	case 3:
+		mes "[Mercenary Manager]";
+		mes "No? You didn't need any";
+		mes "help? Well, feel free to";
+		mes "ask me if you have any";
+		mes "questions about Mercenaries.";
+		close;
+	case 4:
+		mes "[Mercenary Manager]";
+		mes "10th Grade Mercenaries are";
+		mes "the best we have to offer,";
+		mes "and we use different criteria";
+		mes "for our clients to hire them.";
+		mes "There's no zeny fee, but you";
+		mes "must have 500 Loyalty.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "Once you make a contract";
+		mes "with a 10th Grade Mercenary,";
+		mes "your Loyalty rating will be";
+		mes "decreased by 400. In other";
+		mes "words, you pay 400 Loyalty";
+		mes "to hire a 10th Grade Mercenary.";
+		next;
+		mes "[Mercenary Manager]";
+		mes "You must also be at";
+		mes "Base Level 90 or higher to";
+		mes "hire a 10th Grade Mercenary.";
+		mes "Are you still interested in";
+		mes "forming this contract?";
+		next;
+		switch(select("Yes","No"))
+		{
+			case 1:
+				if(mercenary_get_faith(BOW_MERC_GUILD) < 500)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your";
+					mes "Loyalty rating is too";
+					mes "low to hire this 10th Grade";
+					mes "Mercenary. You must have";
+					mes "500 or more Loyalty to";
+					mes "form a contract with one.";
+					close;
+				}
+				else if(baselevel < 90)
+				{
+					mes "[Mercenary Manager]";
+					mes "I'm sorry, but your Base";
+					mes "Level isn't high enough";
+					mes "to hire this Mercenary.";
+					mes "Try to come back if";
+					mes "your Base Level is 90.";
+					close;	
+				}
+				else
+				{
+					getitem 12162,1;
+					//mercenary_set_faith(BOW_MERC_GUILD,-400);
+					mes "[Mercenary Manager]";
+					mes "Great! Our Mercenaries";
+					mes "are sincere and devoted";
+					mes "to protecting their clients.";
+					mes "Summoned Mercenaries will";
+					mes "offer their support to you for";
+					mes "30 minutes. Take care now.";
+					close;
+				}
+			case 2:
+				mes "[Mercenary Manager]";
+				mes "I understand.. It takes";
+				mes "hard work and sacrifice to";
+				mes "even reach the point where";
+				mes "you can hire a 10th Grade";
+				mes "Mercenary. Have you cosidered";
+				mes "hiring a lower grade Mercenary?";
+				close;
+		}
+	}
+}
+

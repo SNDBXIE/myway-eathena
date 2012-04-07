@@ -1,0 +1,344 @@
+-	script	DwarfSmith	826,{
+	set @name$,"Dwarf Smith";
+	mes "[" + @name$ + "]";
+	mes "ข้าสามารถเพิ่มความแข็งแกร่งให้แก่อาวุธและเกราะของเจ้าได้";
+	next;
+	menu "ข้าต้องการตีบวก",M_Refine,"ข้าต้องการซ่อมสิ่งของ",M_Repair,"ข้าต้องการรวมแร่",M_Mix,"ข้าต้องการถอดการ์ด",M_Remove;
+
+M_Refine:
+	mes "[" + @name$ + "]";
+	mes "จงเลือกส่วนที่ท่านต้องการตีบวก";
+	next;
+	setarray .@position$[1], "Head","Body","Left hand","Right hand","Robe","Shoes";
+	set .@menu$,"";
+	for( set .@i,1; .@i <= 6; set .@i,.@i+1 )
+	{
+		if( getequipisequiped(.@i) ) set .@menu$, .@menu$ + .@position$[.@i] + "-" + "[" + getequipname(.@i) + "]";
+		set .@menu$, .@menu$ + ":";
+	}
+	set .@part,select(.@menu$);
+	set @nameid,getequipid(.@part);
+E_Loop:
+	if( !getequipisequiped(.@part) ) close;
+	if( !getequipisenableref(.@part) || !getequipisidentify(.@part) || getequiprefinerycnt(.@part) >= 10 || @nameid==0)
+	{
+		mes "[" + @name$ + "]";
+		mes "อุปกรณ์ของเจ้ามีปัญหา จงตรวจสอบให้ดี";
+		close;
+	}
+	if(getequippercentrefinery(.@part) == 100){
+		mes "[" + @name$ + "]";
+		mes "อุปกรณ์ของท่านสามารถตีบวกได้ถึงระดับปลอดภัยในครั้งเดียว แต่ท่านต้องมีเงินและแร่พอที่จะตี ท่านสนใจหรือไม่";
+		next;
+		switch(select("ข้าสนใจ","ไม่ละ ข้าไม่สนใจ")){
+			case 1:
+				L_Loop:
+				if(getequippercentrefinery(.@part) == 100){
+					switch(getequipweaponlv(.@part)){
+						case 0: callsub S_RefineSpeed,0,985,2000,.@part; break;
+						case 1: callsub S_RefineSpeed,1,1010,50,.@part; break;
+						case 2: callsub S_RefineSpeed,2,1011,200,.@part; break;
+						case 3: callsub S_RefineSpeed,3,984,5000,.@part; break;
+						case 4: callsub S_RefineSpeed,4,984,20000,.@part; break;
+					}
+				}
+				if(getequippercentrefinery(.@part) == 100) goto L_Loop;
+				break;
+			case 2:
+				break;
+		}
+	}
+	mes "[" + @name$ + "]";
+	mes "ท่านต้องการตีบวกด้วยแร่ประเภทใด";
+	mes "การตีบวกจะมีอัตราความสำเร็จเพิ่มขึ้น 20% เมื่อใช้แร่พิเศษ";
+	next;
+	switch(select("แร่ปกติ","แร่พิเศษ")){
+		case 1:
+			set @rate,0;
+			switch( getequipweaponlv(.@part))
+			{
+				case 0: callsub S_RefineValidateEvent,0,985,2000,.@part; break;
+				case 1: callsub S_RefineValidateEvent,1,1010,50,.@part; break;
+				case 2: callsub S_RefineValidateEvent,2,1011,200,.@part; break;
+				case 3: callsub S_RefineValidateEvent,3,984,5000,.@part; break;
+				case 4: callsub S_RefineValidateEvent,4,984,20000,.@part; break;
+			}
+			break;
+		case 2:
+			set @rate,20;
+			switch( getequipweaponlv(.@part))
+			{
+				case 0: callsub S_RefineValidateEvent,0,7619,2000,.@part; break;
+				case 1: callsub S_RefineValidateEvent,1,7620,50,.@part; break;
+				case 2: callsub S_RefineValidateEvent,2,7620,200,.@part; break;
+				case 3: callsub S_RefineValidateEvent,3,7620,5000,.@part; break;
+				case 4: callsub S_RefineValidateEvent,4,7620,20000,.@part; break;
+			}
+			break;
+	}
+	set @refine,getequiprefinerycnt(.@part)+1;
+	if(getequippercentrefinery(.@part)+@rate > rand(100)){
+		mes "[" + @name$ + "]";
+		mes "Clink! Clank! Clunk!";
+		if(@refine > 7){
+			announce strcharinfo(0)+" ได้ตี +"+@refine+" "+getitemname(@nameid)+" สำเร็จแล้ว",bc_all,0x999999;
+		}
+		SuccessRefItem .@part;
+		next;
+		Emotion e_no1;
+		mes "[" + @name$ + "]";
+		mes "เจ้าช่างโชคดีจริงๆ ท่านยังต้องการเสี่ยงตีบวกต่อหรือไม่";
+		next;
+		if(@refine >= 10) {
+			menu "ขอเปลี่ยนอุปกรณ์ก่อน",M_Refine,"ไม่ละ ข้าอยากเลิกแล้ว",-;
+		} else {
+			menu "ต่อเลย กำลังมันส์ ข้าต้องการตีบวกของชิ้นนี้ต่อ",E_Loop,"ขอเปลี่ยนอุปกรณ์ก่อน",M_Refine,"ไม่ละ ข้าอยากเลิกแล้ว",-;
+		}
+		close;
+	} else {
+		mes "[" + @name$ + "]";
+		mes "Clink! Clank! Clunk!";
+		if(@refine> 7){
+			announce strcharinfo(0)+" ได้ตี +"+@refine+" "+getitemname(@nameid)+" แตกแล้ว",bc_all,0x999999;
+		}
+		FailedRefItem .@part;
+		next;
+		if (rand(5) == 1)
+			Emotion e_cash;
+		else 
+			Emotion e_omg;
+		mes "[" + @name$ + "]";
+		mes "เจ้าช่างโชคร้ายจริงๆ ท่านยังต้องการเสี่ยงตีบวกต่อหรือไม่";
+		next;
+		menu "ต่อเลย กำลังมันส์",M_Refine,"ไม่ละ ข้าเข็ดแล้ว",-;
+		close;
+	}
+	
+M_Mix:
+	mes "[" + @name$ + "]";
+	mes "ท่านสามารถรวมแร่ได้";
+	mes "ครั้งละมากๆ เลยครับ";
+	next;
+	mes "[" + @name$ + "]";
+	mes "ต้องการรวมแร่ชนิดใด";
+	next;
+	switch(select("Oridecon","Elunium")){
+		case 1:
+			set @itemreq,756;
+			set @itemex,984;
+			break;
+		case 2:
+			set @itemreq,757;
+			set @itemex,985;
+			break;
+	}
+	mes "[" + @name$ + "]";
+	mes "^FF0000ใส่จำนวนของแร่ก้อนเล็กที่ต้องการจะรวม^000000";
+	mes "ที่หารด้วย 5 ลงตัว ไม่งั้นแร่ที่เกินจะหายไป";
+	input @coal;
+	if(countitem(@itemreq) < @coal && @coal <= 0){
+		mes "ท่านมีแร่ไม่พอหรือไม่ได้ใส่จำนวนแร่ไว้";
+		close;
+	}
+	delitem @itemreq,@coal;
+	getitem @itemex,@coal/5;
+	close;
+	
+M_Repair:
+	callfunc "repairmain","DwarfSmith";
+	end;
+	
+M_Remove:
+	callfunc "removecard";
+	end;
+
+S_RefineValidateEvent:
+	mes "[" + @name$ + "]";
+	mes "ข้าต้องการ ^ff9999" + getitemname(getarg(1)) + "^000000 จำนวน 1 ชิ้นและเงินอีก " + getarg(2) + " Zeny.";
+	next;
+	if( select("Yes:No") == 1 ){
+		if( getequippercentrefinery(getarg(3)) < 100 ){
+			mes "[" + @name$ + "]";
+			mes "ของที่ท่านนำมาตีบวกนั้นมีโอกาสแตก ท่านต้องการจะเสี่ยงหรือไม่";
+			next;
+			if( select("Yes:No") == 2 ){
+				goto L_Exit;
+			}
+		}
+		if( countitem(getarg(1)) >= 1 && Zeny >= getarg(2) ){
+			delitem getarg(1), 1;
+			set Zeny, Zeny - getarg(2);
+			return;
+		} else {
+			mes "[" + @name$ + "]";
+			mes "ท่านไม่สามารถตีบวกได้ เนื่องจากเงินหรือ" + getitemname(getarg(1)) + " ไม่พอ";
+			close;
+		}
+	} else {
+		goto L_Exit;
+	}
+
+S_RefineSpeed:
+	if(countitem(getarg(1)) > 0 && Zeny > getarg(2)){
+		delitem getarg(1), 1;
+		set Zeny, Zeny - getarg(2);
+		SuccessRefItem getarg(3);
+		return;
+	} else {
+		mes "[" + @name$ + "]";
+		mes "ท่านไม่สามารถตีบวกได้ เนื่องจากเงินหรือ" + getitemname(getarg(1)) + " ไม่พอ";
+		close;
+	}
+
+L_Exit:
+	close;
+	
+	OnInit:
+		waitingroom "หน่วยเพิ่มประสิทธิภาพ",0;
+		end;
+}
+
+
+function	script	removecard	{
+	mes "[" + @name$ + "]";
+	mes "โดยต้องเสียค่าแรงให้ข้า 500000 zeny และค่าถอดการ์ดใบละ 250000 zeny";
+	mes "นอกจากนี้ ข้ายังต้องการ star crumb และ yellow gemstone อย่างละ 1 ชิ้นต่อการ์ด 1 ใบด้วย";
+	next;
+	menu "ข้าต้องการถอด",REMOVEMENU,"ข้าไม่ต้องการ",CLOSEOUT;
+
+REMOVEMENU:
+	mes "[" + @name$ + "]";
+	mes "เอาละ เจ้าต้องการให้ข้าถอดการ์ดสิ่งใด?";	
+	next;
+	setarray .@position$[1], "Head","Body","Left hand","Right hand","Robe","Shoes","Accessory 1","Accessory 2","Head 2","Head 3";
+	set .@menu$,"";
+	for( set .@i,1; .@i <= 10; set .@i,.@i+1 )
+	{
+		if( getequipisequiped(.@i) )
+			set .@menu$, .@menu$ + .@position$[.@i] + "-" + "[" + getequipname(.@i) + "]";
+			set .@menu$, .@menu$ + ":";
+	}
+	set .@part,select(.@menu$);
+	if(!getequipisequiped(.@part)) {
+		mes "[" + @name$ + "]";
+		mes "ท่านไม่ได้สวมใส่อยู่";
+		close;
+	}
+	if(getequipcardcnt(.@part) == 0) {
+		mes "[" + @name$ + "]";
+		mes "ของที่ท่านเลือกไม่มีการ์ดใส่อยู่";
+		close;
+	}
+
+	deletearray @cardid;
+	setarray @cardid[0],getequipcardid(.@part,0),getequipcardid(.@part,1),getequipcardid(.@part,2),getequipcardid(.@part,3);
+	for(set @i,0; @i < 4; set @i,@i+1){
+		if(@cardid[@i] != 0){
+			if(@cardid[@i] <= 4000 || @cardid[@i] > 4700){
+				mes "[" + @name$ + "]";
+				mes "ท่านไม่สามารถถอดสิ่งอื่นนอกเหนือจากการ์ดได้";
+				close;
+			}
+		}
+	}
+	
+	set @cardcount,getequipcardcnt(.@part);
+
+	if (!checkweight(1202,(@cardcount+1))) { 
+		mes "[" + @name$ + "]";
+		mes "^3355FFโอ้ น้ำหนักของเจ้าไม่พอจะบรรทุกของได้เพิ่มเติม";
+		mes "จงกลับไปทำน้ำหนักของเจ้าให้เบาลงก่อน ค่อยกลับมาหาข้าใหม่อีกครั้ง";
+		close;
+	}
+	
+	mes "[" + @name$ + "]";
+	mes "สิ่งของชิ้นนี้มีการ์ดใส่อยู่ " + @cardcount + " ใบ";
+	mes "จงเตรียมเงินให้ข้า " + (500000+(@cardcount * 250000)) + " zeny";
+	mes " ^0000FFStar Crumb^000000 "+@cardcount+" ชิ้น";
+	mes "และ ^0000FFYellow Gemstone^000000 "+@cardcount+" ชิ้น";
+	next;
+	menu "ข้าต้องการถอด",REMOVECARDWARNING,
+	     "ข้าไม่ต้องการ",CLOSEOUT;
+		 
+REMOVECARDWARNING:
+	mes "[" + @name$ + "]";
+	mes "ข้าขอเตือนเจ้าก่อนว่า การถอดการ์ดมีความเสี่ยงที่จะไม่สำเร็จได้";
+	mes "ซึ่งนั้นหมายความว่ามีโอกาสที่หายไปทั้งหมด หรือหายเฉพาะบางอย่างเท่านั้น";
+	mes "ท่านให้ความสำคัญกับสิ่งใดเป็นอันดับแรก";
+	next;
+	menu "ข้าเปลี่ยนใจแล้ว",CLOSEOUT,
+	     "สิ่งของ",PRIORITYITEM,
+	     "การ์ด",PRIORITYCARD;
+
+PRIORITYITEM:
+	set @failtype,1;
+	goto REMOVECARD;
+
+PRIORITYCARD:
+	set @failtype,2;
+	goto REMOVECARD;
+
+REMOVECARD:
+	mes "[" + @name$ + "]";
+	mes "เอาละเริ่มกันเลย";
+	if((zeny < (500000+(@cardcount * 250000))) || (countitem(1000) < @cardcount) || (countitem(715) < @cardcount)) goto DENYMATERIAL;
+	set zeny,zeny - (500000+(@cardcount * 250000));
+	delitem 1000,@cardcount;
+	delitem 715,@cardcount;
+	progressbar "ffff00",2;
+	set @failchance,rand(100);
+	if(@failchance < 10) goto FAILREMOVECARD0;
+	if((@failchance < 20) && (@failtype == 1)) goto FAILREMOVECARD1;
+	if((@failchance < 20) && (@failtype == 2)) goto FAILREMOVECARD2;
+	if(@failchance < 30) goto FAILREMOVECARD3;
+	successremovecards .@part;
+	next;
+	mes "[" + @name$ + "]";
+	specialeffect 154;
+	mes "โอ้ ข้าทำมันสำเร็จ";
+	close;
+
+FAILREMOVECARD0:
+	failedremovecards .@part,0;
+	next;
+	mes "[" + @name$ + "]";
+	specialeffect 155;
+	mes "อ้าก ข้าหนักมือไปหน่อย มันเลยแหลกสลายไปหมดเลย";
+	close;
+
+FAILREMOVECARD1:
+	failedremovecards .@part,1;
+	next;
+	mes "[" + @name$ + "]";
+	specialeffect 155;
+	mes "อ้าก ข้าหนักมือไปหน่อย มันเลยเหลือแค่สิ่งของอย่างเดียว";
+	close;
+
+FAILREMOVECARD2:
+	failedremovecards .@part,2;
+	next;
+	mes "[" + @name$ + "]";
+	specialeffect 155;
+	mes "อ้าก ข้าหนักมือไปหน่อย มันเลยเหลือแค่การ์ดอย่างเดียว";
+	close;
+
+FAILREMOVECARD3:
+	failedremovecards .@part,3;
+	next;
+	mes "[" + @name$ + "]";
+	specialeffect 155;
+	mes "อ้าก ข้าตีผิดอัน มันเลยยังไม่เป็นไร";
+	close;
+
+DENYMATERIAL:
+	next;
+	mes "[" + @name$ + "]";
+	mes "ท่านมีของที่ข้าต้องการไม่ครบ เตรียมของให้ครบก่อนมาหาข้า";
+	close;
+
+CLOSEOUT:
+	mes "[" + @name$ + "]";
+	mes "อ่า โอกาสหน้าเชิญมาใหม่อีกครั้ง";
+	close;
+}
+

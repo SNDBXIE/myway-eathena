@@ -420,4 +420,70 @@ bonus bMagicSPGainValue,n;		Heals +n SP when killing an enemy with magic attack.
 bonus bMagicHPGainValue,n;		Heals +n HP when killing an enemy with magic attack.
 
 bonus3 bAddClassDropItem,s,x,n;		Adds an n/100% chance of dropping item s when killing monster class x.
-bonus2 bCooldown,s,n;			Increase cooldown when using skill s by n milliseconds.
+
+//----- Epoque's eAthena Expansion Pack + Custom bonus-------------------
+bonus bWMatk,n;										WMATK + n
+bonus bWMatkRate,n;								WMATK + n%
+bonus bFixCastRate,n;							Increase skill fixed casting time rate n%
+bonus bFixCast,n;									Increase skill fixed casting time n milliseconds.
+bonus bVarCastRate,n;							Increase skill variable casting time rate n%
+bonus bVarCast,n;									Increase skill variable casting time n milliseconds.
+bonus2 bFixCastRate,r,n;						Increase skill fixed casting time rate n% (supports skill names)
+bonus2 bFixCast,r,n;								Increase skill fixed casting time when using skill r by n milliseconds. (supports skill names)
+bonus2 bVarCastRate,r,n;						Increase skill variable casting time rate n% (supports skill names)
+bonus2 bVarCast,r,n;								Increase skill variable casting time when using skill r by n milliseconds. (supports skill names)
+bonus2 bCooldownRate,r,n;					Increase cooldown when using skill r by n%. (supports skill names)
+bonus2 bCooldown,r,n;							Increase cooldown when using skill r by n milliseconds. (supports skill names)
+bonus2 bHPGainRaceAttack,r,n;			Heals n HP when attacking r Race on every hit
+																	{n: 0=Formless, 1=Undead, 2=Brute, 3=Plant, 4=Insect, 5=Fish, 6=Demon, 7=Demi-Human, 8=Angel, 9=Dragon, 10=Boss monster, 11=Other than (normal monster) boss monster}
+bonus2 bSPGainRaceAttack,r,n;			Heals n SP when attacking r Race on every hit
+																	{n: 0=Formless, 1=Undead, 2=Brute, 3=Plant, 4=Insect, 5=Fish, 6=Demon, 7=Demi-Human, 8=Angel, 9=Dragon, 10=Boss monster, 11=Other than (normal monster) boss monster}
+bonus bEMatk,n;										EMATK + n
+bonus bSetRace,n;									Race becomes n
+bonus2 bSCDuration,r,n;							Increase status time to r by n%
+																	{r: SC_XXX}
+bonus2 bSCDamage,r,n;							Increase damage on enemy inflicted with r by n% 
+																	{r: SC_XXX}
+bonus2 bSCResist,r,n;								Increases resistance to r by n% 
+																	{r: SC_XXX}
+bonus3 bSCExchange,n,x,y;					x% chance for n to become y when cast on you 
+																	{n, y: SC_XXX}
+bonus2 bElementDamage,r,n;				r element damage +n%
+																	{r: 0=Neutral, 1=Water, 2=Earth, 3=Fire, 4=Wind, 5=Poison, 6=Holy, 7=Dark, 8=Spirit, 9=Undead}
+bonus2 bHPAttackRatio,r,n;					Deal more damage depending on HP of race n
+																	{n: 0=Formless, 1=Undead, 2=Brute, 3=Plant, 4=Insect, 5=Fish, 6=Demon, 7=Demi-Human, 8=Angel, 9=Dragon, 10=Boss monster, 11=Other than (normal monster) boss monster}
+bonus2 bSPAttackRatio,r,n;					Deal more damage depending on SP of race n
+																	{n: 0=Formless, 1=Undead, 2=Brute, 3=Plant, 4=Insect, 5=Fish, 6=Demon, 7=Demi-Human, 8=Angel, 9=Dragon, 10=Boss monster, 11=Other than (normal monster) boss monster}
+bonus3 bHPDrainRatio,n,x,y;					y/10% chance to drain x% current HP of the enemy of race n, and absorb it as health
+																	{n: 0=Formless, 1=Undead, 2=Brute, 3=Plant, 4=Insect, 5=Fish, 6=Demon, 7=Demi-Human, 8=Angel, 9=Dragon, 10=Boss monster, 11=Other than (normal monster) boss monster}
+bonus3 bSPDrainRatio,n,x,y;					y/10% chance to drain x% current SP of the enemy of race n, and absorb it as SP
+																	{n: 0=Formless, 1=Undead, 2=Brute, 3=Plant, 4=Insect, 5=Fish, 6=Demon, 7=Demi-Human, 8=Angel, 9=Dragon, 10=Boss monster, 11=Other than (normal monster) boss monster}
+bonus bMdefAtkRatioRace,n;					Does more magic damage depending on monster MDEF against race n (defense disregard)
+																	{n: 0=Formless, 1=Undead, 2=Brute, 3=Plant, 4=Insect, 5=Fish, 6=Demon, 7=Demi-Human, 8=Angel, 9=Dragon, 10=Boss monster, 11=Other than (normal monster) boss monster}
+bonus bMdefAtkRatioEle,n;						n attribute if defensive power is high the high extent big damage is given, (defense disregard) 
+																	{n: 0=Neutral, 1=Water, 2=Earth, 3=Fire, 4=Wind, 5=Poison, 6=Holy, 7=Dark, 8=Spirit, 9=Undead}
+bonus2 bCriticalDodge,r,n;						n% chance to completely avoid damage when HP is less than or equal to r%
+bonus bCritAtkMiss,n;								n% chance to dodge a critical hit
+bonus bMaxDamage,n;							n% chance to deal maximum attack damage
+bonus bMinDamage,n;							n% chance to deal minimum attack damage
+bonus3 bSkillGainSP,n,x,y;						x/10% chance to gain y SP when using the skill n (supports skill names)
+bonus bNoSingleMagic,n;						Decreases damage from single target skills by n% (100 = immunity)
+bonus bNoAreaMagic,n;							Decreases damage from AoE skills by n% (100 = immunity)
+bonus bSkillTime,n;									Reduces skill attack animation time by n%
+bonus3 bAreaSkill,n,x,y;							y% chance for skill n to be AoE in x*x cells (supports skill names)
+bonus bAvoidTrap,n;								n% chance to avoid a trap when stood on
+bonus2 bNoConsume,r,n;						n% chance to ignore the consumption of specified items/SP 
+																	{r: NC_ATTACK (Ammo), NC_SKILL (Skill requirements), NC_GEMSTONE (Gemstones), NC_SKILLSP (SP Required)}
+bonus bSkillMove,n;									Allows movement while casting at 100-n% regular walk speed
+bonus2 bSkillMove,r,n;							Allows movement while casting skill r at 100-n% regular walk speed (supports skill names)
+bonus bHealAttack,n;								Causes Heal to become attack type regardless of Undead element/race 
+																	{n: 1=Enemies, 2=Party/Guild, 3=Self (stacks, 1+2 = enemy+party/guild)}
+bonus2 bFullDodge,r,n;							n/10% chance to completely avoid damage 
+																	{r: ATF_FLAGS (ATF_WEAPON|ATF_LONG = avoid while being attacked with long range)}
+bonus bLastStand,n;								n% chance to survive a fatal hit (leave the player with 1 HP)
+bonus2 bIgnoreGTB,r,n;							r% chance to ignore GTB effect, dealing n% damage
+bonus bMagicDamageReturn2,n;			n% chance to deal magic damage back to the caster
+bonus2 bSPCostRate,r,n;						Increase SP cost rate when using skill r by n% (supports skill names)
+bonus2 bSPCost,r,n;								Increase SP cost when using skill r by n point. (supports skill names)
+bonus bDropDiff,n; 									Cancel bad effect in EXP calcuator (difference level between player and monster) and increase exp n% in each level;
+bonus bExpDiff,n;										Cancel bad effect in DROP calcuator (difference level between player and monster) and increase exp n% in each level;

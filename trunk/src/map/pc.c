@@ -2833,6 +2833,14 @@ int pc_bonus(struct map_session_data *sd,int type,int val)
 		if(sd->state.lr_flag != 2)
 			sd->ematk += val;
 		break;
+	case SP_EXPDIFF:
+		if(sd->state.lr_flag != 2)
+			sd->special_state.exexpdiff += val;
+		break;
+	case SP_DROPDIFF:
+		if(sd->state.lr_flag != 2)
+			sd->special_state.exdropdiff += val;
+		break;
 	default:
 		ShowWarning("pc_bonus: unknown type %d %d !\n",type,val);
 		break;
