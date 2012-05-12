@@ -1304,14 +1304,6 @@ int unit_skilluse_id2(struct block_list *src, int target_id, short skill_num, sh
 			casttime = 0;
 	break;
 	}
-	
-	// moved here to prevent Suffragium from ending if skill fails
-	if (!(skill_get_castnodex(skill_num, skill_lv)&2))
-		//Renewal setting
-			if(battle_config.renewal_cast_setting&0 && (skill_num <= SA_ELEMENTWIND || skill_num >= HLIF_HEAL)
-				|| battle_config.renewal_cast_setting&1 && (skill_num > SA_ELEMENTWIND && skill_num < HLIF_HEAL)
-				|| battle_config.renewal_cast_setting&2)
-			casttime = skill_renewal_castfix (src, skill_num, casttime, skill_lv);		
   	
 	// statuses affecting cast time end here [Inkfish]
 	if( !(skill_get_castnodex(skill_num, skill_lv)&2) && sc )
@@ -1495,14 +1487,6 @@ int unit_skilluse_pos2( struct block_list *src, short skill_x, short skill_y, sh
 		return 0; //Arrow-path check failed.
 
 	unit_stop_attack(src);
-	
-	// moved here to prevent Suffragium from ending if skill fails
-	if (!(skill_get_castnodex(skill_num, skill_lv)&2))
-		//Renewal setting
-			if(battle_config.renewal_cast_setting&0 && (skill_num <= SA_ELEMENTWIND || skill_num >= HLIF_HEAL)
-				|| battle_config.renewal_cast_setting&1 && (skill_num > SA_ELEMENTWIND && skill_num < HLIF_HEAL)
-				|| battle_config.renewal_cast_setting&2)
-			casttime = skill_renewal_castfix (src, skill_num, casttime, skill_lv);		
 
 	// statuses affecting cast time end here [Inkfish]
 	if( !(skill_get_castnodex(skill_num, skill_lv)&2) && sc )

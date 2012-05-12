@@ -922,7 +922,13 @@ int party_send_xy_clear(struct party_data *p)
  * Renewal Drop Modifier
  **/
 int party_renewal_drop_mod(int diff, struct map_session_data *sd) {
-	int exdiff = sd->special_state.exdropdiff;
+	int exdiff;
+
+	if(battle_config.drop_penalty){
+		return 100;
+	}
+
+	exdiff = sd->special_state.exdropdiff;
 
 	if(exdiff != 0){
 		if( diff >= -10 && diff <= 5 )
@@ -966,6 +972,7 @@ int party_renewal_drop_mod(int diff, struct map_session_data *sd) {
  * Renewal Experience Earning Mode
  **/
 void party_renewal_exp_mod(unsigned int *base_exp, unsigned int *job_exp, int lvl, int moblvl, struct map_session_data *sd) {
+
 	int diff = lvl - moblvl, boost = 0, exdiff = sd->special_state.exexpdiff;
 
 	if(exdiff != 0){

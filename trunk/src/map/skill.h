@@ -320,9 +320,7 @@ int skill_clear_group(struct block_list *bl, int flag);
 int skill_unit_ondamaged(struct skill_unit *src,struct block_list *bl,int damage,unsigned int tick);
 
 int skill_castfix( struct block_list *bl, int skill_id, int skill_lv);
-int skill_castfix_sc( struct block_list *bl, int time);
 int skill_delayfix( struct block_list *bl, int skill_id, int skill_lv);
-int skill_renewal_castfix (struct block_list *bl, int skill_id, int skill_lv, int base_cast);//[malufett]
 
 // Skill conditions check and remove [Inkfish]
 int skill_check_condition_castbegin(struct map_session_data *sd, short skill, short lv);

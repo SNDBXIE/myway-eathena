@@ -564,6 +564,7 @@ L_Make:
 		mes "นี่คือ ^FF0000"+getitemname(@item[0])+"^000000 ที่ท่านต้องการ";
 		getitem @itemid,1;
 		close;
+	}
 	if(@set==1){
 		set @ramdom,rand(0,100);
 		if(@ramdom > @rate[0]) && (@ramdom < @rate[1])

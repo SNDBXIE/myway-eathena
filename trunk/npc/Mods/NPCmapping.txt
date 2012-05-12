@@ -31,7 +31,7 @@ izlude,93,111,4	duplicate(ArcherMercenary)	æ≈∏πŸ√—∫®È“ß#1	732
 
 izlude,95,120,4	duplicate(questcreate)	Secret Man#01	897
 
-izlude,99,105 	,7	duplicate(DwarfSmith)	™Ë“ßµ’∫«°®Õ¡‚À¥#01	810
+izlude,99,105,7	duplicate(DwarfSmith)	™Ë“ßµ’∫«°®Õ¡‚À¥#01	810
 
 //izlude,161,91,4	duplicate(CashShop)	Cash Machine#1	910
 izlude,99,101,4	duplicate(weaponshop)	·Ω¥π√°#Õ‘ ≈Ÿ∑	812

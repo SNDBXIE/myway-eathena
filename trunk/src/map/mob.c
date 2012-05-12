@@ -1355,8 +1355,7 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 		return false;
 
 	// Abnormalities
-	if( (md->sc.opt1 > 0 && md->sc.opt1 != OPT1_STONEWAIT && md->sc.opt1 != OPT1_BURNING) || md->sc.data[SC_BLADESTOP] || md->sc.data[SC__MANHOLE] ||
-		md->sc.data[SC_DEEPSLEEP] || md->sc.data[SC_CURSEDCIRCLE_TARGET] )
+	if( (md->sc.opt1 > 0 && md->sc.opt1 != OPT1_STONEWAIT && md->sc.opt1 != OPT1_BURNING) || md->sc.data[SC_BLADESTOP] || md->sc.data[SC__MANHOLE] || md->sc.data[SC_DEEPSLEEP] || md->sc.data[SC_CURSEDCIRCLE_TARGET] )
   	{	//Should reset targets.
 		md->target_id = md->attacked_id = 0;
 		return false;
@@ -2231,7 +2230,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			{
 				if( md->dmglog[i].flag != 2 || battle_config.pet_attack_exp_to_master )
 				{
-						party_renewal_exp_mod(&base_exp,&job_exp,tmpsd[i]->status.base_level,md->level, tmpsd[i]);
+						if(!battle_config.exp_penalty) party_renewal_exp_mod(&base_exp,&job_exp,tmpsd[i]->status.base_level,md->level, tmpsd[i]);
 						pc_gainexp(tmpsd[i], &md->bl, base_exp, job_exp, false);
 				}
 			}

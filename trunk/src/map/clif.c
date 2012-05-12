@@ -2634,31 +2634,35 @@ int clif_updatestatus(struct map_session_data *sd,int type)
 		WFIFOL(fd,4)=sd->battle_status.amotion;
 		break;
 	case SP_ATK1:
-		WFIFOL(fd,4)=sd->battle_status.batk;
-		break;
-	case SP_ATK2:
-		WFIFOL(fd,4)=sd->battle_status.rhw.atk + sd->battle_status.rhw.atk2 + sd->battle_status.lhw.atk + sd->battle_status.lhw.atk2 + sd->eatk;
+		WFIFOL(fd,4)=pc_leftside_atk(sd);
 		break;
 	case SP_DEF1:
-		WFIFOL(fd,4)=sd->battle_status.def2;
-		break;
-	case SP_DEF2:
-		WFIFOL(fd,4)=sd->battle_status.def;
+		WFIFOL(fd,4)=pc_leftside_def(sd);
 		break;
 	case SP_MDEF1:
-		WFIFOL(fd,4)=sd->battle_status.mdef2;
+		WFIFOL(fd,4)=pc_leftside_mdef(sd);
 		break;
-	case SP_MDEF2:
-		WFIFOL(fd,4)=sd->battle_status.mdef;
+	case SP_ATK2:
+		WFIFOL(fd,4)=pc_rightside_atk(sd);
+		break;
+	case SP_DEF2:
+		WFIFOL(fd,4)=pc_rightside_def(sd);
+		break;
+	case SP_MDEF2: {
+			//negative check (in case you have something like Berserk active)
+			int mdef2 = pc_rightside_mdef(sd);
+
+			WFIFOL(fd,4)= ( mdef2 < 0 ) ? 0 : mdef2;
+		}
 		break;
 	case SP_CRITICAL:
 		WFIFOL(fd,4)=sd->battle_status.cri/10;
 		break;
 	case SP_MATK1:
-		WFIFOL(fd,4)=sd->wmatk + sd->battle_status.lhw.matk + sd->battle_status.rhw.matk + sd->ematk;
+		WFIFOL(fd,4)=sd->battle_status.matk_max;
 		break;
 	case SP_MATK2:
-		WFIFOL(fd,4)=sd->battle_status.smatk;
+		WFIFOL(fd,4)=sd->battle_status.matk_min;
 		break;
 	case SP_ZENY:
 		WFIFOW(fd,0)=0xb1;
@@ -2749,7 +2753,7 @@ int clif_updatestatus(struct map_session_data *sd,int type)
 		WFIFOW(fd,2)=sd->cart_num;
 		WFIFOW(fd,4)=MAX_CART;
 		WFIFOL(fd,6)=sd->cart_weight;
-		WFIFOL(fd,10)=battle_config.max_cart_weight + (pc_checkskill(sd,GN_REMODELING_CART)*5000);
+		WFIFOL(fd,10)=sd->cart_weight_max;
 		len=14;
 		break;
 
@@ -2959,7 +2963,7 @@ void clif_refreshlook(struct block_list *bl,int id,int type,int val,enum send_ta
  *------------------------------------------*/
 int clif_initialstatus(struct map_session_data *sd)
 {
-	int fd;
+	int fd, mdef2;
 	unsigned char *buf;
 
 	nullpo_ret(sd);
@@ -2983,17 +2987,15 @@ int clif_initialstatus(struct map_session_data *sd)
 	WBUFB(buf,14)=min(sd->status.luk, UINT8_MAX);
 	WBUFB(buf,15)=pc_need_status_point(sd,SP_LUK,1);
 
-	WBUFW(buf,16) = sd->battle_status.batk; //Status ATK
-	WBUFW(buf,18) = sd->battle_status.lhw.atk + sd->battle_status.lhw.atk2 + sd->battle_status.rhw.atk + sd->battle_status.rhw.atk2 + sd->eatk; //Weapon ATK
-	WBUFW(buf,20) = sd->wmatk + sd->battle_status.lhw.matk + sd->battle_status.rhw.matk + sd->ematk; //Weapon MATK
-	WBUFW(buf,22) = sd->battle_status.smatk; //Status MATK
-	WBUFW(buf,24) = sd->battle_status.def2; 
-	WBUFW(buf,26) = sd->battle_status.def; // def
-	fd = sd->battle_status.mdef2 - (sd->battle_status.vit>>1);
-	if (fd < 0) fd = 0; //Negative check for Frenzy'ed characters.
-	WBUFW(buf,28) = fd;
-	WBUFW(buf,30) = sd->battle_status.mdef; // mdef
-	fd = sd->fd;
+	WBUFW(buf,16) = pc_leftside_atk(sd);
+	WBUFW(buf,18) = pc_rightside_atk(sd);
+	WBUFW(buf,20) = sd->battle_status.matk_max;
+	WBUFW(buf,22) = sd->battle_status.matk_min;
+	WBUFW(buf,24) = pc_leftside_def(sd);
+	WBUFW(buf,26) = pc_rightside_def(sd);
+	WBUFW(buf,28) = pc_leftside_mdef(sd);
+	mdef2 = pc_rightside_mdef(sd);
+	WBUFW(buf,30) = ( mdef2 < 0 ) ? 0 : mdef2;  //Negative check for Frenzy'ed characters.
 	WBUFW(buf,32) = sd->battle_status.hit;
 	WBUFW(buf,34) = sd->battle_status.flee;
 	WBUFW(buf,36) = sd->battle_status.flee2/10;
