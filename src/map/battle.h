@@ -371,7 +371,6 @@ extern struct Battle_Config
 	int pet_hair_style; // added by [Skotlex]
 
 	int castrate_dex_scale; // added by [MouseJstr]
-	int castrate_dex_scale2;
 	int area_size; // added by [MouseJstr]
 
 	int max_def, over_def_bonus; //added by [Skotlex]
@@ -517,12 +516,14 @@ extern struct Battle_Config
 	int warg_can_falcon;
 
 	// Renewal Setting
-	int renewal_cast_setting;
+	int renewal_cast_3rd_skills;
+	int castrate_dex_scale_3rd;
 	int exp_penalty;
 	int drop_penalty;
 	int edp_renewal;
 	int npc_timeout;
 	int npc_timeout_interval;
+	int block_relocation;
 
 	// Party Increased Drop Rate [WiseWarrior]
     int party_drop_bonus;
@@ -530,8 +531,9 @@ extern struct Battle_Config
 	//Stop Asura using absorb spirits
 	int asura_absorb_cast_cancel;
 	
-	//Mado use Mastersmith skill
-	int mado_skills;
+	int renewal_baselvl_skill_ratio;
+	int mado_skill_limit;
+	int mado_loss_on_death;
 
 	//PVP Area by Mr.Postman
 	int deathmatch;

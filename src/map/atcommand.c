@@ -59,6 +59,9 @@ DBMap* atcommand_db = NULL;//name -> AtCommandInfo
 
 #define ATCOMMAND_LENGTH 50
 
+#define MOB_FLEE(mob) ( mob->lv + mob->status.dex + mob->status.luk/3 + 175 ) 
+#define MOB_HIT(mob)  ( mob->lv + mob->status.agi + mob->status.luk/5 + 100 ) 
+
 typedef struct AtCommandInfo {
 	char command[ATCOMMAND_LENGTH];
 	int level;
@@ -1476,12 +1479,11 @@ ACMD_FUNC(jobchange)
 		}
 	}
 
-	if (job == 13 || job == 21 || job == 22 || job == 26 || job == 27
-		|| job == 4014 || job == 4022 || job == 4036 || job == 4044 || job == 4048
-		|| job == 4080 || job == 4081 || job == 4082 || job == 4083 || job == 4084
-		|| job == 4085 || job == 4086 || job == 4087
+	if (job == 13 || job == 21 || job == 22 || job == 26 || job == 27 || job == 4014 || job == 4022 || job == 4036 || job == 4044 || job == 4048
+		 || (job >= JOB_RUNE_KNIGHT2 && job <= JOB_MECHANIC_T2) || (job >= JOB_BABY_RUNE2 && job <= JOB_BABY_MECHANIC2)
 	) // Deny direct transformation into dummy jobs
-		return 0;
+		{clif_displaymessage(fd, "You can not change to this job by command.");
+		return 0;}
 
 	if (pcdb_checkid(job))
 	{
@@ -7267,10 +7269,10 @@ ACMD_FUNC(mobinfo)
 		else
 			sprintf(atcmd_output, "Monster: '%s'/'%s'/'%s' (%d)", mob->name, mob->jname, mob->sprite, mob->vd.class_);
 		clif_displaymessage(fd, atcmd_output);
-		sprintf(atcmd_output, " Level:%d  HP:%d  SP:%d  Base EXP:%u  Job EXP:%u", mob->lv, mob->status.max_hp, mob->status.max_sp, mob->base_exp, mob->job_exp);
+		sprintf(atcmd_output, " Lv:%d  HP:%d  Base EXP:%u  Job EXP:%u  HIT:%d  FLEE:%d", mob->lv, mob->status.max_hp, mob->base_exp, mob->job_exp,MOB_HIT(mob), MOB_FLEE(mob));
 		clif_displaymessage(fd, atcmd_output);
-		sprintf(atcmd_output, " DEF:%d~%d  MDEF:%d  STR:%d  AGI:%d  VIT:%d  INT:%d  DEX:%d  LUK:%d",
-			mob->status.def, mob->status.def2, mob->status.mdef, mob->status.str, mob->status.agi,
+		sprintf(atcmd_output, " DEF:%d  MDEF:%d  STR:%d  AGI:%d  VIT:%d  INT:%d  DEX:%d  LUK:%d",
+			mob->status.def, mob->status.mdef,mob->status.str, mob->status.agi,
 			mob->status.vit, mob->status.int_, mob->status.dex, mob->status.luk);
 		clif_displaymessage(fd, atcmd_output);
 		

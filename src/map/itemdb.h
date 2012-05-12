@@ -134,7 +134,7 @@ const char* itemdb_typename(int type);
 #define itemdb_is_rune(n) (n >= ITEMID_NAUTHIZ && n <= ITEMID_HAGALAZ)
 #define itemdb_is_poison(n) (n >= 12717 && n <= 12724)
 #define itemdb_is_spellbook(n) (n >= 6188 && n <= 6205)
-#define itemdb_is_element(n) (n >= 990 && n <= 993)
+#define itemdb_is_element(n) (n >= 6360 && n <= 6363)
 #define itemdb_is_GNbomb(n) (n >= 13260 && n <= 13267)
 
 int itemdb_group_bonus(struct map_session_data* sd, int itemid);
@@ -142,7 +142,7 @@ int itemdb_searchrandomid(int flags);
 
 #define itemdb_value_buy(n) itemdb_search(n)->value_buy
 #define itemdb_value_sell(n) itemdb_search(n)->value_sell
-#define itemdb_canrefine(n) (!itemdb_search(n)->flag.no_refine)
+#define itemdb_canrefine(n) itemdb_search(n)->flag.no_refine
 //Item trade restrictions [Skotlex]
 int itemdb_isdropable_sub(struct item_data *, int, int);
 int itemdb_cantrade_sub(struct item_data*, int, int);

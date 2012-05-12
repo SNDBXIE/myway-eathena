@@ -70,12 +70,12 @@ enum E_MAPSERVER_ST
 #define JOBL_3_2 0x800
 
 #define JOBL_UPPER 0x1000 //4096
-#define JOBL_BABY  0x2000 //8192
+#define JOBL_BABY 0x2000  //8192
 #define JOBL_THIRD 0x4000 //16384
 
 //for filtering and quick checking.
-#define MAPID_UPPERMASK 0x0fff
 #define MAPID_BASEMASK 0x00ff
+#define MAPID_UPPERMASK 0x0fff
 #define MAPID_UPPERMASK_THIRD (JOBL_THIRD|MAPID_UPPERMASK)
 #define MAPID_JOBMASK 0xf000
 

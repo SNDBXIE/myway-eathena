@@ -215,7 +215,7 @@ struct map_session_data {
 	struct item_data* inventory_data[MAX_INVENTORY]; // direct pointers to itemdb entries (faster than doing item_id lookups)
 	short equip_index[14];
 	unsigned int weight,max_weight;
-	int cart_weight,cart_num;
+	int cart_weight,cart_num,cart_weight_max;
 	int fd;
 	unsigned short mapindex;
 	unsigned char head_dir; //0: Look forward. 1: Look right, 2: Look left.
@@ -711,7 +711,16 @@ static inline bool pcdb_checkid(unsigned short class_)
 	return false;
 }
 
+// clientside display macros (values to the left/right of the "+")
+#define pc_leftside_atk(sd) ((sd)->battle_status.batk)
+#define pc_rightside_atk(sd) ((sd)->battle_status.rhw.atk + (sd)->battle_status.lhw.atk + (sd)->battle_status.rhw.atk2 + (sd)->battle_status.lhw.atk2)
+#define pc_leftside_def(sd) ((sd)->battle_status.def2)
+#define pc_rightside_def(sd) ((sd)->battle_status.def)
+#define pc_leftside_mdef(sd) ( (sd)->battle_status.mdef2 - ((sd)->battle_status.vit>>1) )
+#define pc_rightside_mdef(sd) ((sd)->battle_status.mdef)
+
 int pc_class2idx(int class_);
+
 int pc_isGM(struct map_session_data *sd);
 int pc_getrefinebonus(int lv,int type);
 bool pc_can_give_items(int level);
