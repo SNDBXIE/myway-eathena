@@ -2313,7 +2313,7 @@ static struct Damage battle_renewal_calc_weapon_attack(struct block_list *src,st
 					skillratio += ratio;
 					break;
 				case AM_ACIDTERROR:
-					ratio += 100 * skill_lv;
+					ratio = 100 * skill_lv;
 					if(tstatus->mode&MD_BOSS)
 						ratio *= 2;
 					skillratio += ratio;

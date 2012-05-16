@@ -532,6 +532,7 @@ extern struct Battle_Config
 	int asura_absorb_cast_cancel;
 	
 	int renewal_baselvl_skill_ratio;
+	int renewal_baselvl_skill_effect;
 	int mado_skill_limit;
 	int mado_loss_on_death;
 
