@@ -4026,6 +4026,37 @@ ACMD_FUNC(agitstart2)
 	return 0;
 }
 
+//Mod Guildwar by Beer
+ACMD_FUNC(agitstart3)
+{
+	nullpo_retr(-1, sd);
+	if (agit3_flag == 1) {
+		clif_displaymessage(fd, msg_txt(802)); // "War of Emperium TE is currently in progress."
+		return -1;
+	}
+
+	agit3_flag = 1;
+	guild_agit3_start();
+	clif_displaymessage(fd, msg_txt(801)); // "War of Emperium TE has been initiated."
+
+	return 0;
+}
+
+ACMD_FUNC(agitstart4)
+{
+	nullpo_retr(-1, sd);
+	if (agit4_flag == 1) {
+		clif_displaymessage(fd, msg_txt(806)); // "War of Emperium DE is currently in progress."
+		return -1;
+	}
+
+	agit4_flag = 1;
+	guild_agit4_start();
+	clif_displaymessage(fd, msg_txt(805)); // "War of Emperium DE has been initiated."
+
+	return 0;
+}
+
 /*==========================================
  *
  *------------------------------------------*/
@@ -4058,6 +4089,37 @@ ACMD_FUNC(agitend2)
 	agit2_flag = 0;
 	guild_agit2_end();
 	clif_displaymessage(fd, msg_txt(405)); // "War of Emperium SE has been ended."
+
+	return 0;
+}
+
+//Mod Guildwar by Beer
+ACMD_FUNC(agitend3)
+{
+	nullpo_retr(-1, sd);
+	if (agit3_flag == 0) {
+		clif_displaymessage(fd, msg_txt(804)); // "War of Emperium TE is currently not in progress."
+		return -1;
+	}
+
+	agit3_flag = 0;
+	guild_agit3_end();
+	clif_displaymessage(fd, msg_txt(803)); // "War of Emperium TE has been ended."
+
+	return 0;
+}
+
+ACMD_FUNC(agitend4)
+{
+	nullpo_retr(-1, sd);
+	if (agit4_flag == 0) {
+		clif_displaymessage(fd, msg_txt(808)); // "War of Emperium DE is currently not in progress."
+		return -1;
+	}
+
+	agit4_flag = 0;
+	guild_agit4_end();
+	clif_displaymessage(fd, msg_txt(807)); // "War of Emperium DE has been ended."
 
 	return 0;
 }
@@ -9356,6 +9418,117 @@ ACMD_FUNC(guildbreak)
 	return 0;
 }
 
+/* [Ind] */
+ACMD_FUNC(set) {
+	char reg[32], val[128];
+	struct script_data* data;
+	int toset = 0;
+	bool is_str = false;
+	
+	if( !message || !*message || (toset = sscanf(message, "%32s %128[^\n]s", reg, val)) < 1  ) {
+		clif_displaymessage(fd, "Usage: @set <variable name> <value>");
+		clif_displaymessage(fd, "Usage: e.g. @set PoringCharVar 50");
+		clif_displaymessage(fd, "Usage: e.g. @set PoringCharVarSTR$ Super Duper String");
+		clif_displaymessage(fd, "Usage: e.g. \"@set PoringCharVarSTR$\" outputs it's value, Super Duper String");
+		return -1;
+	}
+		
+	/* disabled variable types (they require a proper script state to function, so allowing them would crash the server) */
+	if( reg[0] == '.' ) {
+		clif_displaymessage(fd, "NPC Variables may not be used with @set");
+		return -1;
+	} else if( reg[0] == '\'' ) {
+		clif_displaymessage(fd, "Instance variables may not be used with @set");
+		return -1;
+	}
+
+	is_str = ( reg[strlen(reg) - 1] == '$' ) ? true : false;
+	
+	if( toset >= 2 ) {/* we only set the var if there is an val, otherwise we only output the value */
+		if( is_str )
+			set_var(sd, reg, (void*) val);
+		else
+			set_var(sd, reg, (void*)((int)(atoi(val))));
+
+	}
+	
+	CREATE(data, struct script_data,1);
+	
+	
+	if( is_str ) {// string variable
+		
+		switch( reg[0] ) {
+			case '@':
+				data->u.str = pc_readregstr(sd, add_str(reg));
+				break;
+			case '$':
+				data->u.str = mapreg_readregstr(add_str(reg));
+				break;
+			case '#':
+				if( reg[1] == '#' )
+					data->u.str = pc_readaccountreg2str(sd, reg);// global
+				else
+					data->u.str = pc_readaccountregstr(sd, reg);// local
+				break;
+			default:
+				data->u.str = pc_readglobalreg_str(sd, reg);
+				break;
+		}
+		
+		if( data->u.str == NULL || data->u.str[0] == '\0' ) {// empty string
+			data->type = C_CONSTSTR;
+			data->u.str = "";
+		} else {// duplicate string
+			data->type = C_STR;
+			data->u.str = aStrdup(data->u.str);
+		}
+		
+	} else {// integer variable
+		
+		data->type = C_INT;
+		switch( reg[0] ) {
+			case '@':
+				data->u.num = pc_readreg(sd, add_str(reg));
+				break;
+			case '$':
+				data->u.num = mapreg_readreg(add_str(reg));
+				break;
+			case '#':
+				if( reg[1] == '#' )
+					data->u.num = pc_readaccountreg2(sd, reg);// global
+				else
+					data->u.num = pc_readaccountreg(sd, reg);// local
+				break;
+			default:
+				data->u.num = pc_readglobalreg(sd, reg);
+				break;
+		}
+		
+	}
+	
+	
+	switch( data->type ) {
+		case C_INT:
+			sprintf(atcmd_output,"%s value is now :%d",reg,data->u.num);
+			break;
+		case C_STR:
+			sprintf(atcmd_output,"%s value is now :%s",reg,data->u.str);
+			break;
+		case C_CONSTSTR:
+			sprintf(atcmd_output,"%s is empty",reg);
+			break;
+		default:
+			sprintf(atcmd_output,"%s data type is not supported :%u",reg,data->type);
+			break;
+	}
+	
+	clif_displaymessage(fd, atcmd_output);
+	
+	aFree(data);
+	
+	return 0;
+}
+
 /**
  * Fills the reference of available commands in atcommand DBMap
  **/
@@ -9591,6 +9764,12 @@ void atcommand_basecommands(void) {
 		{ "points",            60,60,     atcommand_cash },
 		{ "agitstart2",        60,60,     atcommand_agitstart2 },
 		{ "agitend2",          60,60,     atcommand_agitend2 },
+		//Mod Guildwar by Beer
+		{ "agitstart3",        60,60,     atcommand_agitstart3 },
+		{ "agitend3",          60,60,     atcommand_agitend3 },
+		{ "agitstart4",        60,60,     atcommand_agitstart4 },
+		{ "agitend4",          60,60,     atcommand_agitend4 },
+
 		{ "skreset",           60,60,     atcommand_resetskill },
 		{ "streset",           60,60,     atcommand_resetstat },
 		{ "storagelist",       40,40,     atcommand_itemlist },
@@ -9609,6 +9788,7 @@ void atcommand_basecommands(void) {
 		{ "seehp",              1,99,     atcommand_seehp },
 		{ "afk",				1,1,	 atcommand_afk },
 		{ "guildbreak",				0,99,	 atcommand_guildbreak },
+		{ "set",				90,99,	 atcommand_set },
 		/**
 		 * For Testing Purposes, not going to be here after we're done.
 		 **/

@@ -7101,27 +7101,40 @@ BUILDIN_FUNC(failedrefitem)
 
 	return 0;
 }
-
-BUILDIN_FUNC(failedrefitemR) // by jakeRed
+/*==========================================
+* Downgrades an Equipment Part by -1 . [Masao] 
+*------------------------------------------*/
+BUILDIN_FUNC(downrefitem) 
 {
-	int i=-1,num;
+	int i = -1,num,ep;
 	TBL_PC *sd;
 
-	num=script_getnum(st,2);
+	num = script_getnum(st,2);
 	sd = script_rid2sd(st);
 	if( sd == NULL )
 		return 0;
 
 	if (num > 0 && num <= ARRAYLENGTH(equip))
-		i=pc_checkequip(sd,equip[num-1]);
+		i = pc_checkequip(sd,equip[num-1]);
 	if(i >= 0) {
-		sd->status.inventory[i].refine = sd->status.inventory[i].refine - 3;
+		ep = sd->status.inventory[i].equip;
+
+		//Logs items, got from (N)PC scripts [Lupus]
+
+		log_pick_pc(sd, LOG_TYPE_SCRIPT, sd->status.inventory[i].nameid, -1, &sd->status.inventory[i]);
+
+		sd->status.inventory[i].refine++;
 		pc_unequipitem(sd,i,2); // status calc will happen in pc_equipitem() below
 
-		clif_refine(sd->fd,0,i,sd->status.inventory[i].refine);
-		clif_delitem(sd,i,1,2);
-		
+		clif_refine(sd->fd,2,i,sd->status.inventory[i].refine = sd->status.inventory[i].refine - 2);
+		clif_delitem(sd,i,1,3);
+
+		//Logs items, got from (N)PC scripts [Lupus]
+
+		log_pick_pc(sd, LOG_TYPE_SCRIPT, sd->status.inventory[i].nameid, 1, &sd->status.inventory[i]);
+
 		clif_additem(sd,i,1,0);
+		pc_equipitem(sd,i,ep);
 		clif_misceffect(&sd->bl,2);
 	}
 
@@ -10312,6 +10325,39 @@ BUILDIN_FUNC(agitend2)
 	return 0;
 }
 
+BUILDIN_FUNC(agitstart3)
+{
+	if(agit3_flag==1) return 0;      // Agit3 already Start.
+	agit3_flag=1;
+	guild_agit3_start();
+	return 0;
+}
+
+BUILDIN_FUNC(agitend3)
+{
+	if(agit3_flag==0) return 0;      // Agit2 already End.
+	agit3_flag=0;
+	guild_agit3_end();
+	return 0;
+}
+
+BUILDIN_FUNC(agitstart4)
+{
+	if(agit4_flag==1) return 0;      // Agit4 already Start.
+	agit4_flag=1;
+	guild_agit4_start();
+	return 0;
+}
+
+BUILDIN_FUNC(agitend4)
+{
+	if(agit4_flag==0) return 0;      // Agit4 already End.
+	agit4_flag=0;
+	guild_agit4_end();
+	return 0;
+}
+
+
 /*==========================================
  * Returns whether woe is on or off.	// choice script
  *------------------------------------------*/
@@ -10327,6 +10373,24 @@ BUILDIN_FUNC(agitcheck)
 BUILDIN_FUNC(agitcheck2)
 {
 	script_pushint(st,agit2_flag);
+	return 0;
+}
+
+/*==========================================
+ * Returns whether woese is on or off.	// choice script
+ *------------------------------------------*/
+BUILDIN_FUNC(agitcheck3)
+{
+	script_pushint(st,agit3_flag);
+	return 0;
+}
+
+/*==========================================
+ * Returns whether woese is on or off.	// choice script
+ *------------------------------------------*/
+BUILDIN_FUNC(agitcheck4)
+{
+	script_pushint(st,agit4_flag);
 	return 0;
 }
 
@@ -15835,6 +15899,64 @@ BUILDIN_FUNC(instance_warpall)
 }
 
 /*==========================================
+ * instance_check_party [malufett]
+ * Values:
+ * party_id : Party ID of the invoking character. [Required Parameter]
+ * amount : Amount of needed Partymembers for the Instance. [Optional Parameter]
+ * min : Minimum Level needed to join the Instance. [Optional Parameter]
+ * max : Maxium Level allowed to join the Instance. [Optional Parameter]
+ * Example: instance_check_party (getcharid(1){,amount}{,min}{,max});
+ * Example 2: instance_check_party (getcharid(1),1,1,99);
+ *------------------------------------------*/
+BUILDIN_FUNC(instance_check_party)
+{
+	struct map_session_data *pl_sd;
+	int amount, min, max, i, party_id, c = 0;
+	struct party_data *p = NULL;
+
+	amount = script_hasdata(st,3) ? script_getnum(st,3) : 1; // Amount of needed Partymembers for the Instance.
+	min = script_hasdata(st,4) ? script_getnum(st,4) : 1; // Minimum Level needed to join the Instance.
+	max  = script_hasdata(st,5) ? script_getnum(st,5) : MAX_LEVEL; // Maxium Level allowed to join the Instance.
+
+	if( min < 1 || min > MAX_LEVEL){
+		ShowError("instance_check_party: Invalid min level, %d\n", min);
+		return 0;
+	}else if(  max < 1 || max > MAX_LEVEL){
+		ShowError("instance_check_party: Invalid max level, %d\n", max);
+		return 0;
+	}
+
+	if( script_hasdata(st,2) )
+		party_id = script_getnum(st,2);
+	else return 0;
+
+	if( !(p = party_search(party_id)) ){
+		script_pushint(st, 0); // Returns false if party does not exist.
+		return 0;
+	}
+
+	for( i = 0; i < MAX_PARTY; i++ )
+		if( (pl_sd = p->data[i].sd) ) 
+			if(map_id2bl(pl_sd->bl.id)){ 
+				if(pl_sd->status.base_level < min){
+					script_pushint(st, 0);
+					return 0; 
+				}else if(pl_sd->status.base_level > max){
+					script_pushint(st, 0);
+					return 0;
+				}
+					c++;
+			}
+	
+	if(c < amount){
+		script_pushint(st, 0); // Not enough Members in the Party to join Instance.
+	}else	
+		script_pushint(st, 1);
+
+	return 0;
+}
+
+/*==========================================
  * Custom Fonts
  *------------------------------------------*/
 BUILDIN_FUNC(setfont)
@@ -16138,7 +16260,7 @@ BUILDIN_FUNC(sendmail) {
 	dest_cid = script_getnum(st,2);
 	dest_aid = script_getnum(st,3);
 	mail.send_id = dest_cid;
-	mail.dest_id = dest_cid;
+	mail.dest_id = dest_aid;
 	safestrncpy(mail.send_name, script_getstr(st,4), NAME_LENGTH);//from who?
 	safestrncpy(mail.title, script_getstr(st,5), MAIL_TITLE_LENGTH);//title
 	safestrncpy(mail.body, script_getstr(st,6), MAIL_BODY_LENGTH);//content
@@ -16397,26 +16519,23 @@ BUILDIN_FUNC(cartreset)
 // Guildwar Observer by Mr.Postman
 BUILDIN_FUNC(setaudience)
 {
-	struct map_session_data* sd;
-	int ticks = 1000;
+        struct map_session_data* sd = script_rid2sd(st);
+        int type = script_getnum(st,2);
+        int mapindex;
 
-	if( st->sleep.tick == 0 ) { 
-		st->state = RERUNLINE;      
-		st->sleep.tick = ticks; 
-	} else { 
-		st->state = RUN; 
-		st->sleep.tick = 0; 
-	}
+        if( !sd )  
+                return 0;
+        
+        if( type&1 ) {
+                mapindex = mapindex_name2id(script_getstr(st, 3));
 
-	if( ( sd = script_rid2sd(st) )  == NULL )
-		return 0;
+                if ( mapindex )
+                        pc_setreg(sd, add_str("@audience_map"), mapindex);
+        } else {
+                status_change_end( &sd->bl, SC_AUDIENCE, INVALID_TIMER );
+        }       
 
-	if( script_getnum(st,2) )
-		sc_start( &sd->bl, SC_AUDIENCE, 100, 0, 0 );
-	else
-		status_change_end( &sd->bl, SC_AUDIENCE, INVALID_TIMER );
-
-   return 0;
+        return 0;
 }
 
 // declarations that were supposed to be exported from npc_chat.c
@@ -16550,7 +16669,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getequippercentrefinery,"i"),
 	BUILDIN_DEF(successrefitem,"i"),
 	BUILDIN_DEF(failedrefitem,"i"),
-	BUILDIN_DEF(failedrefitemR,"i"), //jakeRed
+	BUILDIN_DEF(downrefitem,"i"),
 	BUILDIN_DEF(statusup,"i"),
 	BUILDIN_DEF(statusup2,"ii"),
 	BUILDIN_DEF(bonus,"iv"),
@@ -16859,6 +16978,14 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(agitstart2,""),
 	BUILDIN_DEF(agitend2,""),
 	BUILDIN_DEF(agitcheck2,""),
+	// WoE TE
+	BUILDIN_DEF(agitstart3,""),
+	BUILDIN_DEF(agitend3,""),
+	BUILDIN_DEF(agitcheck3,""),
+	// WoE DE
+	BUILDIN_DEF(agitstart4,""),
+	BUILDIN_DEF(agitend4,""),
+	BUILDIN_DEF(agitcheck4,""),
 	// BattleGround
 	BUILDIN_DEF(waitingroom2bg,"siiss?"),
 	BUILDIN_DEF(waitingroom2bg_single,"isiis"),
@@ -16923,6 +17050,6 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(cartreset,""),
 
 	// Guildwar Observe by Mr.Postman
-	BUILDIN_DEF(setaudience, "i"),
+	BUILDIN_DEF(setaudience, "i?"),
 	{NULL,NULL,NULL},
 };

@@ -283,8 +283,9 @@ unsigned int get_percentage(const unsigned int A, const unsigned int B)
 	return (unsigned int)floor(result);
 }
 
-/// get a random value between [min, max]
-int32 get_randomval(int32 min, int32 max)
+/// Generates a random number in the interval [min, max]
+/// Returns min if range is invalid.
+int32 rnd_value(int32 min, int32 max)
 {
 	if( min >= max )
 		return min;
