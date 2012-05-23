@@ -594,9 +594,10 @@ int guild_invite(struct map_session_data *sd,struct map_session_data *tsd)
 		return 0;
 	}
 
+	//Mod Guildwar by Beer
 	if(tsd->status.guild_id>0 ||
 		tsd->guild_invite>0 ||
-		((agit_flag || agit2_flag) && map[tsd->bl.m].flag.gvg_castle))
+		((agit_flag || agit2_flag || agit3_flag || agit4_flag) && map[tsd->bl.m].flag.gvg_castle))
 	{	//Can't invite people inside castles. [Skotlex]
 		clif_guild_inviteack(sd,0);
 		return 0;
@@ -759,7 +760,7 @@ int guild_leave(struct map_session_data* sd, int guild_id, int account_id, int c
 
 	if(sd->status.account_id!=account_id ||
 		sd->status.char_id!=char_id || sd->status.guild_id!=guild_id ||
-		((agit_flag || agit2_flag) && map[sd->bl.m].flag.gvg_castle))
+		((agit_flag || agit2_flag || agit3_flag || agit4_flag) && map[sd->bl.m].flag.gvg_castle))
 		return 0;
 
 	intif_guild_leave(sd->status.guild_id, sd->status.account_id, sd->status.char_id,0,mes);
@@ -786,10 +787,10 @@ int guild_expulsion(struct map_session_data* sd, int guild_id, int account_id, i
 	if( (ps=guild_getposition(g,sd))<0 || !(g->position[ps].mode&0x0010) )
 		return 0;	//Expulsion permission
 
-  	//Can't leave inside guild castles.
+  	//Can't leave inside guild castles. + Mod Guildwar by Beer
 	if ((tsd = map_id2sd(account_id)) &&
 		tsd->status.char_id == char_id &&
-		((agit_flag || agit2_flag) && map[tsd->bl.m].flag.gvg_castle))
+		((agit_flag || agit2_flag || agit3_flag || agit4_flag) && map[tsd->bl.m].flag.gvg_castle))
 		return 0;
 
 	// find the member and perform expulsion
@@ -1832,6 +1833,8 @@ int guild_castlealldataload(int len,struct guild_castle *gc)
 	if( ev < 0 ) { //No castles owned, invoke OnAgitInit as it is.
 		npc_event_doall("OnAgitInit");
 		npc_event_doall("OnAgitInit2");
+		npc_event_doall("OnAgitInit3");
+		npc_event_doall("OnAgitInit4");
 	}
 	else // load received castles into memory, one by one
 	for( i = 0; i < n; i++, gc++ )
@@ -1852,6 +1855,8 @@ int guild_castlealldataload(int len,struct guild_castle *gc)
 			else { // last owned one
 				guild_npc_request_info(c->guild_id, "::OnAgitInit");
 				guild_npc_request_info(c->guild_id, "::OnAgitInit2");
+				guild_npc_request_info(c->guild_id, "::OnAgitInit3");
+				guild_npc_request_info(c->guild_id, "::OnAgitInit4");
 			}
 		}
 	}
@@ -1884,6 +1889,33 @@ int guild_agit2_end(void)
 {	// Run All NPC_Event[OnAgitEnd2]
 	int c = npc_event_doall("OnAgitEnd2");
 	ShowStatus("NPC_Event:[OnAgitEnd2] Run (%d) Events by @AgitEnd2.\n",c);
+	return 0;
+}
+
+int guild_agit3_start(void)
+{	// Run All NPC_Event[OnAgitStart3]
+	int c = npc_event_doall("OnAgitStart3");
+	ShowStatus("NPC_Event:[OnAgitStart3] Run (%d) Events by @AgitStart3.\n",c);
+	return 0;
+}
+
+int guild_agit3_end(void)
+{	// Run All NPC_Event[OnAgitEnd3]
+	int c = npc_event_doall("OnAgitEnd3");
+	ShowStatus("NPC_Event:[OnAgitEnd3] Run (%d) Events by @AgitEnd3.\n",c);
+	return 0;
+}
+int guild_agit4_start(void)
+{	// Run All NPC_Event[OnAgitStart4]
+	int c = npc_event_doall("OnAgitStart4");
+	ShowStatus("NPC_Event:[OnAgitStart4] Run (%d) Events by @AgitStart4.\n",c);
+	return 0;
+}
+
+int guild_agit4_end(void)
+{	// Run All NPC_Event[OnAgitEnd4]
+	int c = npc_event_doall("OnAgitEnd4");
+	ShowStatus("NPC_Event:[OnAgitEnd4] Run (%d) Events by @AgitEnd4.\n",c);
 	return 0;
 }
 

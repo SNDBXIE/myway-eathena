@@ -1355,7 +1355,7 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, int 
 		sc_start(bl, SC_CRYSTALIZE, rate, skilllv, skill_get_time2(skillid, skilllv));
 		break;
 	case SO_VARETYR_SPEAR:
-		sc_start(bl, SC_STUN, 5 * skilllv, skilllv, skill_get_time2(skillid, skilllv));
+		sc_start(bl, SC_STUN, 5 + 5 * skilllv, skilllv, skill_get_time2(skillid, skilllv));
 		break;
 	case GN_HELLS_PLANT_ATK:
 		sc_start(bl, SC_STUN, 5 + 5 * skilllv, skilllv, skill_get_time(skillid, skilllv));
@@ -4289,10 +4289,10 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, int 
 
 	case WL_DRAINLIFE:
 		{
-			int heal = skill_attack(skill_get_type(skillid), src, src, bl, skillid, skilllv, tick, flag);
-			int rate = 70 + 4 * skilllv + ( sd ? sd->status.job_level : 50 ) / 5;
+		    int heal = skill_attack(skill_get_type(skillid), src, src, bl, skillid, skilllv, tick, flag);
+		    int rate = 70 + 5 * skilllv;
 
-			heal = (heal * 8 * skilllv) / 100;
+		    heal = heal * (5 + 5 * skilllv) / 100;
 			if( status_get_lv(src) > 100 ) heal = heal * status_get_lv(src) / 100;	// Base level bonus.
 
 			if( bl->type == BL_SKILL )
@@ -4555,8 +4555,10 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, int 
 		break;
 
 	case LG_SHIELDSPELL:
-		// flag&1: Phisycal Attack, flag&2: Magic Attack.
-		skill_attack((flag&1)?BF_WEAPON:BF_MAGIC,src,src,bl,skillid,skilllv,tick,flag);
+		if ( skilllv == 1 )
+			skill_attack(BF_WEAPON,src,src,bl,skillid,skilllv,tick,flag);
+		else if ( skilllv == 2 )
+			skill_attack(BF_MAGIC,src,src,bl,skillid,skilllv,tick,flag);
 		break;
 
 	case LG_OVERBRAND:
@@ -5475,15 +5477,15 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, in
 		break;
 	case SO_STRIKING:
 		{
-			int bonus;
-			bonus = ((skilllv * 2)+8)*(sd? sd->status.inventory[sd->equip_index[EQI_HAND_R]].refine : 1);
-			if (sd)
-			bonus += (pc_checkskill(sd, SA_FLAMELAUNCHER)+pc_checkskill(sd, SA_FROSTWEAPON)+pc_checkskill(sd, SA_LIGHTNINGLOADER)+pc_checkskill(sd, SA_SEISMICWEAPON))*5;
-			clif_skill_nodamage( src, bl, skillid, skilllv,
-								battle_check_target(src,bl,BCT_PARTY) ?
-								sc_start2(bl, type, 100, skilllv, bonus, skill_get_time(skillid,skilllv)) :
-								0
-				);
+			int bonus = 0;
+			if( sd )
+			{
+				short index = dstsd->equip_index[EQI_HAND_R];
+				if( index >= 0 && dstsd->inventory_data[index] && dstsd->inventory_data[index]->type == IT_WEAPON )
+				bonus = (8 + 2 * skilllv) * dstsd->inventory_data[index]->wlv;
+			}
+			bonus += 5 * (sd ? (pc_checkskill(sd, SA_FLAMELAUNCHER) + pc_checkskill(sd, SA_FROSTWEAPON) + pc_checkskill(sd, SA_LIGHTNINGLOADER) + pc_checkskill(sd, SA_SEISMICWEAPON)) : 20);
+			clif_skill_nodamage( src, bl, skillid, skilllv, sc_start2(bl, type, 100, skilllv, bonus, skill_get_time(skillid,skilllv)) );
 		}
 		break;
 	case NPC_STOP:
@@ -8081,16 +8083,11 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, in
 		}
 		break;
 
-	case WL_WHITEIMPRISON: // FIXME : On Monsters, 15 second - {[Monster’s VIT + LUK] / 20} = duration
-		if( !(tsc && tsc->data[type]) && (src == bl || battle_check_target(src, bl, BCT_ENEMY)) )
+	case WL_WHITEIMPRISON:
+		if( !(tsc && tsc->data[type]) && (src == bl || battle_check_target(src, bl, BCT_ENEMY)) && !is_boss(bl) )// Should not work with bosses.
 		{
-			if (bl->type == BL_PC) {
-			int rate = 20 + 10 * skilllv;
-			i = sc_start2(bl,type,(src == bl)?100:rate,skilllv,src->id,(src == bl)?skill_get_time2(skillid,skilllv):skill_get_time(skillid, skilllv));
-			} else {
-			int rate = 40 + 10 * skilllv;
-			i = sc_start2(bl,type,rate,skilllv,src->id,15000);
-			}
+			int rate = 50 + 3 * skilllv + ( sd? sd->status.job_level : 50 ) / 4;
+			i = sc_start2(bl,type,rate,skilllv,src->id,(src == bl)?skill_get_time2(skillid,skilllv):skill_get_time(skillid, skilllv));
 			clif_skill_nodamage(src,bl,skillid,skilllv,i);
 			if( sd && i )
 				skill_blockpc_start(sd,skillid,4000); // Reuse Delay only activated on success
@@ -8314,22 +8311,15 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, in
 	case NC_REPAIR:
 		if( sd )
 		{
-			int heal,value;
-			switch(skilllv){
-				case 1: value = 4;
-				case 2: value = 7;
-				case 3: value = 13;
-				case 4: value = 17;
-				case 5: value = 23;
-			}
+			int heal;
 			if( dstsd && pc_isriding(dstsd,OPTION_MADO) )
 			{
-				heal = dstsd->status.max_hp * value / 100;
+				heal = dstsd->status.max_hp * (3+3*skilllv) / 100;
 				status_heal(bl,heal,0,2);
 			}
 			else
 			{
-				heal = sd->status.max_hp * value / 100;
+				heal = sd->status.max_hp * (3+3*skilllv) / 100;
 				status_heal(src,heal,0,2);
 			}
 
@@ -8402,8 +8392,8 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, in
 	case SC_WEAKNESS:
 		if( !(tsc && tsc->data[type]) )
 		{ //((rand(myDEX / 12, myDEX / 4) + myJobLevel + 10 * skLevel) + myLevel / 10) - (targetLevel / 10 + targetLUK / 10 + (targetMaxWeight - targetWeight) / 1000 + rand(targetAGI / 6, targetAGI / 3))
-			int rate = get_randomval(sstatus->dex/12,sstatus->dex/4) + 10*skilllv + (sd?sd->status.job_level:0) + status_get_lv(src)/10
-				- status_get_lv(bl)/10 - tstatus->luk/10 - (dstsd?(dstsd->max_weight-dstsd->weight)/10000:0) - get_randomval(tstatus->agi/6,tstatus->agi/3);
+			int rate = rnd_value(sstatus->dex/12,sstatus->dex/4) + 10*skilllv + (sd?sd->status.job_level:0) + status_get_lv(src)/10
+				- status_get_lv(bl)/10 - tstatus->luk/10 - (dstsd?(dstsd->max_weight-dstsd->weight)/10000:0) - rnd_value(tstatus->agi/6,tstatus->agi/3);
 			rate = cap_value(rate, skilllv+sstatus->dex/20, 100);
 			clif_skill_nodamage(src,bl,skillid,0,sc_start(bl,type,rate,skilllv,skill_get_time(skillid,skilllv)));
 		}
@@ -8414,8 +8404,8 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, in
 	case SC_IGNORANCE:
 		if( !(tsc && tsc->data[type]) )
 		{
-			int rate = get_randomval(sstatus->dex/12,sstatus->dex/4) + 10*skilllv + (sd?sd->status.job_level:0) + status_get_lv(src)/10
-				- status_get_lv(bl)/10 - tstatus->luk/10 - (dstsd?(dstsd->max_weight-dstsd->weight)/10000:0) - get_randomval(tstatus->agi/6,tstatus->agi/3);
+			int rate = rnd_value(sstatus->dex/12,sstatus->dex/4) + 10*skilllv + (sd?sd->status.job_level:0) + status_get_lv(src)/10
+				- status_get_lv(bl)/10 - tstatus->luk/10 - (dstsd?(dstsd->max_weight-dstsd->weight)/10000:0) - rnd_value(tstatus->agi/6,tstatus->agi/3);
 			rate = cap_value(rate, skilllv+sstatus->dex/20, 100);
 			if (clif_skill_nodamage(src,bl,skillid,0,sc_start(bl,type,rate,skilllv,skill_get_time(skillid,skilllv))))
 			{
@@ -8446,29 +8436,32 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, in
 
 	case LG_SHIELDSPELL:
 		if( flag&1 )
-		{
-			int duration = (sd) ? sd->shieldmdef * 2000 : 10000;
-			sc_start(bl,SC_SILENCE,100,skilllv,duration);
-		}
+			//iRO Document says duration is shield MDEF * 30 seconds. Doesent sound right. Must confirm first. [Rytech]
+			sc_start(bl,SC_SILENCE,100,skilllv,sd->shieldmdef * 5000);
 		else if( sd )
 		{
 			int opt = skilllv;
-			int rate = rand()%100;
-			int val, brate;
+			int val;
 			switch( skilllv )
 			{
 				case 1:
 					{
+						int splashrange = 0;
 						struct item_data *shield_data = sd->inventory_data[sd->equip_index[EQI_HAND_L]];
 						if( !shield_data || shield_data->type != IT_ARMOR )
 						{	// No shield?
 							clif_skill_fail(sd, skillid, 0, 0, 0);
 							break;
 						}
-						brate = shield_data->def * 10;
-						if( rate < 50 )
+						if ( shield_data->def >= 0 && shield_data->def <= 4 )
+							splashrange = 1;
+						else if ( shield_data->def >= 5 && shield_data->def <= 9 )
+							splashrange = 2;
+						else
+							splashrange = 3;
+						if( rand()%100 <= 33 )
 							opt = 1;
-						else if( rate < 75 )
+						else if( rand()%100 <= 33 )
 							opt = 2;
 						else
 							opt = 3;
@@ -8476,93 +8469,101 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, in
 						switch( opt )
 						{
 							case 1:
-								sc_start(bl,SC_SHIELDSPELL_DEF,100,opt,-1);
+								sc_start(bl,SC_SHIELDSPELL_DEF,100,opt,-1);//Splash AoE ATK
 								clif_skill_damage(src,bl,tick, status_get_amotion(src), 0, -30000, 1, skillid, skilllv, 6);
-								if( rate < brate )
-									map_foreachinrange(skill_area_sub,src,skill_get_splash(skillid,skilllv),BL_CHAR,src,skillid,skilllv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
+									map_foreachinrange(skill_area_sub,src,splashrange,BL_CHAR,src,skillid,skilllv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
 								status_change_end(bl,SC_SHIELDSPELL_DEF,-1);
 								break;
 							case 2:
-								val = shield_data->def / 2; // % Reflected damage.
-								sc_start2(bl,SC_SHIELDSPELL_DEF,brate,opt,val,shield_data->def * 2000);
+								val = shield_data->def; //Damage Reflecting Increase.
+								sc_start2(bl,SC_SHIELDSPELL_DEF,100,opt,val,shield_data->def * 10 * 1000);
 								break;
 							case 3:
-								val = shield_data->def; //Attack increase
-								sc_start2(bl,SC_SHIELDSPELL_DEF,brate,opt,val,shield_data->def * 3000);
+								val = 10 * shield_data->def; //Weapon Attack Increase.
+								sc_start2(bl,SC_SHIELDSPELL_DEF,100,opt,val,shield_data->def * 10 * 3000);
 								break;
 						}
 					}
 					break;
 
 				case 2:
-					brate = sd->shieldmdef * 20;
-					if( rate < 30 )
-						opt = 1;
-					else if( rate < 60 )
-						opt = 2;
-					else
-						opt = 3;
-					switch( opt )
 					{
-						case 1:
-							sc_start(bl,SC_SHIELDSPELL_MDEF,100,opt,-1);
-							clif_skill_damage(src,bl,tick, status_get_amotion(src), 0, -30000, 1, skillid, skilllv, 6);
-							if( rate < brate )
-								map_foreachinrange(skill_area_sub,src,skill_get_splash(skillid,skilllv),BL_CHAR,src,skillid,skilllv,tick,flag|BCT_ENEMY|2,skill_castend_damage_id);
-							status_change_end(bl,SC_SHIELDSPELL_MDEF,-1);
-							break;
-						case 2:
-							sc_start(bl,SC_SHIELDSPELL_MDEF,100,opt,-1);
-							clif_skill_damage(src,bl,tick, status_get_amotion(src), 0, -30000, 1, skillid, skilllv, 6);
-							if( rate < brate )
-								map_foreachinrange(skill_area_sub,src,skill_get_splash(skillid,skilllv),BL_CHAR,src,skillid,skilllv,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
-							break;
-						case 3:
-							if( sc_start(bl,SC_SHIELDSPELL_MDEF,brate,opt,sd->shieldmdef * 30000) )
-								clif_skill_nodamage(src,bl,PR_MAGNIFICAT,skilllv,
-								sc_start(bl,SC_MAGNIFICAT,100,1,sd->shieldmdef * 30000));
-							break;
+						int splashrange = 0;
+						if ( sd->shieldmdef >= 0 && sd->shieldmdef <= 3 )//Info says between 1 - 3, but ill make it go as low as 0 for now. [Rytech]
+							splashrange = 1;
+						else if ( sd->shieldmdef >= 4 && sd->shieldmdef <= 5 )
+							splashrange = 2;
+						else
+							splashrange = 3;
+						if( rand()%100 <= 33 )
+							opt = 1;
+						else if( rand()%100 <= 33 )
+							opt = 2;
+						else
+							opt = 3;
+						switch( opt )
+						{
+							case 1:
+								sc_start(bl,SC_SHIELDSPELL_MDEF,100,opt,-1);//Splash AoE MATK
+								clif_skill_damage(src,bl,tick, status_get_amotion(src), 0, -30000, 1, skillid, skilllv, 6);
+									map_foreachinrange(skill_area_sub,src,splashrange,BL_CHAR,src,skillid,skilllv,tick,flag|BCT_ENEMY|2,skill_castend_damage_id);
+								status_change_end(bl,SC_SHIELDSPELL_MDEF,-1);
+								break;
+							case 2:
+								sc_start(bl,SC_SHIELDSPELL_MDEF,100,opt,sd->shieldmdef * 2000);//Splash AoE Lex Divina
+								clif_skill_damage(src,bl,tick, status_get_amotion(src), 0, -30000, 1, skillid, skilllv, 6);
+									map_foreachinrange(skill_area_sub,src,splashrange,BL_CHAR,src,skillid,skilllv,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
+								break;
+							case 3://Magnificat
+								if( sc_start(bl,SC_SHIELDSPELL_MDEF,100,opt,sd->shieldmdef * 30000) )//Got this duration formula from Frost. Need to confirm still. [Rytech]
+									clif_skill_nodamage(src,bl,PR_MAGNIFICAT,skilllv,
+									sc_start(bl,SC_MAGNIFICAT,100,1,sd->shieldmdef * 30000));
+								break;
+						}
 					}
 					break;
 
 				case 3:
-				{
-					struct item *it = &sd->status.inventory[sd->equip_index[EQI_HAND_L]];
-					if( !it )
-					{	// No shield?
-						clif_skill_fail(sd,skillid,0,0,0);
-						break;
-					}
-					brate = it->refine * 5;
-					if( rate < 25 )
-						opt = 1;
-					else if( rate < 50 )
-						opt = 2;
-					else
-						opt = 3;
-					switch( opt )
 					{
-						case 1:
-							val = 105 * it->refine / 10;
-							sc_start2(bl,SC_SHIELDSPELL_REF,brate,opt,val,skill_get_time(skillid,skilllv));
+						struct item *it = &sd->status.inventory[sd->equip_index[EQI_HAND_L]];
+						if( !it )
+						{	// No shield?
+							clif_skill_fail(sd,skillid,0,0,0);
 							break;
-						case 2: case 3:
-							if( rate < brate )
-							{
-								val = sstatus->max_hp * (11 + it->refine) / 100;
+						}
+						if( rand()%100 <= 33 )
+							opt = 1;
+						else if( rand()%100 <= 33 )
+							opt = 2;
+						else
+							opt = 3;
+						switch( opt )
+						{
+							case 1:
+								sc_start(bl,SC_SHIELDSPELL_REF,100,opt,-1);
+								//Status Resistance Increase Needs To Be Coded Here.
+								status_change_end(bl,SC_SHIELDSPELL_REF,-1);
+								break;
+							case 2:
+								val = it->refine;//DEF Increase / Using Converted DEF Increase Formula Here.
+								sc_start2(bl,SC_SHIELDSPELL_REF,100,opt,val,it->refine * 20000);
+								break;
+							case 3:
+								sc_start(bl,SC_SHIELDSPELL_REF,100,opt,-1);//HP Recovery
+								if( battle_config.renewal_baselvl_skill_effect == 1 && status_get_lv(src) >= 100 )
+									val = sstatus->max_hp * (status_get_lv(src) / 10 + it->refine) / 100;
+								else
+									val = sstatus->max_hp * (15 + it->refine) / 100;
 								status_heal(bl, val, 0, 3);
-							}
+								status_change_end(bl,SC_SHIELDSPELL_REF,-1);
 							break;
-						/*case 3:
-							// Full protection. I need confirm what effect should be here. Moved to case 2 to until we got it.
-							break;*/
+						}
 					}
+					break;
 				}
-				break;
+				clif_skill_nodamage(src,bl,skillid,skilllv,1);
 			}
-			clif_skill_nodamage(src,bl,skillid,skilllv,1);
-		}
-		break;
+			break;
 
 	case LG_PIETY:
 		if( flag&1 )
@@ -11931,13 +11932,15 @@ int skill_unit_onplace_timer (struct skill_unit *src, struct block_list *bl, uns
 		case UNT_WARMER:
 			if( bl->type == BL_PC && !battle_check_undead(tstatus->race, tstatus->def_ele) && tstatus->race != RC_DEMON )
 			{
-				int hp = status_get_max_hp(bl) * sg->skill_lv / 100;
+				int hp = 0;
 				if( ssc && ssc->data[SC_HEATER_OPTION] )
-					hp = status_get_max_hp(bl) * sg->skill_lv * 3;
+					hp = tstatus->max_hp * 3 * sg->skill_lv / 100;
+				else
+					hp = tstatus->max_hp * sg->skill_lv / 100;
 				status_heal(bl, hp, 0, 0);
 				if( tstatus->hp != tstatus->max_hp )
 					clif_skill_nodamage(&src->bl, bl, AL_HEAL, hp, 0);
-					sc_start(bl, type, 100, sg->skill_lv, sg->interval + 100);
+					sc_start(bl, SC_WARMER, 100, sg->skill_lv, skill_get_time2(sg->skill_id,sg->skill_lv));
 			}
 			break;
 
@@ -13057,13 +13060,13 @@ int skill_check_condition_castbegin(struct map_session_data* sd, short skill, sh
 			return 0;
 		}
 		break;
-	case RETURN_TO_ELDICASTES:
-		if( pc_isriding(sd,OPTION_MADO) )
-		{ //Cannot be used if Mado is equipped.
-			clif_skill_fail(sd,skill,0,0,0);
-			return 0;
-		}
-		break;
+	//case RETURN_TO_ELDICASTES://Mado's prevent use of Merchant and Smith skills, but never herd anything about other skills. [Rytech]
+	//	if( pc_isriding(sd,OPTION_MADO) )
+	//	{ //Cannot be used if Mado is equipped.
+	//		clif_skill_fail(sd,skill,0,0,0);
+	//		return 0;
+	//	}
+	//	break;
 	}
 
 	switch(require.state) {

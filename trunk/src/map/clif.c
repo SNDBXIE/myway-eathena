@@ -9151,6 +9151,11 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 	status_change_end(&sd->bl, SC_FORTUNE, INVALID_TIMER);
 	status_change_end(&sd->bl, SC_SERVICE4U, INVALID_TIMER);
 
+	if( pc_readreg(sd, add_str("@audience_map")) == sd->mapindex ) {
+		sc_start( &sd->bl, SC_AUDIENCE, 100, 0, 0 );
+		pc_setreg(sd, add_str("@audience_map"), -1);
+	}
+
 	// info about nearby objects
 	// must use foreachinarea (CIRCULAR_AREA interferes with foreachinrange)
 	map_foreachinarea(clif_getareachar, sd->bl.m, sd->bl.x-AREA_SIZE, sd->bl.y-AREA_SIZE, sd->bl.x+AREA_SIZE, sd->bl.y+AREA_SIZE, BL_ALL, sd);

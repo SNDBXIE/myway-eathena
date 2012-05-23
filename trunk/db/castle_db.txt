@@ -44,3 +44,8 @@
 31,arug_cas03,Horn,Agit_Ar03,1			// kRO : Horn
 32,arug_cas04,Gefn,Agit_Ar04,1			// kRO : Gefn
 33,arug_cas05,Bandis,Agit_Ar05,1			// kRO : Bandis
+
+//34,aldeg_cas04,Wuerzburg TE,Agit#aldeg_cas04,1			// kRO : Byirtsburi
+//35,gefg_cas01,Repherion TE,Agit#gefg_cas01,1			// kRO : Reprion
+//36,payg_cas02,Scarlet Palace TE,Agit#payg_cas02,1		// kRO : Tiantan
+//37,gefg_cas01,Repherion TE,Agit#gefg_cas01,1			// kRO : Reprion

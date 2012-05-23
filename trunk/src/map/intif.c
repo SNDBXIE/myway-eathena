@@ -2161,7 +2161,7 @@ int intif_parse(int fd)
 // Elemental System
 	case 0x387c:	intif_parse_elemental_received(fd); break;
 	case 0x387d:	intif_parse_elemental_deleted(fd); break;
-	case 0x387e:	intif_parse_elemental_saved(fd);
+	case 0x387e:	intif_parse_elemental_saved(fd); break;
 
 	case 0x3880:	intif_parse_CreatePet(fd); break;
 	case 0x3881:	intif_parse_RecvPetData(fd); break;
