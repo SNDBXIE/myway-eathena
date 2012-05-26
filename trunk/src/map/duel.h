@@ -11,6 +11,8 @@ struct duel {
 };
 
 #define MAX_DUEL 1024
+//PK Mode by Mr.Postman
+#define MAIN_DUEL_ROOM 1	
 extern struct duel duel_list[MAX_DUEL];
 extern int duel_count;
 

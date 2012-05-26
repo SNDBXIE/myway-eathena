@@ -2819,6 +2819,13 @@ ACMD_FUNC(refine)
 		clif_displaymessage(fd, atcmd_output);
 		sprintf(atcmd_output, "%d: Mid Headgear", EQP_HEAD_MID);
 		clif_displaymessage(fd, atcmd_output);
+		// Costumes Support [xRaisen]
+		sprintf(atcmd_output, "%d: Costume Top Headgear", EQP_COSTUME_HEAD_TOP); 
+		clif_displaymessage(fd, atcmd_output);
+		sprintf(atcmd_output, "%d: Costume Mid Headgear", EQP_COSTUME_HEAD_MID); 
+		clif_displaymessage(fd, atcmd_output);
+		sprintf(atcmd_output, "%d: Costume Low Headgear", EQP_COSTUME_HEAD_LOW); 
+		clif_displaymessage(fd, atcmd_output);
 		return -1;
 	}
 
@@ -2833,6 +2840,11 @@ ACMD_FUNC(refine)
 		if(j == EQI_HEAD_MID && sd->equip_index[EQI_HEAD_LOW] == i)
 			continue;
 		if(j == EQI_HEAD_TOP && (sd->equip_index[EQI_HEAD_MID] == i || sd->equip_index[EQI_HEAD_LOW] == i))
+			continue;
+		// Costumes Support [xRaisen]
+		if(j == EQI_COSTUME_MID && sd->equip_index[EQI_COSTUME_LOW] == i)
+			continue;
+		if(j == EQI_COSTUME_TOP && (sd->equip_index[EQI_COSTUME_MID] == i || sd->equip_index[EQI_COSTUME_LOW] == i)) 
 			continue;
 
 		if(position && !(sd->status.inventory[i].equip & position))
@@ -8942,6 +8954,19 @@ ACMD_FUNC(itemlist)
 				strcat(equipstr, "lower/mid head, ");
 			if( (it->equip & EQP_HELM) == EQP_HELM )
 				strcat(equipstr, "lower/mid/top head, ");
+			// Costumes Support [xRaisen]
+			if( (it->equip & EQP_HELM) == EQI_COSTUME_LOW )
+				strcat(equipstr, "costume lower head, ");
+			if( (it->equip & EQP_HELM) == EQI_COSTUME_TOP ) 
+				strcat(equipstr, "costume top head, ");
+			if( (it->equip & EQP_HELM) == (EQI_COSTUME_LOW|EQI_COSTUME_TOP) ) 
+				strcat(equipstr, "costume lower/top head, ");
+			if( (it->equip & EQP_HELM) == EQI_COSTUME_MID )
+				strcat(equipstr, "costume mid head, ");
+			if( (it->equip & EQP_HELM) == (EQI_COSTUME_LOW|EQI_COSTUME_MID) )
+				strcat(equipstr, "costume lower/mid head, ");
+			if( (it->equip & EQP_HELM) ==(EQI_COSTUME_LOW|EQI_COSTUME_MID|EQP_HEAD_TOP) )
+				strcat(equipstr, "costume lower/mid/top head, ");
 			// remove final ', '
 			equipstr[strlen(equipstr) - 2] = '\0';
 			StringBuf_AppendStr(&buf, equipstr);

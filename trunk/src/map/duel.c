@@ -14,7 +14,7 @@
 #include <time.h>
 
 struct duel duel_list[MAX_DUEL];
-int duel_count = 0;
+int duel_count = 1;
 
 /*==========================================
  * Duel organizing functions [LuzZza]

@@ -906,7 +906,10 @@ bool pc_isequipped(struct map_session_data *sd, int nameid)
 		if( i == EQI_HAND_R && sd->equip_index[EQI_HAND_L] == index ) continue;
 		if( i == EQI_HEAD_MID && sd->equip_index[EQI_HEAD_LOW] == index ) continue;
 		if( i == EQI_HEAD_TOP && (sd->equip_index[EQI_HEAD_MID] == index || sd->equip_index[EQI_HEAD_LOW] == index) ) continue;
-	
+		// Costumes Support [xRaisen]
+		if(	i == EQI_COSTUME_MID && sd->equip_index[EQI_COSTUME_LOW] == index) continue; 
+		if(	i == EQI_COSTUME_TOP && (sd->equip_index[EQI_COSTUME_MID] == index || sd->equip_index[EQI_COSTUME_LOW] == index)) continue;	
+		
 		if( !sd->inventory_data[index] ) continue;
 
 		if( sd->inventory_data[index]->nameid == nameid )

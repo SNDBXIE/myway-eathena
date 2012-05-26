@@ -4060,6 +4060,8 @@ void clif_getareachar_unit(struct map_session_data* sd,struct block_list *bl)
 				clif_specialeffect_single(bl,421,sd->fd);
 			if( tsd->bg_id && map[tsd->bl.m].flag.battleground )
 				clif_sendbgemblem_single(sd->fd,tsd);
+			if( tsd->sc.data[SC_CAMOUFLAGE] )
+				clif_status_load(bl,SI_CAMOUFLAGE,1);
 			if( tsd->sc.count && tsd->sc.data[SC_BANDING] )
 				clif_statuschange_single(&sd->bl,&tsd->bl,SI_BANDING,1,9999,tsd->sc.data[SC_BANDING]->val1,0,0);
 			if( tsd->sc.count && tsd->sc.data[SC_ALL_RIDING] )
