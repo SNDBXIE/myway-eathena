@@ -838,7 +838,6 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,struct Damag
 		
 		if( (sce = sc->data[SC__DEADLYINFECT]) && damage > 0 && flag&BF_WEAPON && rand()%100 < 30 + 10 * sce->val1 )
 			status_change_spread(bl, src); // Deadly infect attacked side
-	}
 
 	//Epoque's Expansion Pack
 	if (ssd)
@@ -1543,7 +1542,7 @@ static struct Damage battle_renewal_calc_weapon_attack(struct block_list *src,st
 	//Initial flag
 	flag.rh = 1;
 	flag.weapon = 1;
-	flag.infdef =(tstatus->mode&MD_PLANT) ? 1 : 0;
+	flag.infdef=(tstatus->mode&MD_PLANT&&skill_num!=RA_CLUSTERBOMB?1:0);
 	if( !flag.infdef && (target->type == BL_SKILL && ((TBL_SKILL*)target)->group->unit_id == UNT_REVERBERATION) )
 		flag.infdef = 1; // Reberberation takes 1 damage
 
@@ -3069,6 +3068,9 @@ static struct Damage battle_renewal_calc_weapon_attack(struct block_list *src,st
 				case SR_GATEOFHELL:
 					ATK_ADD (sstatus->max_hp - sstatus->hp);//Will have to add the consumed SP part to the formula in the future. [Rytech]
 					break;
+
+			}
+			switch (skill_num) {
 				case KN_BRANDISHSPEAR:
 				case LK_SPIRALPIERCE:
 				case CR_SHIELDBOOMERANG:

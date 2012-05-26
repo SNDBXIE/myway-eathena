@@ -7561,3 +7561,6 @@ messages into their chat window.
 The official scripts seem to use the 'downrefitem' command as a function  
 instead: 'downrefitem(<number>)' but it returns nothing on the stack. This is  
 since jAthena, so probably nobody knows for sure why is it so. 
+
+*pkmode <type>;
+type = [ 1 = เซตสถนะ, 0 = ยกเลิกสถานะ ]

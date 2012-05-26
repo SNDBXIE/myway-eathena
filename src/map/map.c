@@ -3985,6 +3985,9 @@ int do_init(int argc, char *argv[])
 	if (battle_config.pk_mode)
 		ShowNotice("Server is running on '"CL_WHITE"PK Mode"CL_RESET"'.\n");
 
+	//PK Mode by Mr.Postman
+	duel_list[MAIN_DUEL_ROOM].max_players_limit = MAX_DUEL; // มากสุด 1024 คน
+
 	ShowStatus("Server is '"CL_GREEN"ready"CL_RESET"' and listening on port '"CL_WHITE"%d"CL_RESET"'.\n\n", map_port);
 	
 	if( runflag != CORE_ST_STOP )

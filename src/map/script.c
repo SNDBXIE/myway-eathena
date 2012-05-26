@@ -47,6 +47,7 @@
 #include "mail.h"
 #include "script.h"
 #include "quest.h"
+#include "duel.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -6746,9 +6747,9 @@ BUILDIN_FUNC(strnpcinfo)
 }
 
 
-// aegis->athena slot position conversion table
-static unsigned int equip[] = {EQP_HEAD_TOP,EQP_ARMOR,EQP_HAND_L,EQP_HAND_R,EQP_GARMENT,EQP_SHOES,EQP_ACC_L,EQP_ACC_R,EQP_HEAD_MID,EQP_HEAD_LOW};
-
+// aegis->athena slot position conversion table + Costumes Support [xRaisen]
+static unsigned int equip[] = {EQP_HEAD_TOP,EQP_ARMOR,EQP_HAND_L,EQP_HAND_R,EQP_GARMENT,EQP_SHOES,EQP_ACC_L,EQP_ACC_R,EQP_HEAD_MID,EQP_HEAD_LOW,EQP_COSTUME_HEAD_TOP,EQP_COSTUME_HEAD_MID,EQP_COSTUME_HEAD_LOW};
+ 
 /*==========================================
  * GetEquipID(Pos);     Pos: 1-10
  *------------------------------------------*/
@@ -12606,7 +12607,10 @@ BUILDIN_FUNC(isequippedcnt)
 			if(j == EQI_HAND_R && sd->equip_index[EQI_HAND_L] == index) continue;
 			if(j == EQI_HEAD_MID && sd->equip_index[EQI_HEAD_LOW] == index) continue;
 			if(j == EQI_HEAD_TOP && (sd->equip_index[EQI_HEAD_MID] == index || sd->equip_index[EQI_HEAD_LOW] == index)) continue;
-			
+			// Costumes Support [xRaisen]
+			if(j == EQI_COSTUME_MID && sd->equip_index[EQI_COSTUME_LOW] == index) continue; 
+			if(j == EQI_COSTUME_TOP && (sd->equip_index[EQI_COSTUME_MID] == index || sd->equip_index[EQI_COSTUME_LOW] == index)) continue;
+ 			
 			if(!sd->inventory_data[index])
 				continue;
 
@@ -12665,7 +12669,10 @@ BUILDIN_FUNC(isequipped)
 			if(j == EQI_HAND_R && sd->equip_index[EQI_HAND_L] == index) continue;
 			if(j == EQI_HEAD_MID && sd->equip_index[EQI_HEAD_LOW] == index) continue;
 			if(j == EQI_HEAD_TOP && (sd->equip_index[EQI_HEAD_MID] == index || sd->equip_index[EQI_HEAD_LOW] == index)) continue;
-	
+			// Costumes Support [xRaisen]
+			if(j == EQI_COSTUME_MID && sd->equip_index[EQI_COSTUME_LOW] == index) continue;  
+			if(j == EQI_COSTUME_TOP && (sd->equip_index[EQI_COSTUME_MID] == index || sd->equip_index[EQI_COSTUME_LOW] == index)) continue;
+ 	
 			if(!sd->inventory_data[index])
 				continue;
 			
@@ -16593,6 +16600,29 @@ BUILDIN_FUNC(petremove)
 	return 0;
 }
 
+// pkmode <type>; PK Mode BY Mr.postman
+BUILDIN_FUNC(pkmode)
+{
+      TBL_PC *sd = script_rid2sd(st);
+       char output[256];
+       uint8 type = script_getnum(st, 2);
+       
+       if(!sd) return 0;
+
+       if( type == 1 ) {
+			sd->duel_group = MAIN_DUEL_ROOM;
+			duel_list[MAIN_DUEL_ROOM].members_count++;
+			clif_map_property(sd, MAPPROPERTY_FREEPVPZONE);
+			strcpy(output, "คุณได้เข้าสู่โหมด PK");
+			clif_disp_onlyself(sd, output, strlen(output));
+       } else {																																				duel_leave(sd->duel_group, sd);
+			strcpy(output, "คุณได้ออกจากโหมด PK");
+			clif_disp_onlyself(sd, output, strlen(output));
+       }
+
+       return 0;
+}
+
 /// script command definitions
 /// for an explanation on args, see add_buildin_func
 struct script_function buildin_func[] = {
@@ -17051,5 +17081,7 @@ struct script_function buildin_func[] = {
 
 	// Guildwar Observe by Mr.Postman
 	BUILDIN_DEF(setaudience, "i?"),
+	//PK item by Mr.Postman
+	BUILDIN_DEF(pkmode, "i"),
 	{NULL,NULL,NULL},
 };
