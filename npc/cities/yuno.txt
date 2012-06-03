@@ -1,11 +1,11 @@
-//===== eAthena Script ======================================= 
+//===== rAthena Script ======================================= 
 //= Juno City
 //===== By: ================================================== 
 //= KitsuneStarwind, kobra_k88, L0ne_W0lf
 //===== Current Version: ===================================== 
 //= 1.4a
 //===== Compatible With: ===================================== 
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: ========================================= 
 //= [Aegis Conversion]
 //= NPCs for the City of Juno
@@ -323,7 +323,7 @@ yuno,334,182,4	script	Juno Soldier#6juno	105,{
 	mes "[Juno Soldier]";
 	mes "Its use is limited to the Sage class, and it increases the chance of inflicting critical attacks. So, for Sages, that dagger can be very useful, as well as make them look stylish in battle.";
 	close;
-}	
+}
 	
 yuno,263,320,4	script	Juno Soldier#7juno	105,{
 	mes "[Juno Soldier]";

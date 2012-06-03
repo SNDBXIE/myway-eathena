@@ -1,4 +1,4 @@
-//===== eAthena Script =======================================
+//===== rAthena Script =======================================
 //= Hugel City
 //===== By: ==================================================
 //= vicious_pucca, Poki#3, erKURITA, Munin, and everybody in the
@@ -6,7 +6,7 @@
 //===== Current Version: =====================================
 //= 1.7
 //===== Compatible With: =====================================
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: =========================================
 //= NPC's for the City of Hugel.
 //===== Additional Comments: =================================
@@ -102,25 +102,6 @@ hugel,169,112,5	script	Old Nikki	892,{
 	close;
 }
 
-hugel,168,183,5	script	Bismarc	118,{
-	mes "[Bismarc]";
-	mes "^808080*Ghyklk*";
-	mes "*Huk Hukk*^000000";
-	mes "When will my";
-	mes "o-order arrive...?";
-	next;
-	mes "[Bismarc]";
-	mes "The poison in";
-	mes "my body... the pain...";
-	mes "excruciating... L-lord...";
-	next;
-	mes "[Bismarc]";
-	mes "When is the";
-	mes "antidote gonna";
-	mes "get here?!";
-	close;
-}
-
 hugel,175,115,5	script	Marius	897,{
 	mes "[Marius]";
 	mes "Yes, I'm an old man, but";
@@ -185,7 +166,7 @@ hu_in01,23,311,4	script	Party Supplies Shop	898,{
 			mes "[Shopkeeper]";
 			mes "Thank you, please come again.";
 			close;
-	}	
+	}
 }
 
 hu_in01,18,94,0	script	A Part-Timer#1	49,{

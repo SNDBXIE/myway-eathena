@@ -1,11 +1,11 @@
-//===== eAthena Script =======================================
+//===== rAthena Script =======================================
 //= Ice Cream Maker
 //===== By: ==================================================
 //= KOOK SWU, Kisuka
 //===== Current Version: =====================================
 //= 1.5
 //===== Compatible With: =====================================
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: =========================================
 //= A man makes you ice-cream
 //===== Additional Comments: =================================
@@ -54,14 +54,14 @@
 			mes "If you eat more than 5 Ice creams,";
 			mes "If you might haveto make a lot of trips";
 			mes "to the bathroom tonight.";
-			next;		
+			next;
 		}
 	}
 	if(Zeny<.@input*100) {
 		mes "[Ice Cream Maker]";
 		mes "Dear customer, your wallet seems to be light.";
 		mes "Price is ^3355FF100 Zeny^000000 per ice cream.";
-		close;	
+		close;
 	}
 	if(checkweight(536,.@input) == 0) {
 		mes "[Ice Cream Maker]";

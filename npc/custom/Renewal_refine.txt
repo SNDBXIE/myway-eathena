@@ -19,15 +19,15 @@
 // +20 Refiners
 //=====================================================================================
 prt_in,90,72,4	script	Bestri#001	826,{
-	callfunc "refinenew","Bestri",0;
+	callfunc "refinenew2","Bestri",0;
 	end;
 }
 payon_in01,18,132,4	script	Bestri#002	826,{
-	callfunc "refinenew","Bestri",0;
+	callfunc "refinenew2","Bestri",0;
 	end;
 }
 morocc_in,64,41,4	script	Bestri#003	826,{
-	callfunc "refinenew","Bestri",0;
+	callfunc "refinenew2","Bestri",0;
 	end;
 }
 
@@ -37,7 +37,7 @@ morocc_in,64,41,4	script	Bestri#003	826,{
 // To allow auto safe refining/multiple refining set the
 // second argument to '1' in the function call.
 //============================================================
-function	script	refinenew	{
+function	script	refinenew2	{
 	set .@features,getarg(1);
 	mes "[" + getarg(0) + "]";
 	mes "I'm Bestri.";

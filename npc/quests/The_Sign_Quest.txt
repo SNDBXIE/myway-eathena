@@ -3,7 +3,7 @@
 //===== By: ================================================== 
 //= SinSloth(Most of the NPCs), MasterOfMuppets(Some of the NPCs + bug fixes) & Kargha(The quiz NPCs)
 //===== Current Version: ===================================== 
-//= 3.4
+//= 3.6
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
@@ -23,12 +23,13 @@
 //= 3.4 Added Renewal Changes. [Kisuka]
 //= 3.4 Updated 'waitingroom' to support required zeny/lvl. [Kisuka]
 //= 3.5 Fixed two bugs. 4230 & 4404 [CalciumKid]
+//= 3.6 Corrected the Level Requirements for 'Standby Room' [tr0n]
 //============================================================ 
 
 //============================================================ 
 // The Sign (Part 1)
 //============================================================ 
-prontera,147,305,0	script	Sign#prontera::TheSign	111,{
+-	script	Sign::TheSign	111,{
 	callfunc "F_UpdateSignVars";
 	cutin "sign_01",4;
 	mes "^3355FFNext^000000";
@@ -60,6 +61,7 @@ OnInit:
 	end;
 }
 
+prontera,147,305,0	duplicate(TheSign)	Sign#prontera	111
 geffen,168,175,0	duplicate(TheSign)	Sign#geffen	111
 morocc,168,265,0	duplicate(TheSign)	Sign#morroc	111
 payon,160,183,0	duplicate(TheSign)	Sign#payon	111
@@ -5225,7 +5227,7 @@ cmd_in01,33,33,1	script	Standby Room#sign	66,{
 	end;
 
 OnInit:
-	waitingroom "DANCE~ DANCE~",20,"Standby Room#sign::OnStartArena",1,0,44,99;
+	waitingroom "DANCE~ DANCE~",20,"Standby Room#sign::OnStartArena",1,0,50;
 	enablewaitingroomevent;
 	end;
 

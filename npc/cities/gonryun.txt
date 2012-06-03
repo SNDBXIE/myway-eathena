@@ -1,11 +1,11 @@
-//===== eAthena Script ======================================= 
+//===== rAthena Script ======================================= 
 //= Kunlun Town
 //===== By: ================================================== 
 //= x[tsk], KarLaeda
 //===== Current Version: ===================================== 
 //= 1.4
 //===== Compatible With: ===================================== 
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: ========================================= 
 //= [Aegis Conversion]
 //= Kunlun Town Script
@@ -16,7 +16,7 @@
 
 // Kunlun Transportation
 //============================================================ 
-alberta,245,69,3	script	Kunlun Envoy#gon	776,{
+alberta,246,62,3	script	Kunlun Envoy#gon	776,{
 	mes "[Wa Bai Hu]";
 	mes "Good day~";
 	mes "Let me invite you all";
@@ -143,7 +143,7 @@ gon_fild01,255,79,7	script	Kunlun Envoy#gon2	776,{
 		mes "back. Now, let me guide you";
 		mes "back to Alberta.";
 		close2;
-		warp "alberta",243,67;
+		warp "alberta",244,60;
 		end;
 	}
 	mes "[Wa Bai Hu]";
@@ -412,7 +412,7 @@ gonryun,169,71,3	script	Guidev#gon	770,{
 // Old changelog
 //============================================================ 
 // May be missing npc's and dialogue.
-//= 1.1 Fixed Typo’s [Nexon]
+//= 1.1 Fixed Typoï¿½s [Nexon]
 //= 1.2 Removed Duplicates [Silent]
 //= 1.3 Max NPC Name is 23 [Toms]
 //= 1.3a Removed temp NPC plugs due Broken Sword quest [Lupus]

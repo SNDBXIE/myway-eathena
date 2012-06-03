@@ -4754,11 +4754,15 @@ struct Damage battle_calc_misc_attack(struct block_list *src,struct block_list *
 		md.damage = md.damage * (20 * ( sd ? pc_checkskill(sd,RA_RESEARCHTRAP) : 10 )) / 50;
 		break;
 	case NC_SELFDESTRUCTION:
-		md.damage = (1 + skill_lv) * (8 + (sd?pc_checkskill(sd,NC_MAINFRAME):10)) * (status_get_sp(src) + sstatus->vit);
-		if ( re_baselv_bonus == 1 && s_level >= 100 )
-			md.damage = md.damage * s_level / 100;// Base level bonus.
-		md.damage = md.damage + sstatus->hp;
-		if (sd) status_set_sp(src, 0, 0);
+		{
+			short totaldef = tstatus->def2 + (short)status_get_def(target);
+			md.damage = ( (sd?pc_checkskill(sd,NC_MAINFRAME):10) + 8 ) * ( skill_lv + 1 ) * ( status_get_sp(src) + sstatus->vit );
+			if ( re_baselv_bonus == 1 && s_level >= 100 )
+				md.damage = md.damage * s_level / 100;// Base level bonus.
+			md.damage += status_get_hp(src) - totaldef;
+			break;
+		}
+
 		break;
 	case GN_THORNS_TRAP:
 		md.damage = 100 + 200 * skill_lv + sstatus->int_;
@@ -6123,7 +6127,7 @@ static const struct _battle_data {
 	{ "equip_natural_break_rate",           &battle_config.equip_natural_break_rate,        0,      0,      INT_MAX,        },
 	{ "equip_self_break_rate",              &battle_config.equip_self_break_rate,           100,    0,      INT_MAX,        },
 	{ "equip_skill_break_rate",             &battle_config.equip_skill_break_rate,          100,    0,      INT_MAX,        },
-	{ "pk_mode",                            &battle_config.pk_mode,                         0,      0,      1,              },
+	{ "pk_mode",                            &battle_config.pk_mode,                         0,      0,      2,              },
 	{ "pk_level_range",                     &battle_config.pk_level_range,                  0,      0,      INT_MAX,        },
 	{ "manner_system",                      &battle_config.manner_system,                   0xFFF,  0,      0xFFF,          },
 	{ "pet_equip_required",                 &battle_config.pet_equip_required,              0,      0,      1,              },
@@ -6268,6 +6272,10 @@ static const struct _battle_data {
 	{ "skillsbonus_maxhp_RK",               &battle_config.skillsbonus_maxhp_RK,             0,     0,      INT_MAX,        },
 	{ "skillsbonus_maxhp_SR",               &battle_config.skillsbonus_maxhp_SR,             0,     0,      INT_MAX,        },
 	{ "metallicsound_spburn_rate",          &battle_config.metallicsound_spburn_rate,        100,   0,      INT_MAX,        },
+	{ "renewal_baselvl_skill_ratio",        &battle_config.renewal_baselvl_skill_ratio,      1,     0,            1,        },
+	{ "renewal_baselvl_skill_effect",       &battle_config.renewal_baselvl_skill_effect,     1,     0,            1,        },
+	{ "mado_skill_limit",                   &battle_config.mado_skill_limit,                 1,     0,            1,        },
+	{ "mado_loss_on_death",                 &battle_config.mado_loss_on_death,               1,     0,            1,        },
 	{ "active_mvp_tombstone",               &battle_config.active_mvp_tombstone,              1,    0,      1,              },
 	{ "atcommand_max_stat_bypass",          &battle_config.atcommand_max_stat_bypass,       0,      0,      100,            },			{ "warg_can_falcon",                    &battle_config.warg_can_falcon,                  0,     0,            1,        }, 
 	{ "skill_amotion_leniency",             &battle_config.skill_amotion_leniency,          90,     0,      100				},
@@ -6278,16 +6286,17 @@ static const struct _battle_data {
 	{ "drop_penalty",						&battle_config.drop_penalty,                       1,   0,      1,              },
 	{ "edp_renewal",						&battle_config.edp_renewal,                        1,	0,		1,				},
 	{ "warg_can_falcon",                    &battle_config.warg_can_falcon,                  0,     0,            1,        },
-    { "party_drop_bonus",                    &battle_config.party_drop_bonus,               0,     0,      INT_MAX,        },
+
+	{ "guardianguild",         				&battle_config.guardianguild,         			 1,     0,      1,              },
+	{ "npc_timeout",           				&battle_config.npc_timeout,         			60,     0,      INT_MAX,              },
+	{ "npc_timeout_interval",           	&battle_config.npc_timeout_interval,        	60,     0,      INT_MAX,              },
+	{ "block_relocation",           		&battle_config.block_relocation,        		 1,     0,      1,              },
 	{ "asura_absorb_cast_cancel",           &battle_config.asura_absorb_cast_cancel,         1,     0,      1,              },
-	{ "guardianguild",           &battle_config.guardianguild,         1,     0,      1,              },
-	{ "npc_timeout",           &battle_config.npc_timeout,         60,     0,      INT_MAX,              },
-	{ "npc_timeout_interval",           &battle_config.npc_timeout_interval,         60,     0,      INT_MAX,              },
-	{ "block_relocation",           &battle_config.block_relocation,         1,     0,      1,              },
-	{ "renewal_baselvl_skill_ratio",        &battle_config.renewal_baselvl_skill_ratio,      1,     0,            1,        },
-	{ "renewal_baselvl_skill_effect",       &battle_config.renewal_baselvl_skill_effect,     1,     0,            1,        },
-	{ "mado_skill_limit",                   &battle_config.mado_skill_limit,                 1,     0,            1,        },
-	{ "mado_loss_on_death",                 &battle_config.mado_loss_on_death,               1,     0,            1,        },
+	{ "mob_display_hpmeter",           		&battle_config.mob_display_hpmeter,        		 1,     0,      2,              },
+
+// Party Increased Drop Rate [WiseWarrior]
+    { "party_drop_bonus",                    &battle_config.party_drop_bonus,               0,     0,      INT_MAX,        },
+
 //PVP Area by Mr.Postman
 	{ "deathmatch",							&battle_config.deathmatch,						0,		0,		1,				},
 };

@@ -4,7 +4,7 @@
 //= Masao
 //= Credits: Muad_Dib
 //===== Current Version: ===================================== 
-//= 1.0
+//= 1.1
 //===== Compatible With: ===================================== 
 //= Any rAthena SVN
 //===== Description: ========================================= 
@@ -12,22 +12,13 @@
 //= Job change Quest from Bard / Clown -> Minstrel.
 //===== Additional Comments: ================================= 
 //= 1.0 First Version.
+//= 1.1 Fix the checking of requirements before job change to Minstel - [JayPee]
 //============================================================
 
 alberta,196,133,4	script	Bard#job_min	486,{
 
-	if ((Class >= 4023) && (Class <= 4045)){
-		mes "[Bard]";
-		mes "Youngling~ On the sea, you should be careful!";
-		mes "There are terrible monsters there.";
-		next;
-		mes "[Bard]";
-		mes "I've heard that they eat people!";
-		close;
-	}
-
 	if (job_min == 0){
-		if (Class == Job_Bard || Class == Job_Clown){
+		if (Class == Job_Bard || Class == Job_Clown || Class == Job_Baby_Bard){
 			if ((BaseLevel > 98) && (JobLevel > 49)){
 				mes "[Bard]";
 				mes "The voice of heaven revolves around in my ears";
@@ -546,7 +537,7 @@ hu_in01,361,103,3	script	Tone-deaf person	995,{
 		mes "Lalala...";
 		mes "......!!";
 		next;
-		if (Class == Job_Bard){
+		if (Class == Job_Bard || Class == Job_Baby_Bard){
 			mes "[Tone-deaf person]";
 			mes "Hum!! Hey you, you were listening to my song.";
 			mes "You look like a Bard, how about you sing for me as rewarding my song?";
@@ -993,7 +984,7 @@ OnTimer100000:
 	end;
 }
 
-lighthalzen,162,126,3	script	Little Girl#job_min	890,3,3,{
+lighthalzen,162,126,3	script	Little Girl#job_min	62,3,3,{
 
 OnTouch:
 	if (checkquest(11145,2) == 2){
@@ -2446,11 +2437,6 @@ OnTouch:
 			mes "You should use them.";
 			close;
 		}
-		if ((Class >= 4023) && (Class <= 4045)){
-			mes "[Karian]";
-			mes "Why... Why are you so little?";
-			close;
-		}
 		if(checkweight(1201,1) == 0){
 			mes "^3355FFWait a minute! You're";
 			mes "carrying too many items";
@@ -2465,7 +2451,7 @@ OnTouch:
 			mes "How did you lose levels?";
 			close;
 		}
-		if (Class == Job_Bard || Class == Job_Clown){
+		if (Class == Job_Bard || Class == Job_Clown || Class == Job_Baby_Bard){
 			mes "["+strcharinfo(0)+"]";
 			mes "-It's a poem that you picked up in the desert.-";
 			next;
@@ -2492,31 +2478,9 @@ OnTouch:
 
 prt_in,94,172,4	script	Karian#job_min3	480,{
 
-	if ((Class >= 4023) && (Class <= 4045)){
-		mes "[Karian]";
-		mes "Why... Why are you so little?";
-		close;
-	}
-	if(checkweight(1201,1) == 0){
-		mes "^3355FFWait a minute! You're";
-		mes "carrying too many items";
-		mes "right now: store some of";
-		mes "your extra things in Kafra";
-		mes "Storage, and then come back.^000000";
-		close;
-	}
-	if (JobLevel < 50 || BaseLevel < 99){
-		mes "[Karian]";
-		mes "Hey... why are you so low?";
-		mes "How did you lose levels?";
-		close;
-	}
-	if (SkillPoint != 0){
-		mes "[Karian]";
-		mes "Hey... Don't you know how to use your skill points?";
-		mes "You should use them.";
-		close;
-	}else if (job_min >= 27){
+if(job_min >= 27)
+{
+	if (job_min > 99){
 		switch(select("Talk.:Leave.")){
 		case 1:
 			mes "[Maestro Song]";
@@ -2548,7 +2512,27 @@ prt_in,94,172,4	script	Karian#job_min3	480,{
 			end;
 		}
 	}
-	if (Class == Job_Bard || Class == Job_Clown){
+	if(checkweight(1201,1) == 0){
+		mes "^3355FFWait a minute! You're";
+		mes "carrying too many items";
+		mes "right now: store some of";
+		mes "your extra things in Kafra";
+		mes "Storage, and then come back.^000000";
+		close;
+	}
+	if (JobLevel < 50 || BaseLevel < 99){
+		mes "[Karian]";
+		mes "Hey... why are you so low?";
+		mes "How did you lose levels?";
+		close;
+	}
+	if (SkillPoint != 0){
+		mes "[Karian]";
+		mes "Hey... Don't you know how to use your skill points?";
+		mes "You should use them.";
+		close;
+	}
+	if (Class == Job_Bard || Class == Job_Clown || Class == Job_Baby_Bard){
 		mes "[Karian]";
 		mes "I'm sorry about the lie.";
 		mes "The song written on this paper...";
@@ -2575,7 +2559,16 @@ prt_in,94,172,4	script	Karian#job_min3	480,{
 		mes "[Maestro Song]";
 		mes "This is my present to you.";
 		next;
-		if (Class == Job_Bard){
+		if (Class == Job_Baby_Bard){
+			mes "[Maestro Song]";
+			mes "You are also my friend.";
+			set job_min,100;
+			jobchange Job_Baby_Minstrel;
+			completequest 11154;
+			getitem 5751,1;
+			getitem 2795,1;
+			close;
+		}if (Class == Job_Bard){
 			mes "[Maestro Song]";
 			mes "You are also my friend.";
 			set job_min,100;
@@ -2598,6 +2591,7 @@ prt_in,94,172,4	script	Karian#job_min3	480,{
 		mes "Huh?";
 		close;
 	}
+}
 	mes "[Karian]";
 	mes "How did you get in here?";
 	close;

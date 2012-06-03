@@ -1,11 +1,11 @@
-//===== eAthena Script =======================================
+//===== rAthena Script =======================================
 //= War of Emperium Second Edition
 //===== By: ==================================================
 //= L0ne_W0lf
 //===== Current Version: =====================================
 //= 2.4
 //===== Compatible With: =====================================
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: =========================================
 //= WoE SE Schwaltzvalt Castle 3
 //===== Additional Comments: =================================
@@ -35,12 +35,8 @@
 schg_cas03,1,1,0	script	Manager#sch03_02	111,{
 	end;
 
-OnInterIfInitOnce:
-	GetCastleData "schg_cas03",0,"::OnRecvCastleSc03";
-	end;
-
+OnAgitInit2:
 OnRecvCastlesc03:
-	RequestGuildInfo GetCastleData("schg_cas03",1);
 	if (GetCastleData("schg_cas03",1) == 0) {
 		donpcevent "Manager#sch03_02::Onstart";
 	}
@@ -2254,6 +2250,7 @@ schg_cas03,283,206,2	script	Vidblainn#LF_sc03_11::LF_sc03_2	722,{
 	}
 	end;
 
+OnInterIfInitOnce:
 OnRecvCastlesc03:
 	FlagEmblem GetCastleData("schg_cas03",1);
 	end;
@@ -2719,7 +2716,7 @@ OnStartArena:
 		end;
 	}
 	MapRespawnGuildID "schg_cas03",GetCastleData("schg_cas03",1),2;
-	GetCastleData "schg_cas03",0,"::OnRecvCastlesc03";
+	donpcevent "::OnRecvCastlesc03";
 	end;
 
 OnTimer10000:
@@ -2923,6 +2920,7 @@ sch_gld,91,191,0	script	Vidblainn#flag_sc03_1::Sc03_Flag	722,{
 		close;
 	}
 
+OnInterIfInitOnce:
 OnRecvCastlesc03:
 	FlagEmblem GetCastleData("schg_cas03",1);
 	end;

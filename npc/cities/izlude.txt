@@ -1,4 +1,4 @@
-//===== eAthena Script ======================================= 
+//===== rAthena Script ======================================= 
 //= Izlude Town
 //===== By: ================================================== 
 //= kobra_k88
@@ -6,7 +6,7 @@
 //===== Current Version: ===================================== 
 //= 1.8a
 //===== Compatible With: ===================================== 
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: ========================================= 
 //= [Aegis Conversion]
 //= Izlude town NPCs
@@ -458,7 +458,7 @@ izlude,124,178,2	script	Soldier#izlude	105,{
 	close;
 }
 
-// Inside Izlude	
+// Inside Izlude
 //============================================================
 izlude_in,125,164,2	script	Aaron#izlude	65,{
 	mes "[Aaron]";

@@ -1076,6 +1076,22 @@ static int mob_ai_sub_hard_changechase(struct block_list *bl,va_list ap)
 	return 1;
 }
 
+/*==========================================
+ * finds nearby bg ally for guardians looking for users to follow.
+ *------------------------------------------*/
+static int mob_ai_sub_hard_bg_ally(struct block_list *bl,va_list ap) {
+	struct mob_data *md;
+	struct block_list **target;
+	
+	nullpo_ret(bl);
+	md=va_arg(ap,struct mob_data *);
+	target= va_arg(ap,struct block_list**);
+		
+	if( status_check_skilluse(&md->bl, bl, 0, 0, 0) && battle_check_target(&md->bl,bl,BCT_ENEMY)<=0 ) {
+		(*target) = bl;
+	}
+	return 1;
+}
 
 /*==========================================
  * loot monster item search
@@ -1490,6 +1506,18 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 	if (!tbl) { //No targets available.
 		if (mode&MD_ANGRY && !md->state.aggressive)
 			md->state.aggressive = 1; //Restore angry state when no targets are available.
+		
+		/* bg guardians follow allies when no targets nearby */
+		if( md->bg_id && mode&MD_CANATTACK ) {
+			if( md->ud.walktimer != INVALID_TIMER )
+				return true;/* we are already moving */
+			map_foreachinrange (mob_ai_sub_hard_bg_ally, &md->bl, view_range, BL_PC, md, &tbl, mode);
+			if( tbl ) {
+				if( distance_blxy(&md->bl, tbl->x, tbl->y) <= 3 || unit_walktobl(&md->bl, tbl, 1, 1) )
+					return true;/* we're moving or close enough don't unlock the target. */
+			}
+		}
+		
 		//This handles triggering idle walk/skill.
 		mob_unlocktarget(md, tick);
 		return true;
@@ -1992,7 +2020,7 @@ void mob_damage(struct mob_data *md, struct block_list *src, int damage)
 	if (battle_config.show_mob_info&3)
 		clif_charnameack (0, &md->bl);
 
-	if (!md->state.boss)
+	if (battle_config.mob_display_hpmeter > 0 && !md->state.boss)
 		map_foreachinarea(clif_hpmeter_mob, md->bl.m, md->bl.x-AREA_SIZE, md->bl.y-AREA_SIZE, md->bl.x+AREA_SIZE, md->bl.y+AREA_SIZE, BL_PC, md);
 	
 	if (!src)
@@ -2598,7 +2626,7 @@ void mob_revive(struct mob_data *md, unsigned int hp)
 	if (battle_config.show_mob_info&3)
 		clif_charnameack (0, &md->bl);
 
-	if (!md->state.boss)
+	if (battle_config.mob_display_hpmeter > 0 && !md->state.boss)
 		map_foreachinarea(clif_hpmeter_mob, md->bl.m, md->bl.x-AREA_SIZE, md->bl.y-AREA_SIZE, md->bl.x+AREA_SIZE, md->bl.y+AREA_SIZE, BL_PC, md);
 }
 
@@ -2740,7 +2768,7 @@ int mob_class_change (struct mob_data *md, int class_)
 	clif_charnameack(0, &md->bl);
 	status_change_end(&md->bl,SC_KEEPING,INVALID_TIMER);
 
-	if (!md->state.boss)
+	if (battle_config.mob_display_hpmeter > 0 && !md->state.boss)
 		map_foreachinarea(clif_hpmeter_mob, md->bl.m, md->bl.x-AREA_SIZE, md->bl.y-AREA_SIZE, md->bl.x+AREA_SIZE, md->bl.y+AREA_SIZE, BL_PC, md);
 
 	return 0;
@@ -2754,7 +2782,7 @@ void mob_heal(struct mob_data *md,unsigned int heal)
 	if (battle_config.show_mob_info&3)
 		clif_charnameack (0, &md->bl);
 
-	if (!md->state.boss)
+	if (battle_config.mob_display_hpmeter > 0 && !md->state.boss)
 		map_foreachinarea(clif_hpmeter_mob, md->bl.m, md->bl.x-AREA_SIZE, md->bl.y-AREA_SIZE, md->bl.x+AREA_SIZE, md->bl.y+AREA_SIZE, BL_PC, md);
 }
 

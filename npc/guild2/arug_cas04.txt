@@ -1,11 +1,11 @@
-//===== eAthena Script =======================================
+//===== rAthena Script =======================================
 //= War of Emperium Second Edition
 //===== By: ==================================================
 //= L0ne_W0lf
 //===== Current Version: =====================================
 //= 2.3
 //===== Compatible With: =====================================
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: =========================================
 //= WoE SE Arunafeltz Castle 4
 //===== Additional Comments: =================================
@@ -32,12 +32,8 @@
 arug_cas04,1,1,0	script	Manager#aru04_02	111,{
 	end;
 
-OnInterIfInitOnce:
-	GetCastleData "arug_cas04",0,"::OnRecvCastlear04";
-	end;
-
+OnAgitInit2:
 OnRecvCastlear04:
-	RequestGuildInfo GetCastleData("arug_cas04",1);
 	if (GetCastleData("arug_cas04",1) == 0) {
 		donpcevent "Manager#aru04_02::Onstart";
 	}
@@ -2263,6 +2259,7 @@ arug_cas04,148,103,4	script	Gefn#LF_ar04_10::LF_ar04_02	722,{
 	}
 	end;
 
+OnInterIfInitOnce:
 OnRecvCastlear04:
 	FlagEmblem GetCastleData("arug_cas04",1);
 	end;
@@ -2728,7 +2725,7 @@ OnStartArena:
 		end;
 	}
 	MapRespawnGuildID "arug_cas04",GetCastleData("arug_cas04",1),2;
-	GetCastleData "arug_cas04",0,"::OnRecvCastlear04";
+	donpcevent "::OnRecvCastlear04";
 	end;
 
 OnTimer10000:
@@ -2931,6 +2928,7 @@ aru_gld,306,359,6	script	Gefn#flag_ar04_1::ar04_Flag	722,{
 		close;
 	}
 
+OnInterIfInitOnce:
 OnRecvCastlear04:
 	FlagEmblem GetCastleData("arug_cas04",1);
 	end;
@@ -2967,6 +2965,7 @@ aru_gld,301,318,4	script	Gefn#flag_ar04_3::ar04_Flag2	722,{
 		close;
 	}
 
+OnInterIfInitOnce:
 OnRecvCastlear04:
 	FlagEmblem GetCastleData("arug_cas04",1);
 	end;

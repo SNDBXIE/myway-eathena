@@ -1,11 +1,11 @@
-//===== eAthena Script ======================================= 
+//===== rAthena Script ======================================= 
 //= Alberta Town
 //===== By: ================================================== 
 //= DZeroX
 //===== Current Version: ===================================== 
 //= 1.5
 //===== Compatible With: ===================================== 
-//= eAthena 1.0
+//= rAthena 1.0
 //===== Description: ========================================= 
 //= Town-specific Alberta NPCs
 //===== Additional Comments: ================================= 
@@ -67,7 +67,7 @@ alberta,131,139,2	script	Drunken Old Man	54,{
 	mes "^666666*Hiccup*^000000";
 	mes "Wh-what are you";
 	mes "staring at? Get lost!!";
-	next;	
+	next;
 	switch(select("Say nothing.","Leave him alone.")) {
 		case 1:
 			mes "[Deagle]";

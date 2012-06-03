@@ -3,7 +3,7 @@
 //===== By: ================================================== 
 //= L0ne_W0lf
 //===== Current Version: ===================================== 
-//= 1.8
+//= 2.1
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
@@ -35,7 +35,9 @@
 //= 1.6 Fixed check in cat hand agent.
 //= 1.7 Moved the close in Cat Hand Service Warps. (bugreport:4079) [L0ne_W0lf]
 //= 1.8 Added 13.2 Additions to Report from the New World NPCs
-//=     Upped success rates for Report from the New World drops.
+//= 1.9 Upped success rates for Report from the New World drops.
+//= 2.0 Added Mid Camp Warper, translated from the Official [Slim]
+//= 2.1 Fixed some typos [tr0n]
 //============================================================ 
 
 // Onward to the New World
@@ -6179,48 +6181,6 @@ mid_camp,212,237,5	script	Camp Guard Captain#man1	852,{
 // The Tripartite Union's Feud
 //============================================================ 
 mid_campin,376,120,0	script	Research Official#ep131	754,3,3,{
-	mes "[United Research Official]";
-	mes "Hmm? What did you just say?";
-	next;
-	mes "[United Research Official]";
-	mes "I can't really hear you. Could you speak louder?";
-	close;
-
-OnInit:
-	enablenpc "Research Official#ep131";
-	end;
-
-OnEnable:
-	enablenpc "Research Official#ep131";
-	end;
-
-OnDisable:
-	disablenpc "Research Official#ep131";
-	end;
-
-Onmeet:
-	donpcevent "Ryosen#ep131_rhea05::OnEnable";
-	donpcevent "Hue#ep131_rhea06::OnEnable";
-	donpcevent "Hansenne#ep131_rhea07::OnEnable";
-	end;
-
-Oncall:
-	initnpctimer;
-	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
-	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
-	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
-	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
-	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
-	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
-	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
-	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
-	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
-	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
-	donpcevent "Research Official#ep131::OnDisable";
-	donpcevent "Ryosen#ep131_rhea05::OnDisable";
-	donpcevent "Hue#ep131_rhea06::OnDisable";
-	donpcevent "Hansenne#ep131_rhea07::OnDisable";
-	end;
 
 OnTouch:
 	if (checkweight(1201,1) == 0) {
@@ -6674,6 +6634,49 @@ OnTouch:
 		mes "It's very dangerous here, and people dwelling is this place are not that nice.";
 		close;
 	}
+	end;
+
+	mes "[United Research Official]";
+	mes "Hmm? What did you just say?";
+	next;
+	mes "[United Research Official]";
+	mes "I can't really hear you. Could you speak louder?";
+	close;
+
+OnInit:
+	enablenpc "Research Official#ep131";
+	end;
+
+OnEnable:
+	hideoffnpc "Research Official#ep131";
+	end;
+
+OnDisable:
+	hideonnpc "Research Official#ep131";
+	end;
+
+Onmeet:
+	donpcevent "Ryosen#ep131_rhea05::OnEnable";
+	donpcevent "Hue#ep131_rhea06::OnEnable";
+	donpcevent "Hansenne#ep131_rhea07::OnEnable";
+	end;
+
+Oncall:
+	initnpctimer;
+	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
+	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
+	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
+	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
+	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
+	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
+	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
+	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
+	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
+	monster "mid_campin",376,134,"Thief Bug",1051,1,"Research Official#ep131::OnMyMobDead";
+	donpcevent "Research Official#ep131::OnDisable";
+	donpcevent "Ryosen#ep131_rhea05::OnDisable";
+	donpcevent "Hue#ep131_rhea06::OnDisable";
+	donpcevent "Hansenne#ep131_rhea07::OnDisable";
 	end;
 
 OnMyMobDead:
@@ -8453,13 +8456,13 @@ mid_camp,143,306,5	script	Breeder Taab#ep13_alba	946,{
 				mes "material to give you.";
 				mes "How about a spiritual reward?";
 				next;
-				mes "^4d4dff You have received 80,000 EXP";
-				mes "and 30000 JEXP.^000000.";
 				delitem 579,50; //Delicious_Fish
 				set ep13_alba,6;
 				getexp 8000,3000;
 				erasequest 7042;
 				setquest 7047;
+				mes "^4d4dff You have received 8,000 EXP";
+				mes "and 3,000 JEXP.^000000.";
 				close;
 			}
 			else {
@@ -8485,14 +8488,14 @@ mid_camp,143,306,5	script	Breeder Taab#ep13_alba	946,{
 				mes "material to give you.";
 				mes "How about a spiritual reward?";
 				next;
-				mes "^4d4dff You have received 90,000 EXP";
-				mes "and 40000 JEXP.^000000.";
 				delitem 7198,30; //Great_Leaf
 				delitem 7188,30; //Browny_Root
 				set ep13_alba,6;
 				getexp 9000,4000;
 				erasequest 7043;
 				setquest 7047;
+				mes "^4d4dff You have received 9,000 EXP";
+				mes "and 4,000 JEXP.^000000.";
 				close;
 			}
 			else {
@@ -8523,14 +8526,14 @@ mid_camp,143,306,5	script	Breeder Taab#ep13_alba	946,{
 				mes "material to give you.";
 				mes "How about a spiritual reward?";
 				next;
-				mes "^4d4dff You have received 80,000 EXP";
-				mes "and 30000 JEXP.^000000.";
 				delitem 528,20; //Monster's_Feed
 				delitem 537,30; //Pet_Food
 				set ep13_alba,6;
 				getexp 8000,3000;
 				erasequest 7044;
 				setquest 7047;
+				mes "^4d4dff You have received 8,000 EXP";
+				mes "and 3,000 JEXP.^000000.";
 				close;
 			}
 			else {
@@ -8558,14 +8561,14 @@ mid_camp,143,306,5	script	Breeder Taab#ep13_alba	946,{
 				mes "material to give you.";
 				mes "How about a spiritual reward?";
 				next;
-				mes "^4d4dff You have received 80,000 EXP";
-				mes "and 30000 JEXP.^000000.";
 				delitem 517,50; //Meat
 				delitem 537,30; //Pet_Food
 				set ep13_alba,6;
 				getexp 8000,3000;
 				erasequest 7045;
 				setquest 7047;
+				mes "^4d4dff You have received 8,000 EXP";
+				mes "and 3,000 JEXP.^000000.";
 				close;
 			}
 			else {
@@ -8591,13 +8594,13 @@ mid_camp,143,306,5	script	Breeder Taab#ep13_alba	946,{
 				mes "material to give you.";
 				mes "How about a spiritual reward?";
 				next;
-				mes "^4d4dff You have received 80,000 EXP";
-				mes "and 30000 JEXP.^000000.";
 				delitem 6020,30; //Fur
 				set ep13_alba,6;
 				getexp 8000,3000;
 				erasequest 7046;
 				setquest 7047;
+				mes "^4d4dff You have received 8,000 EXP";
+				mes "and 3,000 JEXP.^000000.";
 				close;
 			}
 			else {
@@ -9915,7 +9918,7 @@ mid_camp,69,144,0	script	Ferocious Gorurug	421,{
 				set ep13_yong1,10;
 				setquest 12060;
 				next;
-				mes "^0000ffYou gain EXP 30,000^000000";
+				mes "^0000ffYou gain EXP 3,000^000000";
 				close;
 			}
 			else {
@@ -9935,7 +9938,7 @@ mid_camp,69,144,0	script	Ferocious Gorurug	421,{
 				setquest 12060;
 				set ep13_yong1,ep13_yong1+1;
 				next;
-				mes "^0000ffYou gain EXP 15,000^000000";
+				mes "^0000ffYou gain EXP 1,500^000000";
 				close;
 			}
 			else {
@@ -9956,7 +9959,7 @@ mid_camp,69,144,0	script	Ferocious Gorurug	421,{
 				setquest 12060;
 				set ep13_yong1,ep13_yong1+1;
 				next;
-				mes "^0000ffYou gain EXP 15,000^000000";
+				mes "^0000ffYou gain EXP 1,500^000000";
 				close;
 			}
 			else {
@@ -9976,7 +9979,7 @@ mid_camp,69,144,0	script	Ferocious Gorurug	421,{
 				setquest 12060;
 				set ep13_yong1,ep13_yong1+1;
 				next;
-				mes "^0000ffYou gain EXP 15,000^000000";
+				mes "^0000ffYou gain EXP 1,500^000000";
 				close;
 			}
 			else {
@@ -9999,7 +10002,7 @@ mid_camp,69,144,0	script	Ferocious Gorurug	421,{
 				setquest 12060;
 				set ep13_yong1,ep13_yong1+1;
 				next;
-				mes "^0000ffYou gain EXP 15,000^000000";
+				mes "^0000ffYou gain EXP 1,500^000000";
 				close;
 			}
 			else {
@@ -11076,7 +11079,7 @@ mid_campin,90,121,5	script	Hibba Agip	459,{
 		mes "I don't know what you're talking about. Boss, do you know this adventurer?";
 		next;
 		mes "[Hibba Agip]";
-		mes "Stop calling me bos! Call me Commander, alright? Hey Abidal, is this adventurer really famous?";
+		mes "Stop calling me boss! Call me Commander, alright? Hey Abidal, is this adventurer really famous?";
 		next;
 		mes "[Staff Officer Abidal]";
 		mes "Commander, haven't you read the report? The adventurer who helped the expedition solve the XX case was" + strcharinfo(0)+ ".";
@@ -11091,7 +11094,7 @@ mid_campin,90,121,5	script	Hibba Agip	459,{
 		mes "Hey Abidal, he's here to see me, not you. Remember?";
 		next;
 		mes "[Staff Officer Abidal]";
-		mes "Commander, please let me talk. " + strcharinfo(0) + "I'd like to tal to you privately. Can you come back later?";
+		mes "Commander, please let me talk. " + strcharinfo(0) + "I'd like to talk to you privately. Can you come back later?";
 		next;
 		mes "[Hibba Agip]";
 		mes "Why do you want to talk privately?";
@@ -11139,7 +11142,7 @@ mid_campin,90,121,5	script	Hibba Agip	459,{
 		mes "Don't you think you're exaggerating?";
 		next;
 		mes "[Hibba Agip]";
-		mes "Hmm... ANyaywas, this is not a difficult mission. All you have to do is deliver this expedition report to officials of three countries of Rune Midgard. Simple right?";
+		mes "Hmm... Anyways, this is not a difficult mission. All you have to do is deliver this expedition report to officials of three countries of Rune Midgard. Simple right?";
 		next;
 		getitem 11012,1; //Expedition_Report
 		set ep13_1_edq,3;
@@ -11217,10 +11220,10 @@ mid_campin,90,121,5	script	Hibba Agip	459,{
 		mes "Hey, you must find the report. If you bring as may pages of the report as you can, then Abidal will use them to fill missing parts.";
 		next;
 		mes "[Hibba Agip]";
-		mes "Some of them might have be consumed by monsters, or have found their way to the sea, but I don't care. You'll find the at all costs, and that's my order.";
+		mes "Some of them might have be consumed by monsters, or have found their way to the sea, but I don't care. You'll find them at all costs, and that's my order.";
 		next;
 		mes "[Hibba Agip]";
-		mes "I hope you'll do your best. You need to finish what you've started. We'll do our best to help ypu. Am I right, guys? Abidal? Igrid?";
+		mes "I hope you'll do your best. You need to finish what you've started. We'll do our best to help you. Am I right, guys? Abidal? Igrid?";
 		next;
 		mes "[Staff Officer Abidal]";
 		mes "Of Course, I'm happy to...";
@@ -11304,10 +11307,10 @@ mid_campin,90,121,5	script	Hibba Agip	459,{
 		mes "Hey, you must find the report. If you bring as may pages of the report as you can, then Abidal will use them to fill missing parts.";
 		next;
 		mes "[Hibba Agip]";
-		mes "Some of them might have be consumed by monsters, or have found their way to the sea, but I don't care. You'll find the at all costs, and that's my order.";
+		mes "Some of them might have be consumed by monsters, or have found their way to the sea, but I don't care. You'll find them at all costs, and that's my order.";
 		next;
 		mes "[Hibba Agip]";
-		mes "I hope you'll do your best. You need to finish what you've started. We'll do our best to help ypu. Am I right, guys? Abidal? Igrid?";
+		mes "I hope you'll do your best. You need to finish what you've started. We'll do our best to help you. Am I right, guys? Abidal? Igrid?";
 		next;
 		mes "[Staff Officer Abidal]";
 		mes "Of Course, I'm happy to...";
@@ -11342,13 +11345,13 @@ mid_campin,90,121,5	script	Hibba Agip	459,{
 		mes "Talk to my staff officer until you're finisehd finding the pages of the lost report. Right now, I'm swarmed with work.";
 		next;
 		mes "[Hibba Agip]";
-		mes "I'm sure you'll easily find thos eif you keep your eyes open. I must warn you about the monsters around this area though. Who knows? They might love the taste of paper.";
+		mes "I'm sure you'll easily find those if you keep your eyes open. I must warn you about the monsters around this area though. Who knows? They might love the taste of paper.";
 		cutin "ep13_captin_edq",255;
 		close;
 	}
 	else if ((ep13_1_edq == 71) || (ep13_1_edq == 72)) {
 		mes "[Hibba Agip]";
-		mes "How have you been doing? I've heard Igrid has personaly send out his soldiers to support you guys.";
+		mes "How have you been doing? I've heard Igrid has personally send out his soldiers to support you guys.";
 		mes "Haven't you met them?";
 		next;
 		mes "[Hibba Agip]";
@@ -11362,7 +11365,7 @@ mid_campin,90,121,5	script	Hibba Agip	459,{
 		mes "So, the report has been restored successfully?";
 		next;
 		mes "[Hibba Agip]";
-		mes "This was finished more quickly than I though. Let me see...";
+		mes "This was finished more quickly than I thought. Let me see...";
 		next;
 		delitem 11012,1; //Expedition_Report
 		set ep13_1_edq,9;
@@ -11605,7 +11608,7 @@ mid_campin,90,121,5	script	Hibba Agip	459,{
 			mes "We should map out a strategy. There is a method that uses Laphine and Sapha's together.";
 			next;
 			mes "[Staff Officer Abidal]";
-			mes "We send this guy to one of the tribes and ask for cooperation in our investgation.";
+			mes "We send this guy to one of the tribes and ask for cooperation in our investigation.";
 			next;
 			mes "[Hibba Agip]";
 			mes "Will they help us? They have already said threatening words...";
@@ -11629,7 +11632,7 @@ mid_campin,90,121,5	script	Hibba Agip	459,{
 			mes "That's called that Kuhotanrangjigea from east. I didn't make that by myself.";
 			next;
 			mes "[Hibba Agip]";
-			mes "Whatever.. Hey, you there... your name is " + name + " right? Do you know what to do?";
+			mes "Whatever.. Hey, you there... your name is " + strcharinfo(0) + " right? Do you know what to do?";
 			next;
 			mes "[Hibba Agip]";
 			mes "Go to one of the tribes and ask for help officially. I'll send someone to the other tribe.";
@@ -11747,7 +11750,7 @@ mid_campin,90,121,5	script	Hibba Agip	459,{
 	}
 	else if ((ins_nyd == 92) || (ins_nyd == 102) || (ins_nyd == 112)) {
 		mes "[Hibba Agip]";
-		mes "How's the activity Sapha? They have a stern character.";
+		mes "How's the activity in Sapha? They have a stern character.";
 		next;
 		mes "[Hibba Agip]";
 		mes "I'm not cut out for matching with them...ew...";
@@ -18063,3 +18066,32 @@ que_dan02,102,42,3	script	Disfigured Corpse#moc2	457,{
 	close;
 }
 
+//Mid Camp Warper (gogoash), Translated from the Official [Slim]
+prontera,161,192,5	script	Ash Vacuum Warper	707,{
+	mes "[Warp Soldier]";
+	mes "For a limited period.";
+	mes "I can send you to Ash-Vacuum without any fee.";
+	next;
+	mes "[Warp Soldier]";
+	mes "Do you want to go to Ash-Vacuum right now?";
+	next;
+	switch(select("Yes, please","Not yet")) {
+
+		case 1:
+			mes "[Warp Soldier]";
+			mes "Ok. I hope you";
+			mes "enjoy your trip.";
+			close2;
+			set ep13_ryu,100;
+			warp "mid_camp",210,291;
+			break;
+		case 2:
+			mes "[Warp Soldier]";
+			mes "No problem. I understand.";
+			mes "Tell me when you change your mind.";
+			mes "See you.";
+			close;
+			break;
+	}
+	end;
+}

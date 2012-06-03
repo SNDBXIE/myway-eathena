@@ -1,11 +1,11 @@
-//===== eAthena Script ======================================= 
+//===== rAthena Script ======================================= 
 //= Episode 12 Socket Enchant NPC
 //===== By: ================================================== 
 //= Gepard
 //===== Current Version: ===================================== 
 //= 1.1
 //===== Compatible With: ===================================== 
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: ========================================= 
 //= [Aegis Conversion]
 //= Adds slots to selected weapons and armor.
@@ -378,7 +378,7 @@
 	}
 }
 
-payon,236,199,3	duplicate(SocketEnchant2)	Leablem#pay	86,{
+payon,236,199,3	duplicate(SocketEnchant2)	Leablem#pay	86
 lighthalzen,96,137,3	duplicate(SocketEnchant2)	Leablem#lhz	86
 prontera,244,169,5	duplicate(SocketEnchant2)	Leablem#prt	86
 moc_ruins,154,86,3	duplicate(SocketEnchant2)	Leablem#moc	86

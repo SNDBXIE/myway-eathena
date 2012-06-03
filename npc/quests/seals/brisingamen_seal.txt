@@ -1,11 +1,11 @@
-//===== eAthena Script ======================================= 
+//===== rAthena Script ======================================= 
 //= Brisingamen seal unlocking NPCs.
 //===== By: ================================================== 
 //= SinSloth
 //===== Current Version: ===================================== 
 //= 1.5
 //===== Compatible With: ===================================== 
-//= eAthena
+//= rAthena
 //===== Description: ========================================= 
 //= Quest for breaking the seal of Brisingamen.
 //===== Additional Comments: =================================
@@ -900,7 +900,7 @@ yuno_in04,47,113,1	script	Studying Scholar#1	749,{
 					if ($God3 == 50) {
 						announce "The 3rd Seal of [Brisingamen] has appeared.",bc_all;
 					}
-					else if ($God3 == 100) {				
+					else if ($God3 == 100) {
 						if ($God1 == 100 && $God2 == 100 && $God3 == 100 && $God4 == 100) {
 							announce "Four seals have been released at the same time with the seal of [Brisingamen].",bc_all;
 						}
@@ -3682,7 +3682,7 @@ xmas,38,105,0	script	#brisindwarf1	111,3,3,{
 			mes "be just some regular";
 			mes "puzzle cube that someone";
 			mes "just dropped in the snow!";
-			close;	
+			close;
 		case 3:
 			mes "^3355FFYou use your finger to poke the pile of snow. However, you hurt your finger a little bit after hitting something really solid.^000000";
 			emotion e_ag,1;
