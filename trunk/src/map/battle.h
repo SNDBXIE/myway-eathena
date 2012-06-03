@@ -511,9 +511,12 @@ extern struct Battle_Config
 	int skillsbonus_maxhp_RK; // [Pinky]
 	int skillsbonus_maxhp_SR; // [Pinky]
 	int metallicsound_spburn_rate;
+	int renewal_baselvl_skill_ratio;
+	int renewal_baselvl_skill_effect;
+	int mado_skill_limit;
+	int mado_loss_on_death;
 	int active_mvp_tombstone; // [Mark]
 	int atcommand_max_stat_bypass;
-	int warg_can_falcon;
 
 	// Renewal Setting
 	int renewal_cast_3rd_skills;
@@ -521,26 +524,21 @@ extern struct Battle_Config
 	int exp_penalty;
 	int drop_penalty;
 	int edp_renewal;
+	int warg_can_falcon;
+
+	int guardianguild;
 	int npc_timeout;
 	int npc_timeout_interval;
 	int block_relocation;
+	int asura_absorb_cast_cancel;
+	int mob_display_hpmeter;
 
 	// Party Increased Drop Rate [WiseWarrior]
     int party_drop_bonus;
-
-	//Stop Asura using absorb spirits
-	int asura_absorb_cast_cancel;
 	
-	int renewal_baselvl_skill_ratio;
-	int renewal_baselvl_skill_effect;
-	int mado_skill_limit;
-	int mado_loss_on_death;
-
 	//PVP Area by Mr.Postman
 	int deathmatch;
 	
-	// Guardian show Guild name
-	int guardianguild;
 } battle_config;
 
 void do_init_battle(void);

@@ -1,11 +1,11 @@
-//===== eAthena Script =======================================
+//===== rAthena Script =======================================
 //= 2006 Halloween Event
 //===== By: ==================================================
 //= Brainstorm
 //===== Current Version: =====================================
 //= 1.4
 //===== Compatible With: =====================================
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: =========================================
 //= [Aegis Conversion]
 //= Event 1: Redeem "Pumpkin Mojo" for pumpkin headgear.
@@ -655,8 +655,8 @@ nif_fild01,167,113,3	script	Masta's chicken#06_hw01	800,{
 		mes "Oh, this must be Chicken Masta's chicken.";
 		mes "I should insert the magic word.";
 		next;
-		input @inputstr$;
-		if( @inputstr$ == "Return" ) {
+		input .@inputstr$;
+		if( .@inputstr$ == "Return" ) {
 			emotion e_omg;
 			specialeffect EF_TELEPORTATION;
 			mes "The magic spell has been casted.";
@@ -1068,7 +1068,7 @@ prontera,155,285,3	script	Familiar#06_hw01::HWFamiDup	799,{
 		mes "Ok.";
 		mes "Actually, it's useless to have a special ticket to Nifflheim.";
 		close;
-	}		
+	}
 	mes "[Familiar]";
 	mes "Ok.";
 	mes "If you want to ask something, give a piece of pumpkin pie to Loli Ruri.";

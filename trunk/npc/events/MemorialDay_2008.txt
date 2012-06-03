@@ -1,11 +1,11 @@
-//===== eAthena Script =======================================
+//===== rAthena Script =======================================
 //= In Memory of Heroes (iRO Memorial Day 2008)
 //===== By: ==================================================
 //= Kisuka
 //===== Current Version: =====================================
 //= 1.2
 //===== Compatible With: =====================================
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: =========================================
 //
 //===== Additional Comments: =================================
@@ -168,7 +168,7 @@ prontera,182,214,4	script	Lauds#Memorial	58,{
 			mes "[Mad Sago Lauds]";
 			mes "Don't panic!";
 			emotion 0;
-			close;	
+			close;
 		}
 		else if(.@RandomMsg == 2) {
 			mes "[Mad Sago Lauds]";

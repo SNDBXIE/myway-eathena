@@ -1,11 +1,11 @@
-//===== eAthena Script ======================================= 
+//===== rAthena Script ======================================= 
 //= Quest NPCs related to Alberta
 //===== By: ================================================== 
 //= kobra_k88
 //===== Current Version: ===================================== 
 //= 2.4
 //===== Compatible With: ===================================== 
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: ========================================= 
 //= Dolls Quest
 //= Boy's Cap Quest
@@ -100,7 +100,7 @@ alberta,117,135,0	script	Elin	96,{
 						next;
 						mes "[Elin]";
 						if (Sex == 1) {
-							mes "But since a cute boy is giving it to me, I'll happily take it! Hee hee, soft and fluffy Poring doll~";	
+							mes "But since a cute boy is giving it to me, I'll happily take it! Hee hee, soft and fluffy Poring doll~";
 						} else {
 							mes "But since a nice girl is giving it to me, I'll take it! Hee he, soft and fluffy Poring doll~";
 						}
@@ -1114,7 +1114,7 @@ alberta_in,23,104,4	script	Grandpa Turtle#tur	120,{
 	}
 }
 
-alberta,247,122,4	script	Sailor#tur	709,{
+alberta,244,118,4	script	Sailor#tur	709,{
 	if (TURTLE || (MISC_QUEST & 65536)) {
 		mes "[Gotanblue]";
 		mes "Heh...";
@@ -1248,12 +1248,12 @@ tur_dun01,165,29,4	script	Sailor#tur2	709,{
 		mes "I certainly hope you've found what you were looking for. Alright, I guess there's always a time for an adventurer to return home...";
 		next;
 		mes "^3355FF* Choo Choo *^000000";
-		warp "alberta",241,115;
+		warp "alberta",238,112;
 	}
 	close;
 }
 
-alberta,248,89,4	script	Turtle Island Scholar	121,{
+alberta,246,114,4	script	Turtle Island Scholar	121,{
 	mes "[Jornadan Niliria]";
 	mes "Every single place";
 	mes "has its own unique";

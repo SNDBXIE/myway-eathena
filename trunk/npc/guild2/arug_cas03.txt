@@ -1,11 +1,11 @@
-//===== eAthena Script =======================================
+//===== rAthena Script =======================================
 //= War of Emperium Second Edition
 //===== By: ==================================================
 //= L0ne_W0lf
 //===== Current Version: =====================================
 //= 2.1
 //===== Compatible With: =====================================
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: =========================================
 //= WoE SE Arunafeltz Castle 3
 //===== Additional Comments: =================================
@@ -31,12 +31,8 @@
 arug_cas03,1,1,0	script	Manager#aru03_02	111,{
 	end;
 
-OnInterIfInitOnce:
-	GetCastleData "arug_cas03",0,"::OnRecvCastleAr03";
-	end;
-
+OnAgitInit2:
 OnRecvCastleAr03:
-	RequestGuildInfo GetCastleData("arug_cas03",1);
 	if (GetCastleData("arug_cas03",1) == 0) {
 		donpcevent "Manager#aru03_02::Onstart";
 	}
@@ -2259,6 +2255,7 @@ arug_cas03,148,103,4	script	Horn#LF_ar03_10::LF_ar03_02	722,{
 	}
 	end;
 
+OnInterIfInitOnce:
 OnRecvCastleAr03:
 	FlagEmblem GetCastleData("arug_cas03",1);
 	end;
@@ -2724,7 +2721,7 @@ OnStartArena:
 		end;
 	}
 	MapRespawnGuildID "arug_cas03",GetCastleData("arug_cas03",1),2;
-	GetCastleData "arug_cas03",0,"::OnRecvCastleAr03";
+	donpcevent "::OnRecvCastleAr03";
 	end;
 
 OnTimer10000:
@@ -2928,6 +2925,7 @@ aru_gld,60,174,0	script	Horn#flag_Ar03_1::Ar03_Flag	722,{
 		close;
 	}
 
+OnInterIfInitOnce:
 OnRecvCastleAr03:
 	FlagEmblem GetCastleData("arug_cas03",1);
 	end;

@@ -1,11 +1,11 @@
-//===== eAthena Script =======================================
+//===== rAthena Script =======================================
 //= War of Emperium Second Edition
 //===== By: ==================================================
 //= L0ne_W0lf
 //===== Current Version: =====================================
 //= 2.3
 //===== Compatible With: =====================================
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: =========================================
 //= WoE SE Arunafeltz Castle 2
 //===== Additional Comments: =================================
@@ -32,12 +32,8 @@
 arug_cas02,1,1,0	script	Manager#aru02_02	111,{
 	end;
 
-OnInterIfInitOnce:
-	GetCastleData "arug_cas02",0,"::OnRecvCastleAr02";
-	end;
-
+OnAgitInit2:
 OnRecvCastleAr02:
-	RequestGuildInfo GetCastleData("arug_cas02",1);
 	if (GetCastleData("arug_cas02",1) == 0) {
 		donpcevent "Manager#aru02_02::Onstart";
 	}
@@ -2214,6 +2210,7 @@ arug_cas02,129,178,4	script	Cyr#LF_ar02_13::LF_ar02_2	722,{
 	}
 	end;
 
+OnInterIfInitOnce:
 OnRecvCastleAr02:
 	FlagEmblem GetCastleData("arug_cas02",1);
 	end;
@@ -2679,7 +2676,7 @@ OnStartArena:
 		end;
 	}
 	MapRespawnGuildID "arug_cas02",GetCastleData("arug_cas02",1),2;
-	GetCastleData "arug_cas02",0,"::OnRecvCastleAr02";
+	donpcevent "::OnRecvCastleAr02";
 	end;
 
 OnTimer10000:
@@ -2883,6 +2880,7 @@ aru_gld,80,41,6	script	Cyr#flag_Ar02_1::Ar02_Flag	722,{
 		close;
 	}
 
+OnInterIfInitOnce:
 OnRecvCastleAr02:
 	FlagEmblem GetCastleData("arug_cas02",1);
 	end;
@@ -2918,8 +2916,8 @@ aru_gld,120,83,5	script	Cyr#flag_Ar02_3	722,{
 		mes "appointed Guild Siege times.";
 		close;
 	}
+OnInterIfInitOnce:
 OnRecvCastleAr02:
 	FlagEmblem GetCastleData("arug_cas02",1);
 	end;
 }
-

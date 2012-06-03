@@ -17043,6 +17043,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(instance_npcname,"s?"),
 	BUILDIN_DEF(has_instance,"s?"),
 	BUILDIN_DEF(instance_warpall,"sii?"),
+	BUILDIN_DEF(instance_check_party,"i???"),
 	
 	// rAthena and beyond!
 	BUILDIN_DEF(getargcount,""),

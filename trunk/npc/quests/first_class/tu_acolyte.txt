@@ -1,11 +1,11 @@
-//===== eAthena Script ======================================= 
+//===== rAthena Script ======================================= 
 //= Acolyte Class Tutorial and Job Specific Quest
 //===== By: ================================================== 
 //= Fix up by Jukka
 //===== Current Version: ===================================== 
 //= 1.5
 //===== Compatible With: ===================================== 
-//= eAthena SVN (Testet in Trunk 88xx)
+//= rAthena SVN (Testet in Trunk 88xx)
 //===== Description: ========================================= 
 //=
 //===== Additional Comments: ================================= 
@@ -1518,7 +1518,7 @@ prt_monk,153,210,3	script	Cleope Verce	95,{
 					break;
 				}
 				next;
-				mes "[Cleope Verce]";	
+				mes "[Cleope Verce]";
 				mes "^333333*Sigh*^000000";
 				mes "Ah, memories~";
 				mes "Of course, if I had";

@@ -1,11 +1,11 @@
-//===== eAthena Script ======================================= 
+//===== rAthena Script ======================================= 
 //= Nameless Island Quests
 //===== By: ================================================== 
 //= L0ne_W0lf
 //===== Current Version: ===================================== 
 //= 2.1
 //===== Compatible With: ===================================== 
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: ========================================= 
 //= [Aegis Conversion]
 //= Collection of Nameless Island Quests
@@ -66,7 +66,7 @@
 airplane_01,95,61,3	script	QuestTrigger#Aru	-1,3,3,{
 	end;
 
-OnTouch:	
+OnTouch:
 	if ((prt_curse == 36 || prt_curse == 45 || prt_curse == 56 || prt_curse == 61) && (aru_monas < 1)) {
 		hideoffnpc "Agent#Aru";
 		mes "[????]";
@@ -474,7 +474,7 @@ ve_in,78,314,5	script	Magistrate#Aru	945,{
 		mes "peace, and letting anyone";
 		mes "in here will cause trouble.";
 		close;
-	}	
+	}
 	else if (aru_monas == 10) {
 		mes "[Al Hamad]";
 		mes "I thought I told you";
@@ -1928,7 +1928,7 @@ nameless_n,259,218,3	script	Larjes#Boat1	97,{
 		close;
 	}
 	mes "[Larjes]";
-	mes "“Did you still want to";
+	mes "ï¿½Did you still want to";
 	mes "investigate the island?";
 	next;
 	if(select("No:yes")==1) {

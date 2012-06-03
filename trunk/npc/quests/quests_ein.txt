@@ -1,11 +1,11 @@
-//===== eAthena Script ======================================= 
+//===== rAthena Script ======================================= 
 //= Quest NPCs related to Einbroch and Einbech
 //===== By: ================================================== 
-//= Evera and The eAthena Dev Team
+//= Evera and The rAthena Dev Team
 //===== Current Version: ===================================== 
 //= 2.5
 //===== Compatible With: ===================================== 
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: ========================================= 
 //= [Aegis conversion]
 //= Oridecon/Mineral Quest
@@ -149,7 +149,7 @@ einbech,97,167,5	script	Cavitar	847,{
 			mes "Come back";
 			mes "whenever you're ready.";
 			close;
-		}				
+		}
 	}
 	else {
 		if (BaseLevel < 40){
@@ -423,7 +423,7 @@ einbech,97,167,5	script	Cavitar	847,{
 						mes "But please understand";
 						mes "that I'm desperate...";
 						close;
-					}	
+					}
 		 		case 2:
 					mes "[Cavitar]";
 					mes "You're...";
@@ -6022,7 +6022,7 @@ ein_in01,31,138,3	script	Calla#ein	90,{
 			mes "Would you please tell";
 			mes "me your name again?";
 			close;
-		}	
+		}
 	}
 	if (EIN_LOVERQ == 4) {
 		mes "[Calla]";
@@ -6330,7 +6330,7 @@ ein_in01,200,101,5	script	Klitzer#ein	854,{
 			mes "time, why don't you talk";
 			mes "to my mother? She always";
 			mes "likes meeting my friends.";
-			close;	
+			close;
 		}
 		else {
 			mes "[Klitzer]";
@@ -6681,7 +6681,7 @@ ein_in01,31,151,3	script	Satra#ein	850,{
 		else {
 			mes "[Satra]";
 			mes "I beg your pardon?";
-			mes "" + inputstr + "? Oh my...";
+			mes .@input$ + "? Oh my...";
 			mes "I believe I may have";
 			mes "misheard you. Ho ho ho ho~";
 			close;

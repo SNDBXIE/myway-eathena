@@ -1,11 +1,11 @@
-//===== eAthena Script =======================================
+//===== rAthena Script =======================================
 //= War of Emperium Second Edition
 //===== By: ==================================================
 //= L0ne_W0lf
 //===== Current Version: =====================================
 //= 2.3
 //===== Compatible With: =====================================
-//= eAthena SVN
+//= rAthena SVN
 //===== Description: =========================================
 //= WoE SE Arunafeltz Castle 5
 //===== Additional Comments: =================================
@@ -32,12 +32,8 @@
 arug_cas05,1,1,0	script	Manager#aru05_02	111,{
 	end;
 
-OnInterIfInitOnce:
-	GetCastleData "arug_cas05",0,"::OnRecvCastlear05";
-	end;
-
+OnAgitInit2:
 OnRecvCastlear05:
-	RequestGuildInfo GetCastleData("arug_cas05",1);
 	if (GetCastleData("arug_cas05",1) == 0) {
 		donpcevent "Manager#aru05_02::Onstart";
 	}
@@ -2263,6 +2259,7 @@ arug_cas05,148,103,4	script	Banadis#LF_ar05_10::LF_ar05_02	722,{
 	}
 	end;
 
+OnInterIfInitOnce:
 OnRecvCastlear05:
 	FlagEmblem GetCastleData("arug_cas05",1);
 	end;
@@ -2728,7 +2725,7 @@ OnStartArena:
 		end;
 	}
 	MapRespawnGuildID "arug_cas05",GetCastleData("arug_cas05",1),2;
-	GetCastleData "arug_cas05",0,"::OnRecvCastlear05";
+	donpcevent "::OnRecvCastlear05";
 	end;
 
 OnTimer10000:
@@ -2933,6 +2930,7 @@ aru_gld,289,103,6	script	Banadis#flag_ar05_1::ar05_Flag	722,{
 		close;
 	}
 
+OnInterIfInitOnce:
 OnRecvCastlear05:
 	FlagEmblem GetCastleData("arug_cas05",1);
 	end;
@@ -2969,6 +2967,7 @@ aru_gld,350,98,6	script	Banadis#flag_ar05_3::ar05_Flag2	722,{
 		close;
 	}
 
+OnInterIfInitOnce:
 OnRecvCastlear05:
 	FlagEmblem GetCastleData("arug_cas05",1);
 	end;

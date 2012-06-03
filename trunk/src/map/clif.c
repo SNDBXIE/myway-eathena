@@ -1320,6 +1320,9 @@ int clif_spawn(struct block_list *bl)
 				clif_specialeffect(&md->bl,423,AREA);
 			else if(md->special_state.size==1)
 				clif_specialeffect(&md->bl,421,AREA);
+			//Show Monster HP Bar when monster spawned in player view area
+			if (battle_config.mob_display_hpmeter == 2 && !md->state.boss)
+				map_foreachinarea(clif_hpmeter_mob, md->bl.m, md->bl.x-AREA_SIZE, md->bl.y-AREA_SIZE, md->bl.x+AREA_SIZE, md->bl.y+AREA_SIZE, BL_PC, md);
 		}
 		break;
 	case BL_NPC:
@@ -4090,6 +4093,9 @@ void clif_getareachar_unit(struct map_session_data* sd,struct block_list *bl)
 				clif_specialeffect_single(bl,423,sd->fd);
 			else if(md->special_state.size==1)
 				clif_specialeffect_single(bl,421,sd->fd);
+			//Show Monster HP Bar when monster in player view area
+			if (battle_config.mob_display_hpmeter == 2 && !md->state.boss)
+				map_foreachinarea(clif_hpmeter_mob, md->bl.m, md->bl.x-AREA_SIZE, md->bl.y-AREA_SIZE, md->bl.x+AREA_SIZE, md->bl.y+AREA_SIZE, BL_PC, md);
 		}
 		break;
 	case BL_PET:
@@ -10051,20 +10057,11 @@ void clif_parse_TakeItem(int fd, struct map_session_data *sd)
 
 		if (fitem == NULL || fitem->bl.type != BL_ITEM || fitem->bl.m != sd->bl.m)
 			break;
-	
-		if (pc_cant_act(sd))
-			break;
 
-		// Guildwar Observe by Mr.Postman
-		if(sd->sc.count && (
-			sd->sc.data[SC_HIDING] ||
-			sd->sc.data[SC_CLOAKING] ||
-			sd->sc.data[SC_TRICKDEAD] ||
-			sd->sc.data[SC_BLADESTOP] ||
-			sd->sc.data[SC_CLOAKINGEXCEED] ||
-			(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOITEM) ||
-			sd->sc.data[SC_CURSEDCIRCLE_TARGET] || sd->sc.data[SC_AUDIENCE])
-		)
+		if( sd->sc.cant.pickup )
+			break;
+		
+		if (pc_cant_act(sd))
 			break;
 
 		if (!pc_takeitem(sd, fitem))

@@ -1,4 +1,4 @@
-//===== eAthena Script =======================================
+//===== rAthena Script =======================================
 //= War of Emperium - WoE Auto-Start
 //===== By: ==================================================
 //= kalen (1.0)
@@ -6,7 +6,7 @@
 //===== Current Version: =====================================
 //= 2.0
 //===== Compatible With: =====================================
-//= eAthena SVN; RO Episode 4+
+//= rAthena SVN; RO Episode 4+
 //===== Description: =========================================
 //= Auto Start for War of Emperium
 //=============================================
@@ -78,7 +78,7 @@ S_DisplayOwners:
 		}
 		else {
 			Announce "The [" + GetCastleName(.@maps$[.@i]) + "] castle is currently unoccupied.",bc_all|bc_woe;
-		}		
+		}
 	}
 	end;
 }
