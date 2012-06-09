@@ -1,0 +1,6 @@
+//to set drop announce item id
+//@reloditemdb to reload all setting
+//format: item id
+//512
+//501
+//502

@@ -2380,14 +2380,15 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			ditem = mob_setdropitem(md->db->dropitem[i].nameid, 1);
 
 			//A Rare Drop Global Announce by Lupus
-			if( mvp_sd && drop_rate <= battle_config.rare_drop_announce ) {
+			if( mvp_sd) {
 				struct item_data *i_data;
 				char message[128];
 				i_data = itemdb_search(ditem->item_data.nameid);
-				if(temp_rate > 0) {
-					sprintf (message, msg_txt(541), mvp_sd->status.name, md->name, i_data->jname, (float)temp_rate/100);
-				} else {
-					sprintf (message, msg_txt(541), mvp_sd->status.name, md->name, i_data->jname, (float)drop_rate/100);				
+				if(drop_rate <= battle_config.rare_drop_announce || i_data->ann==1){
+					if(temp_rate > 0)
+						sprintf (message, msg_txt(541), mvp_sd->status.name, md->name, i_data->jname, (float)temp_rate/100);
+					else
+						sprintf (message, msg_txt(541), mvp_sd->status.name, md->name, i_data->jname, (float)drop_rate/100);
 				}
 				//MSG: "'%s' won %s's %s (chance: %0.02f%%)"
 				intif_broadcast(message,strlen(message)+1,0);
@@ -2513,13 +2514,25 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			log_mvp[0] = item.nameid;
 			
 			//A Rare MVP Drop Global Announce by Lupus
-			if(temp<=battle_config.rare_drop_announce) {
+			if(temp<=battle_config.rare_drop_announce ) {
 				struct item_data *i_data;
 				char message[128];
 				i_data = itemdb_exists(item.nameid);
 				sprintf (message, msg_txt(541), mvp_sd->status.name, md->name, i_data->jname, temp/100.);
 				//MSG: "'%s' won %s's %s (chance: %0.02f%%)"
 				intif_broadcast(message,strlen(message)+1,0);
+			}
+
+			//Specify item drop announce by QQfoolsorellina
+			if(mvp_sd){
+				struct item_data *i_data;
+				char message[128];
+				i_data = itemdb_exists(item.nameid);
+				if(i_data->ann == 1){
+					sprintf (message, msg_txt(541), mvp_sd->status.name, md->name, i_data->jname, temp/100.);
+					//MSG: "'%s' won %s's %s (chance: %0.02f%%)"
+					intif_broadcast(message,strlen(message)+1,0);
+				}
 			}
 
 			if((temp = pc_additem(mvp_sd,&item,1,LOG_TYPE_PICKDROP_PLAYER)) != 0) {

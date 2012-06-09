@@ -16255,45 +16255,6 @@ BUILDIN_FUNC(freeloop) {
 	return 0;
 }
 
-//Syntax:
-//target char id, target account id, sender name (can be anything), title (anything), content/body, destination name (anything), zeny, item id, item amount.
-//iissssiii
-//23456789
-BUILDIN_FUNC(sendmail) {
-	struct mail_message mail;
-	struct item item_tmp;
-	int dest_cid, dest_aid;//char id & account id of target, yes we need both.
-	int zeny=0, itemid=0, amount=0;
-	dest_cid = script_getnum(st,2);
-	dest_aid = script_getnum(st,3);
-	mail.send_id = dest_cid;
-	mail.dest_id = dest_aid;
-	safestrncpy(mail.send_name, script_getstr(st,4), NAME_LENGTH);//from who?
-	safestrncpy(mail.title, script_getstr(st,5), MAIL_TITLE_LENGTH);//title
-	safestrncpy(mail.body, script_getstr(st,6), MAIL_BODY_LENGTH);//content
-	safestrncpy(mail.dest_name, script_getstr(st,7), NAME_LENGTH);//to who?
-	if( script_hasdata(st,8) ) {
-		zeny = script_getnum(st,8);
-	}
-	mail.zeny = zeny;
-	if( script_hasdata(st,9) && script_hasdata(st,10) ) {
-		memset(&item_tmp, 0, sizeof(item_tmp));
-		item_tmp.nameid = script_getnum(st,9);
-		item_tmp.identify = 1;
-		item_tmp.amount = script_getnum(st,10);
-		memcpy(&mail.item, &item_tmp, sizeof(struct item));
-	} else
-		memset(&mail.item, 0x00, sizeof(struct item));
-	//mail = (struct mail_message *) aMalloc(sizeof(struct mail_message));
-	mail.status = MAIL_NEW;//it just got out of the oven, or it actually didn't even get into it. so it surely is new.
-	mail.timestamp = time(NULL);//NOW()
-	mail.id = 0;//char server is the one who says what it is its id, so we zero...
-	if( !intif_Mail_send(dest_aid, &mail) )
-		script_pushint(st,-1);
-	script_pushint(st,0);
-	return 0;
-}
-
 // Apply an extra bonus to drops that only expires when reset [WiseWarrior]
 BUILDIN_FUNC(setdropbonus){
 	TBL_PC *sd = NULL;
@@ -17070,9 +17031,6 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(areascript, "si*"),
 	BUILDIN_DEF(getstatus, "i*"),
 	BUILDIN_DEF(scbonus, "is"),
-
-	//[Ind/ro-resources.net]
-	BUILDIN_DEF(sendmail,"iissss???"),
 
 	// Carlos H.
 	BUILDIN_DEF(getitemguild,"ii?*"),

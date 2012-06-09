@@ -2539,7 +2539,8 @@ static struct Damage battle_renewal_calc_weapon_attack(struct block_list *src,st
 					{
 						short index = sd->equip_index[EQI_HAND_R];
 						if( index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON )
-							skillratio = sstatus->rhw.atk + sd->inventory_data[index]->weight / 10 + sd->inventory_data[index]->wlv * (sd->status.inventory[index].refine + 6) * 100;
+							skillratio = sd->inventory_data[index]->weight/10 + sstatus->rhw.atk +
+								100 * sd->inventory_data[index]->wlv * (sd->status.inventory[index].refine + 6);
 					}
 					break;
 				case RK_STORMBLAST:
@@ -2560,9 +2561,9 @@ static struct Damage battle_renewal_calc_weapon_attack(struct block_list *src,st
 					if( re_baselv_bonus == 1 && s_level >= 100 )
 						skillratio = skillratio * s_level / 120;
 					if( re_baselv_bonus == 1 && s_level >= 100 )
-					skillratio += sstatus->agi * 2 + (sd ? sd->status.job_level : 50) * 4;
+						skillratio += sstatus->agi * 2 + (sd ? sd->status.job_level : 50) * 4;
 					else
-					skillratio += sstatus->agi * 2 + 200;
+						skillratio += sstatus->agi * 2 + 200;
 					break;
 				case GC_PHANTOMMENACE:
 					skillratio += 200;
@@ -3724,11 +3725,30 @@ static struct Damage battle_renewal_calc_weapon_attack(struct block_list *src,st
 				wd.damage = battle_calc_bg_damage(src,target,wd.damage2,wd.div_,skill_num,skill_lv,wd.flag);
 		}
 	}
-
+	//Reject Sword bugreport:4493 by Daegaladh
+	if(wd.damage && tsc && tsc->data[SC_REJECTSWORD] &&
+		(src->type!=BL_PC || (
+			((TBL_PC *)src)->weapontype1 == W_DAGGER ||
+			((TBL_PC *)src)->weapontype1 == W_1HSWORD ||
+			((TBL_PC *)src)->status.weapon == W_2HSWORD
+		)) &&
+		rand()%100 < tsc->data[SC_REJECTSWORD]->val2
+		) {
+		wd.damage = wd.damage * 50 / 100;
+		status_fix_damage(target,src,wd.damage,clif_damage(target,src,gettick(),0,0,wd.damage,0,0,0));
+		clif_skill_nodamage(target,target,ST_REJECTSWORD,tsc->data[SC_REJECTSWORD]->val1,1);
+		if( --(tsc->data[SC_REJECTSWORD]->val3) <= 0 )
+			status_change_end(target, SC_REJECTSWORD, INVALID_TIMER);
+	}
 	if(skill_num==AM_ACIDTERROR)
 	{
 		struct Damage ad = battle_calc_magic_attack(src, target, skill_num, skill_lv, wflag);
 		wd.damage += ad.damage;
+	}
+	
+	if(skill_num == ASC_BREAKER) {	//Breaker's int-based damage (a misc attack?)
+		struct Damage md = battle_calc_misc_attack(src, target, skill_num, skill_lv, wflag);
+		wd.damage += md.damage;
 	}
 
 	//SG_FUSION hp penalty [Komurka]
@@ -3747,17 +3767,8 @@ static struct Damage battle_renewal_calc_weapon_attack(struct block_list *src,st
 	}
 
 	if( sc && sc->data[SC_ENCHANTBLADE] && !skill_num && sd && ((flag.rh && sd->weapontype1) || (flag.lh && sd->weapontype1)) ) // Only regular melee attacks are increased. A weapon must be equiped. [pakpil]
-	{	// Magic damage from Enchant Blade
-		struct Damage md = battle_calc_magic_attack(src, target, RK_ENCHANTBLADE, ((TBL_PC*)src)->status.skill[RK_ENCHANTBLADE].lv, wflag);
-		wd.damage += md.damage;
-		wd.flag |= md.flag;
-	}
-	if( skill_num == LG_RAYOFGENESIS )
-	{
-		struct Damage md = battle_calc_magic_attack(src, target, skill_num, skill_lv, wflag);
-		wd.damage += md.damage;	
-	}
-	if( skill_num == CR_GRANDCROSS )
+		ATK_ADD( ( sc->data[SC_ENCHANTBLADE]->val1*20+100 ) * status_get_lv(src) / 150 + status_get_int(src) );
+	if( skill_num == CR_GRANDCROSS || skill_num == LG_RAYOFGENESIS)
 	{
 		struct Damage md = battle_calc_magic_attack(src, target, skill_num, skill_lv, wflag);
 		wd.damage += md.damage;
@@ -6135,7 +6146,7 @@ static const struct _battle_data {
 	{ "max_exp_gain_rate",                  &battle_config.max_exp_gain_rate,               0,      0,      INT_MAX,        },
 	{ "backstab_bow_penalty",               &battle_config.backstab_bow_penalty,            0,      0,      1,              },
 	{ "night_at_start",                     &battle_config.night_at_start,                  0,      0,      1,              },
-	{ "show_mob_info",                      &battle_config.show_mob_info,                   0,      0,      1|2|4,          },
+	{ "show_mob_info",                      &battle_config.show_mob_info,                   0,      0,      1|2|4|8,          },
 	{ "ban_hack_trade",                     &battle_config.ban_hack_trade,                  0,      0,      INT_MAX,        },
 	{ "hack_info_GM_level",                 &battle_config.hack_info_GM_level,              60,     0,      100,            },
 	{ "any_warp_GM_min_level",              &battle_config.any_warp_GM_min_level,           20,     0,      100,            },
@@ -6279,6 +6290,7 @@ static const struct _battle_data {
 	{ "active_mvp_tombstone",               &battle_config.active_mvp_tombstone,              1,    0,      1,              },
 	{ "atcommand_max_stat_bypass",          &battle_config.atcommand_max_stat_bypass,       0,      0,      100,            },			{ "warg_can_falcon",                    &battle_config.warg_can_falcon,                  0,     0,            1,        }, 
 	{ "skill_amotion_leniency",             &battle_config.skill_amotion_leniency,          90,     0,      100				},
+	{ "min_npc_vending_distance",           &battle_config.min_npc_vending_distance,		3,		0,		100				},
 // Renewal Setting
 	{ "renewal_cast_3rd_skills",            &battle_config.renewal_cast_3rd_skills,          1,     0,            3,        },
 	{ "castrate_dex_scale_3rd",             &battle_config.castrate_dex_scale_3rd,         150,     1,      INT_MAX,        },
@@ -6299,6 +6311,9 @@ static const struct _battle_data {
 
 //PVP Area by Mr.Postman
 	{ "deathmatch",							&battle_config.deathmatch,						0,		0,		1,				},
+
+//Addon Player View Script [Ize]
+	{ "viewscript",							&battle_config.viewscript,						0,		0,		1,				},
 };
 
 

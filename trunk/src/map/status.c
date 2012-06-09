@@ -67,12 +67,19 @@ int current_equip_card_id; //To prevent card-stacking (from jA) [Skotlex]
 //we need it for new cards 15 Feb 2005, to check if the combo cards are insrerted into the CURRENT weapon only
 //to avoid cards exploits
 
-static sc_type SkillStatusChangeTable[MAX_SKILL]; // skill  -> status
-static int StatusIconChangeTable[SC_MAX];         // status -> icon
-unsigned long StatusChangeFlagTable[SC_MAX];      // status -> flags
-static int StatusSkillChangeTable[SC_MAX];        // status -> skill
+static sc_type SkillStatusChangeTable[MAX_SKILL];  // skill  -> status
+static int StatusIconChangeTable[SC_MAX];          // status -> "icon" (icon is a bit of a misnomer, since there exist values with no icon associated)
+unsigned long StatusChangeFlagTable[SC_MAX]; // status -> flags
+static int StatusSkillChangeTable[SC_MAX];         // status -> skill
+static int StatusRelevantBLTypes[SI_MAX];          // "icon" -> enum bl_type (for clif_status_change to identify for which bl types to send packets)
 static unsigned int StatusChangeStateTable[SC_MAX]; // status -> flags
 
+
+/**
+ * Returns the status change associated with a skill.
+ * @param skill The skill to look up
+ * @return The status registered for this skill
+ **/
 sc_type status_skill2sc(int skill)
 {
 	int sk = skill_get_index(skill);
@@ -83,6 +90,12 @@ sc_type status_skill2sc(int skill)
 	return SkillStatusChangeTable[sk];
 }
 
+/**
+ * Returns the FIRST skill (in order of definition in initChangeTables) to use a given status change.
+ * Utilized for various duration lookups. Use with caution!
+ * @param sc The status to look up
+ * @return A skill associated with the status
+ **/
 int status_sc2skill(sc_type sc)
 {
 	if( sc < 0 || sc >= SC_MAX ) {
@@ -93,7 +106,39 @@ int status_sc2skill(sc_type sc)
 	return StatusSkillChangeTable[sc];
 }
 
+/**
+ * Returns the status calculation flag associated with a given status change.
+ * @param sc The status to look up
+ * @return The scb_flag registered for this status (see enum scb_flag)
+ **/
+unsigned int status_sc2scb_flag(sc_type sc)
+{
+	if( sc < 0 || sc >= SC_MAX ) {
+		ShowError("status_sc2scb_flag: Unsupported status change id %d\n", sc);
+		return SCB_NONE;
+	}
+
+	return StatusChangeFlagTable[sc];
+}
+
+/**
+ * Returns the bl types which require a status change packet to be sent for a given client status identifier.
+ * @param type The client-side status identifier to look up (see enum si_type)
+ * @return The bl types relevant to the type (see enum bl_type)
+ **/
+int status_type2relevant_bl_types(int type)
+{
+	if( type < 0 || type >= SI_MAX ) {
+		ShowError("status_type2relevant_bl_types: Unsupported type %d\n", type);
+		return SI_BLANK;
+	}
+
+	return StatusRelevantBLTypes[type];
+}
+
 #define add_sc(skill,sc) set_sc(skill,sc,SI_BLANK,SCB_NONE)
+// indicates that the status displays a visual effect for the affected unit, and should be sent to the client for all supported units
+#define set_sc_with_vfx(skill, sc, icon, flag) set_sc((skill), (sc), (icon), (flag)); if((icon) < SI_MAX) StatusRelevantBLTypes[(icon)] |= BL_SCEFFECT
 
 static void set_sc(int skill, sc_type sc, int icon, unsigned int flag)
 {
@@ -124,6 +169,9 @@ void initChangeTables(void)
 		StatusIconChangeTable[i] = SI_BLANK;
 	for (i = 0; i < MAX_SKILL; i++)
 		SkillStatusChangeTable[i] = SC_NONE;
+	
+	for (i = 0; i < SI_MAX; i++)
+		StatusRelevantBLTypes[i] = BL_PC;
 
 	memset(StatusSkillChangeTable, 0, sizeof(StatusSkillChangeTable));
 	memset(StatusChangeFlagTable, 0, sizeof(StatusChangeFlagTable));
@@ -515,7 +563,7 @@ void initChangeTables(void)
 	add_sc( SR_DRAGONCOMBO           , SC_STUN            );
 	add_sc( SR_EARTHSHAKER           , SC_STUN            );
 	set_sc( SR_CRESCENTELBOW         , SC_CRESCENTELBOW      , SI_CRESCENTELBOW         , SCB_NONE );
-	set_sc( SR_CURSEDCIRCLE          , SC_CURSEDCIRCLE_TARGET, SI_CURSEDCIRCLE_TARGET   , SCB_NONE );
+	set_sc_with_vfx( SR_CURSEDCIRCLE          , SC_CURSEDCIRCLE_TARGET, SI_CURSEDCIRCLE_TARGET   , SCB_NONE );
 	set_sc( SR_LIGHTNINGWALK         , SC_LIGHTNINGWALK      , SI_LIGHTNINGWALK         , SCB_NONE );
 	set_sc( SR_RAISINGDRAGON            , SC_RAISINGDRAGON        , SI_RAISINGDRAGON            , SCB_REGEN|SCB_MAXHP|SCB_MAXSP|SCB_ASPD );
 	set_sc( SR_GENTLETOUCH_ENERGYGAIN, SC_GT_ENERGYGAIN      , SI_GENTLETOUCH_ENERGYGAIN, SCB_NONE );
@@ -929,7 +977,6 @@ void initChangeTables(void)
 	StatusChangeStateTable[SC_MAGNETICFIELD]       |= SCS_NOMOVE;
 	StatusChangeStateTable[SC__MANHOLE]            |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_VACUUM_EXTREME]      |= SCS_NOMOVE;
-	StatusChangeStateTable[SC_FEAR]                |= SCS_NOMOVE|SCS_NOMOVECOND;
 	StatusChangeStateTable[SC_CURSEDCIRCLE_ATKER]  |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_CURSEDCIRCLE_TARGET] |= SCS_NOMOVE;
 	
@@ -3577,7 +3624,6 @@ void status_calc_state( struct block_list *bl, struct status_change *sc, enum sc
 				  || (sc->data[SC_GRAVITATION] && sc->data[SC_GRAVITATION]->val3 == BCT_SELF)
 				  || (sc->data[SC_CLOAKING] && //Need wall at level 1-2
 							sc->data[SC_CLOAKING]->val1 < 3 && !(sc->data[SC_CLOAKING]->val4&1))
-				  || (sc->data[SC_FEAR] && sc->data[SC_FEAR]->val2 > 0)
 				 ) {
 			sc->cant.move += ( start ? 1 : -1 );
 		}
@@ -6279,6 +6325,7 @@ int status_change_start(struct block_list* bl,enum sc_type type,int rate,int val
 	struct view_data *vd;
 	int opt_flag, calc_flag, undead_flag, val_flag = 0;
 	int duration = tick;
+	bool sc_isnew = true;
 
 	nullpo_ret(bl);
 	sc = status_get_sc(bl);
@@ -8777,9 +8824,8 @@ int status_change_start(struct block_list* bl,enum sc_type type,int rate,int val
 	{// reuse old sc
 		if( sce->timer != INVALID_TIMER )
 			delete_timer(sce->timer, status_change_timer);
-	}
-	else
-	{// new sc
+		sc_isnew = false;
+	} else {// new sc
 		++(sc->count);
 		sce = sc->data[type] = ers_alloc(sc_data_ers, struct status_change_entry);
 	}
@@ -8797,8 +8843,8 @@ int status_change_start(struct block_list* bl,enum sc_type type,int rate,int val
 		status_calc_pc(sd,false);
 	else if (calc_flag)
 		status_calc_bl(bl,calc_flag);
-	
-	if ( StatusChangeStateTable[type] ) /* non-zero */
+		
+	if ( sc_isnew && StatusChangeStateTable[type] ) /* non-zero */
 		status_calc_state(bl,sc,( enum scs_flag ) StatusChangeStateTable[type],true);
 	
 	if(sd && sd->pd)
@@ -9365,8 +9411,8 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 			}
 			break;
 		case SC_CURSEDCIRCLE_ATKER:
-			if( sce->val3 )
-				map_foreachinrange(status_change_timer_sub, bl, skill_get_splash(SR_CURSEDCIRCLE, sce->val1),BL_CHAR, bl, sce, SC_CURSEDCIRCLE_TARGET, gettick());
+			if( sce->val3 ) // used the default area size cause there is a chance the caster could knock back and can't clear the target.
+				map_foreachinrange(status_change_timer_sub, bl, battle_config.area_size,BL_CHAR, bl, sce, SC_CURSEDCIRCLE_TARGET, gettick()); 
 			break;
 		case SC_RAISINGDRAGON:
 			if( sd && sce->val2 && !pc_isdead(sd) )

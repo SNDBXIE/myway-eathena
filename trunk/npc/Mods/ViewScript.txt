@@ -1,0 +1,28 @@
+// Addon Player View Script by Ize and Creative Lab
+-	script	player_check_script	-1,{
+	end;
+
+OnCheckEquip1:
+	set .name$, strcharinfo(0);
+	set .class$, jobname(readparam(19));
+	set .lv, readparam(11);
+	set .job, readparam(55);
+	set .maxhp, readparam(6);
+	set .maxsp, readparam(8);
+	for (set .@i, 0; .@i < getarraysize(.stat_param); set .@i, .@i+1)
+		set .stat[.@i], readparam(.stat_param[.@i]);	
+	end;
+
+OnCheckEquip2:
+	dispbottom "=============== PLAYER INFO ==============";
+	dispbottom " Name: ( " + .name$ +" ) | Class: ( " + .class$ +" )";
+	dispbottom " Lv: "+ .lv +"/"+ .job +" | MaxHP: "+ .maxhp +" | MaxSP: "+ .maxsp +"";
+	for (set .@i, 0; .@i < getarraysize(.stat_param); set .@i, .@i+1)
+		dispbottom " "+.stat_param$[.@i] +" : "+ .stat[.@i] +"";
+	end;
+
+OnInit:
+	setarray .stat_param[0],bStr,bAgi,bVit,bInt,bDex,bLuk;
+	setarray .stat_param$[0],"Str","Agi","Vit","Int","Dex","Luk";
+	end;
+}

@@ -517,6 +517,7 @@ extern struct Battle_Config
 	int mado_loss_on_death;
 	int active_mvp_tombstone; // [Mark]
 	int atcommand_max_stat_bypass;
+    int min_npc_vending_distance;
 
 	// Renewal Setting
 	int renewal_cast_3rd_skills;
@@ -538,7 +539,9 @@ extern struct Battle_Config
 	
 	//PVP Area by Mr.Postman
 	int deathmatch;
-	
+
+	// Addon Player View Script [Ize]
+	int viewscript;	
 } battle_config;
 
 void do_init_battle(void);

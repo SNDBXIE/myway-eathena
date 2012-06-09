@@ -337,7 +337,7 @@ prontera,163,178,4	script	Magic Gear Master	105,{
 				mes "You already have a Magic Gear.";
 				close;
 			}
-			setmadogear;
+			setriding;
 			close;
 		case 2:
 			mes "[Magic Gear Master]";
