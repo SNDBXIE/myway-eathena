@@ -2774,35 +2774,41 @@ int skill_attack(int attack_type, struct block_list* src, struct block_list *dsr
 			skill_additional_effect(bl, src, CR_REFLECTSHIELD, 1, BF_WEAPON|BF_SHORT|BF_NORMAL,ATK_DEF,tick);
 		}
 	}
-	
-	if( damage > 0 && skillid == RK_CRUSHSTRIKE )
-		skill_break_equip(src,EQP_WEAPON,2000,BCT_SELF);
-	
-	if( damage > 0 && skillid == GC_VENOMPRESSURE )
-	{
-		struct status_change *ssc = status_get_sc(src);
-		if( ssc && ssc->data[SC_POISONINGWEAPON] && rand()%100 < 70 + 5*skilllv )
-		{
-			sc_start(bl,ssc->data[SC_POISONINGWEAPON]->val2,100,ssc->data[SC_POISONINGWEAPON]->val1,skill_get_time2(GC_POISONINGWEAPON,ssc->data[SC_POISONINGWEAPON]->val1));
-			status_change_end(src,SC_POISONINGWEAPON,-1);
-			clif_skill_nodamage(src,bl,skillid,skilllv,1);				
+	if( damage > 0 ) {
+		/**
+		 * Post-damage effects
+		 **/
+		switch( skillid ) {
+			case RK_CRUSHSTRIKE:
+				skill_break_equip(src,EQP_WEAPON,2000,BCT_SELF); // 20% chance to destroy the weapon.
+				break;
+			case GC_VENOMPRESSURE: {
+					struct status_change *ssc = status_get_sc(src);
+					if( ssc && ssc->data[SC_POISONINGWEAPON] && rand()%100 < 70 + 5*skilllv ) {
+						sc_start(bl,ssc->data[SC_POISONINGWEAPON]->val2,100,ssc->data[SC_POISONINGWEAPON]->val1,skill_get_time2(GC_POISONINGWEAPON,ssc->data[SC_POISONINGWEAPON]->val1));
+						status_change_end(src,SC_POISONINGWEAPON,INVALID_TIMER);
+						clif_skill_nodamage(src,bl,skillid,skilllv,1);
+					}
+				}
+				break;
+			case WM_METALICSOUND:
+				status_zap(bl, 0, damage*battle_config.metallicsound_spburn_rate/(100*(110-pc_checkskill(sd,WM_LESSON)*10)));
+				break;
 		}
-	}
-	
-	if ( skillid == WM_METALICSOUND )
-		status_zap(bl, 0, damage*battle_config.metallicsound_spburn_rate/(100*(110-pc_checkskill(sd,WM_LESSON)*10)));
-
-	if( sc && sc->data[SC_WATER_SCREEN_OPTION] && sc->data[SC_WATER_SCREEN_OPTION]->val1 && damage > 0)
-	{
-		struct block_list *e_bl = map_id2bl(sc->data[SC_WATER_SCREEN_OPTION]->val1);
-		if( e_bl && !status_isdead(e_bl) )
+		if( sc && sc->data[SC_WATER_SCREEN_OPTION] && sc->data[SC_WATER_SCREEN_OPTION]->val1)
 		{
-			clif_damage(e_bl,e_bl,tick,dmg.amotion,dmg.dmotion,damage,dmg.div_,dmg.type,dmg.damage2);
-			status_damage(bl,e_bl,damage,0,0,0);
-			// Just show damage in target.
-			clif_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, dmg.type, dmg.damage2 );
-			return ATK_NONE;
-		}			
+			struct block_list *e_bl = map_id2bl(sc->data[SC_WATER_SCREEN_OPTION]->val1);
+			if( e_bl && !status_isdead(e_bl) )
+			{
+				clif_damage(e_bl,e_bl,tick,dmg.amotion,dmg.dmotion,damage,dmg.div_,dmg.type,dmg.damage2);
+				status_damage(bl,e_bl,damage,0,0,0);
+				// Just show damage in target.
+				clif_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, dmg.type, dmg.damage2 );
+				return ATK_NONE;
+			}			
+		}
+		if( sd )
+			skill_onskillusage(sd, bl, skillid, tick);
 	}
 
 	if (!(flag&2) &&
@@ -4799,6 +4805,11 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, int 
 		return 1;
 	}
 
+	if( sc && sc->data[SC_CURSEDCIRCLE_ATKER] ) { //Should only remove after the skill has been casted.
+		sc->data[SC_CURSEDCIRCLE_ATKER]->val3 = 1;
+		status_change_end(src,SC_CURSEDCIRCLE_ATKER,INVALID_TIMER);
+	}
+
 	map_freeblock_unlock();
 
 	if( sd && !(flag&1) )
@@ -6382,7 +6393,15 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, in
 		if (i < 5) i = 5; //Minimum rate 5%
 
 		//Duration in ms
-		d = skill_get_time(skillid,skilllv) + (sstatus->dex - tstatus->dex)*500;
+		if( skillid == GC_WEAPONCRUSH){
+			d = skill_get_time(skillid,skilllv);
+			if(bl->type == BL_PC)
+				d += skilllv * 15 + (sstatus->dex - tstatus->dex);
+			else
+				d += skilllv * 30 + (sstatus->dex - tstatus->dex) / 2;
+		}else
+			d = skill_get_time(skillid,skilllv) + (sstatus->dex - tstatus->dex)*500;
+
 		if (d < 0) d = 0; //Minimum duration 0ms
 
 		switch (skillid) {
@@ -9194,6 +9213,14 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, in
 		clif_skill_nodamage(src,bl,skillid,skilllv,1);
 		map_freeblock_unlock();
 		return 1;
+	}
+
+	if(skillid != SR_CURSEDCIRCLE){
+		struct status_change *sc = status_get_sc(src);
+		if( sc && sc->data[SC_CURSEDCIRCLE_ATKER] ) { //Should only remove after the skill had been casted.
+			sc->data[SC_CURSEDCIRCLE_ATKER]->val3 = 1;
+			status_change_end(src,SC_CURSEDCIRCLE_ATKER,INVALID_TIMER);
+		}
 	}
 
 	if (dstmd) { //Mob skill event for no damage skills (damage ones are handled in battle_calc_damage) [Skotlex]

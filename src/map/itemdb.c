@@ -1009,6 +1009,24 @@ static int itemdb_read_sqldb(void)
 #endif /* not TXT_ONLY */
 
 /*====================================
+* read item_announce.txt 
+*------------------------------------*/
+static bool itemdb_read_announce(char* fields[], int columns, int current)
+{
+        unsigned short nameid;
+        struct item_data* id;
+        nameid = (unsigned short)strtoul(fields[0], NULL, 10);
+        if( ( id = itemdb_exists(nameid) ) == NULL )
+        {
+                ShowWarning("itemdb_read_announce: Unknow item id '%hu'.\n", nameid);
+                return false;
+        }
+
+        id->ann=1;
+        return true;
+}
+
+/*====================================
  * read all item-related databases
  *------------------------------------*/
 static void itemdb_read(void)
@@ -1026,6 +1044,7 @@ static void itemdb_read(void)
 	sv_readdb(db_path, "item_trade.txt",   ',', 3, 3, -1,             &itemdb_read_itemtrade);
 	sv_readdb(db_path, "item_delay.txt",   ',', 2, 2, -1, &itemdb_read_itemdelay);
 	sv_readdb(db_path, "item_buyingstore.txt", ',', 1, 1, -1,         &itemdb_read_buyingstore);
+	sv_readdb(db_path, "item_announce.txt", ',', 1, 1, -1,           &itemdb_read_announce);
 }
 
 /*==========================================

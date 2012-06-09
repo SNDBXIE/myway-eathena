@@ -90,6 +90,8 @@ struct item_data {
 		unsigned buyingstore : 1;
 	} flag;
 	short gm_lv_trade_override;	//GM-level to override trade_restriction
+	//Specify item drop announce by QQfoolsorellina
+	unsigned ann: 1;//annouce flag
 };
 
 struct item_group {

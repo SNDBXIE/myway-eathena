@@ -7,12 +7,10 @@
 //   state           : 0: account is ok, 1 to 256: error code of packet 0x006a + 1
 //   unban time      : 0: no ban, <other value>: banned until the date (unix timestamp)
 //   expiration time : 0: unlimited account, <other value>: account expires on the date (unix timestamp)
-1	root	ragnarok	S	a@a.com	0	0	0	0	436	2011-09-20 18:40:20	127.0.0.1	0000-00-00	
-2	s2	p2	S	a@a.com	0	0	0	0	1	2011-07-24 07:05:37	127.0.0.1	0000-00-00	
+1	s1	p1	S	a@a.com	0	0	0	0	1	2012-06-09 22:45:35	127.0.0.1	0000-00-00	
+2	s2	p2	S	a@a.com	0	0	0	0	0	0000-00-00 00:00:00	-	0000-00-00	
 3	s3	p3	S	a@a.com	0	0	0	0	0	0000-00-00 00:00:00	-	0000-00-00	
 4	s4	p4	S	a@a.com	0	0	0	0	0	0000-00-00 00:00:00	-	0000-00-00	
 5	s5	p5	S	a@a.com	0	0	0	0	0	0000-00-00 00:00:00	-	0000-00-00	
-2000001	fataleror	test	M	dezkoat13@yahoo.co.id	99	0	0	0	379	2011-07-24 07:09:25	127.0.0.1	0000-00-00	
-2000002	aaaa	wkwk	F	a@a.com	99	0	0	0	435	2011-09-20 17:45:47	127.0.0.1	0000-00-00	
-2000003	qwqw	wkwk	M	a@a.com	99	0	0	0	88	2011-09-20 18:47:37	127.0.0.1	0000-00-00	
-2000004	%newid%
+2000001	Test	Test	M	a@a.com	0	0	0	0	1	2012-06-09 22:46:23	127.0.0.1	0000-00-00	
+2000002	%newid%

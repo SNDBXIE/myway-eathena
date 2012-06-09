@@ -933,7 +933,7 @@ int unit_can_move(struct block_list *bl)
 		return 0; //Can't move
 	
 	if (sc) {
-		if( sc->cant.move )
+		if( sc->cant.move || (sc->data[SC_FEAR] && sc->data[SC_FEAR]->val2 > 0) )
 			return 0;
 		
 		if (sc->opt1 > 0 && sc->opt1 != OPT1_STONEWAIT && sc->opt1 != OPT1_BURNING)
@@ -1340,23 +1340,24 @@ int unit_skilluse_id2(struct block_list *src, int target_id, short skill_num, sh
 	ud->skillid      = skill_num;
 	ud->skilllv      = skill_lv;
 
-	if( sc && sc->data[SC_CLOAKING] && !(sc->data[SC_CLOAKING]->val4&4) && skill_num != AS_CLOAKING )
-	{ // Need confirm if Cloaking Exceed ends it.
-		status_change_end(src, SC_CLOAKING, INVALID_TIMER);
-		if (!src->prev) return 0; //Warped away!
+	if( sc ) {
+		/**
+		 * why the if else chain: these 3 status do not stack, so its efficient that way.
+		 **/
+ 		if( sc->data[SC_CLOAKING] && !(sc->data[SC_CLOAKING]->val4&4) && skill_num != AS_CLOAKING ) {
+			status_change_end(src, SC_CLOAKING, INVALID_TIMER);
+			if (!src->prev) return 0; //Warped away!
+		} else if( sc->data[SC_CLOAKINGEXCEED] && !(sc->data[SC_CLOAKINGEXCEED]->val4&4) && skill_num != GC_CLOAKINGEXCEED ) {
+			status_change_end(src,SC_CLOAKINGEXCEED, INVALID_TIMER);
+			if (!src->prev) return 0;
+		} else if( sc->data[SC_CAMOUFLAGE] && skill_num != RA_CAMOUFLAGE )
+			status_change_end(src,SC_CAMOUFLAGE,INVALID_TIMER);
+		else if( sc->data[SC__MANHOLE] )	{
+			status_change_end(src,SC__MANHOLE,-1);
+			if (!src->prev) return 0; //Warped away!
+		}
 	}
 
-	if( sc && sc->data[SC_CLOAKINGEXCEED] && !(sc->data[SC_CLOAKINGEXCEED]->val4&4) && skill_num != GC_CLOAKINGEXCEED )
-	{ // Need confirm if Cloaking ends it.
-		status_change_end(src,SC_CLOAKINGEXCEED, INVALID_TIMER);
-		if (!src->prev) return 0;
-	}
-
-	if( sc && sc->data[SC__MANHOLE] )
-	{
-		status_change_end(src,SC__MANHOLE,-1);
-		if (!src->prev) return 0; //Warped away!
-	}
 	if( casttime > 0 )
 	{
 		ud->skilltimer = add_timer( tick+casttime, skill_castend_id, src->id, 0 );

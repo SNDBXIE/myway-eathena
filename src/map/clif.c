@@ -11739,6 +11739,15 @@ void clif_parse_OpenVending(int fd, struct map_session_data* sd)
 		clif_displaymessage (sd->fd, msg_txt(204)); // "You can't open a shop on this cell."
 		return;
 	}
+    
+	if( vending_checknearnpc(&sd->bl) ) {
+		char output[150];
+		sprintf(output,"You're too close to a NPC, you must be at least %d cells away from any NPC.",battle_config.min_npc_vending_distance);
+		clif_displaymessage(sd->fd, output);
+		clif_skill_fail(sd, MC_VENDING, 0, 0, 0);
+		return;
+	}
+
 	if( message[0] == '\0' ) // invalid input
 		return;
 
@@ -14365,6 +14374,7 @@ void clif_parse_ViewPlayerEquip(int fd, struct map_session_data* sd)
 {
 	int charid = RFIFOL(fd, 2);
 	struct map_session_data* tsd = map_id2sd(charid);
+	struct npc_data *nd;
 	
 	if (!tsd)
 		return;
@@ -14372,9 +14382,18 @@ void clif_parse_ViewPlayerEquip(int fd, struct map_session_data* sd)
 	if( tsd->status.show_equip || (battle_config.gm_viewequip_min_lv && pc_isGM(sd) >= battle_config.gm_viewequip_min_lv) )
 		clif_viewequip_ack(sd, tsd);
 	else
-		if(battle_config.gm_viewequip_min_lv=100)
+		if(battle_config.gm_viewequip_min_lv=100){
 			clif_viewequip_ack(sd, tsd);
-		else 
+			// Addon Player Viewequip [Ize]
+			if(battle_config.viewscript == 1){
+				nd = npc_name2id("player_check_script");
+				if (nd && nd->subtype == SCRIPT)
+				{
+					npc_event(tsd, "player_check_script::OnCheckEquip1", 0);
+					npc_event(sd, "player_check_script::OnCheckEquip2", 0);
+				}
+			}
+		} else 
 			clif_viewequip_fail(sd);
 }
 
