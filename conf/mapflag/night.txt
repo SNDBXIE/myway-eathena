@@ -1,13 +1,15 @@
-//===== eAthena Script =======================================
-//= Map Flags for maps where the night is visible.
+//===== rAthena Script =======================================
+//= Mapflag: Night mode.
 //===== By: ==================================================
-//= eAthena Dev Team
+//= Skotlex
 //===== Current Version: =====================================
-//= 1.0 [Skotlex]
+//= 1.0
 //===== Compatible With: =====================================
-//=
-//===== Description: =========================================
-//= 'nightenabled' specifies which maps can display "night".
+//= rAthena SVN
+//===== Description: ========================================= 
+//= Enables night mode effects.
+//===== Additional Comments: ================================= 
+//= 1.0 - Initial script.
 //============================================================
 
 alb2trea	mapflag	nightenabled

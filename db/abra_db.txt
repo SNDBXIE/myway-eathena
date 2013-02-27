@@ -13,6 +13,7 @@
 //       until a skill succeeds.
 
 //1,Basic Skill,1,0
+
 //2,Sword Mastery,1,0
 //3,Two-Handed Sword Mastery,1,0
 //4,Increase HP Recovery,1,0
@@ -168,7 +169,7 @@
 
 //---JP2.0 Additional skill---
 142,First Aid,1,5000
-//143,Act Dead,1,5000
+143,Act Dead,1,5000
 //144,Moving HP-Recovery,1,0
 //145,Fatal Blow,1,0
 146,Auto Berserk,1,0

@@ -1,0 +1,8 @@
+// Extra Bonuses [Lilith]
+// If enable_extra_bonus is 1 this and below Extra bonuses will be received by all players 
+// If enable_extra_bonus is 2 this Extra bonus will be received by players which have variable EXTRA_BONUS = 1
+//{ bonus bStr,15; bonus bSpeedAddRate,50; /* more bonuses */ }
+// If enable_extra_bonus is 2 this Extra bonus will be received by players which have variable EXTRA_BONUS = 2
+//{ bonus bAgi,10; bonus bMdef,30; /* more bonuses */ }
+// More bonuses...
+{ callfunc "artifact";}

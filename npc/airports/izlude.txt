@@ -10,7 +10,7 @@
 //= Official NPCs.
 //============================================================ 
 
-izlude,206,55,3	script	Airship Staff#izlude	90,{
+-	script	::Airship_Staff_izlude	-1,{
 	mes "[Airship Staff]";
 	mes "Welcome! Would you like";
 	mes "to board the Airship that";

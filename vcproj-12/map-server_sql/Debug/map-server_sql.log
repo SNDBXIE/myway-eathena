@@ -1,0 +1,136 @@
+﻿  grammar.c
+  libconfig.c
+  scanctx.c
+  scanner.c
+  strbuf.c
+  mt19937ar.c
+  conf.c
+  core.c
+  db.c
+  des.c
+  ers.c
+  grfio.c
+  malloc.c
+c:\mocharo\src\common\malloc.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+  mapindex.c
+  md5calc.c
+  mempool.c
+  mutex.c
+  nullpo.c
+c:\mocharo\src\common\nullpo.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\common\nullpo.c)
+  raconf.c
+  random.c
+  showmsg.c
+  socket.c
+  sql.c
+  strlib.c
+  thread.c
+  timer.c
+  utils.c
+  cli.c
+  msg_conf.c
+  atcommand.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\atcommand.c)
+  battle.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\battle.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\atcommand.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\battle.c)
+  battleground.c
+  buyingstore.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\battleground.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\buyingstore.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\battleground.c)
+  chat.c
+  chrif.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\chat.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\chat.c)
+  clif.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\chrif.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\chrif.c)
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\clif.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\clif.c)
+  date.c
+  duel.c
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\duel.c)
+  elemental.c
+  guild.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\guild.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\guild.c)
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\elemental.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\elemental.c)
+  intif.c
+  itemdb.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\itemdb.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\itemdb.c)
+  log.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\log.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\log.c)
+  mail.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\mail.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\mail.c)
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\intif.c)
+  map.c
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\intif.c)
+  mapreg_sql.c
+  homunculus.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\map.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\map.c)
+  instance.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\homunculus.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\homunculus.c)
+  mercenary.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\instance.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\instance.c)
+  mob.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\mob.c)
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\mercenary.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\mercenary.c)
+  npc.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\npc.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\mob.c)
+  npc_chat.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\npc_chat.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\npc_chat.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\npc.c)
+  party.c
+  path.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\path.c)
+  pc.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\pc.c)
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\party.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\party.c)
+  pc_groups.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\pc_groups.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\pc.c)
+  pet.c
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\pc_groups.c)
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\pet.c)
+  quest.c
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\pet.c)
+  script.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\script.c)
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\quest.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\quest.c)
+  searchstore.c
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\script.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\searchstore.c)
+  skill.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\skill.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\skill.c)
+  status.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\status.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\status.c)
+  storage.c
+  trade.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\trade.c)
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\storage.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\storage.c)
+  unit.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\unit.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\unit.c)
+  vending.c
+c:\mocharo\src\common\nullpo.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\vending.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\vending.c)
+c:\mocharo\src\map\unit.h : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss (..\src\map\trade.c)
+  map-server_sql.vcxproj -> C:\mocharo\vcproj-12\..\map-server_sql.exe

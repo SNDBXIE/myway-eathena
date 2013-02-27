@@ -1,9 +1,16 @@
-//===== eAthena Script =======================================
-//= Map flags that disable warpto
+//===== rAthena Script =======================================
+//= Mapflag: Disable warpto.
 //===== By: ==================================================
-//= eAthena Dev Team
-//= v 1.3
+//= rAthena Dev Team
 //===== Current Version: =====================================
+//= 1.3
+//===== Compatible With: =====================================
+//= rAthena SVN
+//===== Description: ========================================= 
+//= Disables use of @warp to a map.
+//===== Additional Comments: ================================= 
+//= 1.0 - Initial script.
+//============================================================
 
 // Guild Castles ========================
 //alde_gld	mapflag	nowarpto
@@ -143,3 +150,9 @@ spl_in01	mapflag	nowarpto
 // Poring War ====================
 poring_w01	mapflag	nowarpto
 poring_w02	mapflag	nowarpto
+
+// Bossnia (custom) ==============
+bossnia_01	mapflag	nowarpto
+bossnia_02	mapflag	nowarpto
+bossnia_03	mapflag	nowarpto
+bossnia_04	mapflag	nowarpto

@@ -1,10 +1,17 @@
-//===== eAthena Script =======================================
-//= Map flag that disable party modification.
-//= Currently not used officially by any maps.
+//===== rAthena Script =======================================
+//= Mapflag: Party lock.
 //===== By: ==================================================
-//= eAthena Dev Team
-//= v 1.0
+//= rAthena Dev Team
 //===== Current Version: =====================================
+//= 1.0
+//===== Compatible With: =====================================
+//= rAthena SVN
+//===== Description: ========================================= 
+//= Blocks all party modifications on a map:
+//=   /organize, /leave, /invite, @changeleader
+//===== Additional Comments: ================================= 
+//= 1.0 - Initial script.
+//============================================================
 
 // Sealed Shrine ==================
 1@cata	mapflag	partylock

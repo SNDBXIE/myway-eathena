@@ -7,7 +7,7 @@
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
-//= [Aegis Conversion]
+//= [Official Conversion]
 //= Job quest for Monk classes
 //===== Additional Comments: ================================= 
 //= 2.2 Rescripted to Aegis 10.3 stadards. [L0ne_W0lf]
@@ -2605,10 +2605,6 @@ monk_test,137,338,1	script	switchreset#monkmonk	79,{
 //============================================================ 
 job_monk,0,0,0,0	monster	Thief Mushroom	1182,70,0,0,0
 job_monk,0,0,0,0	monster	Thief Bug Larva	1051,20,0,0,0
-
-//============================================================ 
-// mapflag
-//============================================================ 
 
 //============================================================ 
 // Old changelog
