@@ -3016,7 +3016,7 @@ que_god02,55,64,4	script	Soldier#2_brising	105,1,1,{
 que_god02,1,1,1	script	#brisinsold2	-1,{
 OnInit:
 	hideonnpc "Soldier#2_brising";
-	areawarp "que_god02",100,128,85,3,"geffen",120,100;
+	areawarp "que_god02",15,125,185,131,"geffen",120,100;
 	end;
 
 OnSold2On:
@@ -3037,7 +3037,7 @@ OnTimer540000:
 	end;
 
 OnTimer542000:
-	areawarp "que_god02",1,1,400,400,"geffen",120,100;
+	areawarp "que_god02",15,125,185,131,"geffen",120,100;
 	end;
 
 OnTimer550000:

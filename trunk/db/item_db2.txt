@@ -1,9 +1,8 @@
-// Items Additional Database - Custom Items go here
+// Items Additional Database
 //
 // Structure of Database:
 // ID,Name,Name,Type,Price,Sell,Weight,ATK,DEF,Range,Slot,Job,Upper,Gender,Loc,wLV,eLV,Refineable,View,{ Script },{ OnEquip_Script },{ OnUnequip_Script }
 //
-//Charm Example 2140,Energy_Rune_Guard,Energy Rune Guard,99,50,,70,,,,,0xFFFFFFFF,7,2,,,60,,,{ bonus bMaxSPrate,10; },{},{}
 // THQ Quest Items
 //=============================================================
 //7950,THG_Membership,THG Membership,3,,10,10,,,,,,,,,,,,,{},{},{}
@@ -62,19 +61,3 @@
 //==================================================================
 //2338,Wedding_Dress,Wedding Dress,5,43000,,500,,0,,0,0xFFFFFFFE,7,0,16,,0,1,0,{},{ setoption Option_Wedding,1; },{ setoption Option_Wedding,0; }
 //7170,Tuxedo,Tuxedo,5,43000,,10,,0,,0,0xFFFFFFFE,7,1,16,,0,1,0,{},{ setoption Option_Wedding,1; },{ setoption Option_Wedding,0; }
-// Purchase Shop Items
-//6377,Buy_Stall_Permit,Buy Stall Permit,3,200,,10,,,,,,,,,,,,,{},{},{}
-//12548,Buy_Shabby_Stall_Permit,Buy Shabby Stall Permit,11,500,,10,,,,,0xFFFFFFFF,8,2,,,,,,{ itemskill "ALL_BUYING_STORE",1; },{},{}
-//12622,Reins_Of_Mounts,Reins Of Mounts,2,0,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_ALL_RIDING,99999999,0; getitem 12622,1; },{},{}
-
-// Kagerou/Oboro Exclusive Equips
-13075,Kurenai,Kurenai,4,5000,,700,130,,1,0,0x20000000,7,2,2,3,99,1,1,{ bonus bInt,3; },{},{}
-13076,Nachal_Sword,Nachal Sword,4,40000,,600,120,,1,1,0x20000000,7,2,2,3,110,1,1,{ bonus bInt,3; },{},{}
-13078,Mikacheuki,Mikacheuki,4,40000,,600,50,,1,1,0x20000000,7,2,2,4,100,1,1,{},{},{}
-
-13294,Explosive_Kunai,Explosive Kunai,10,100,,30,50,,,,0x20000000,7,2,32768,,100,,7,{ bonus bAtkEle,Ele_Neutral; },{},{}
-
-13313,Flower_Huuma_Shuriken,Flower Huuma Shuriken,4,100000,,1500,150,,1,2,0x20000000,7,2,34,3,110,1,22,{ /* bonus bWeaponMatk,50; */ bonus bAtkEle,Ele_Fire; },{},{}
-13314,Wave_Huuma_Shuriken,Wave Huuma Shuriken,4,100000,,1500,200,,1,0,0x20000000,7,2,34,4,110,1,22,{ /* bonus bWeaponMatk,50; */ bonus bAtkEle,Ele_Water; },{},{}
-13315,Thunderstorm_Huuma_Shuriken,Thunderstorm Huuma Shuriken,4,100000,,1500,200,,1,0,0x20000000,7,2,34,4,110,1,22,{ /* bonus bWeaponMatk,50; */ bonus bAtkEle,Ele_Wind; },{},{}
-13316,Enhance_Huuma_Shuriken,Enhance Huuma Shuriken,4,20,,1500,55,,1,1,0x20000000,7,2,34,3,1,1,22,{ bonus bUnbreakableWeapon,0; bonus bBaseAtk,10*getrefine(); /* bonus bWeaponMatk,5*getrefine(); */ bonus bLongAtkRate,getrefine(); if(BaseLevel >= 70) { bonus bBaseAtk,5*((BaseLevel-60)/10); } },{},{}

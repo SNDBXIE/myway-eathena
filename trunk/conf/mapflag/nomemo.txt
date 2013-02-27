@@ -1,15 +1,22 @@
-//===== eAthena Script =======================================
-//= Map flags that disable warp portal memory
+//===== rAthena Script =======================================
+//= Mapflag: Disable Warp Portal memory.
 //===== By: ==================================================
-//= eAthena Dev Team
-//= 1.6a added up to Hugel maps. [Lupus]
-//= 1.6b Added job_knt map. [Samuray22]
-//= 1.7 Added all novice maps. [L0ne_W0lf]
-//= 1.8 Added nameless_i location [Lupus]
-//= 1.8a Removed duplicate gef_cas nomemo mapflags [Yommy]
-//= 1.8b Removed duplicate arug_dun01 & schg_dun01 entries [Gepard]
+//= rAthena Dev Team
 //===== Current Version: =====================================
-
+//= 1.8b
+//===== Compatible With: =====================================
+//= rAthena SVN
+//===== Description: ========================================= 
+//= Prevents players from using /memo on a map.
+//= Also disables marriage warp skills.
+//===== Additional Comments: ================================= 
+//= 1.6a - Added up to Hugel maps. [Lupus]
+//= 1.6b - Added job_knt map. [Samuray22]
+//= 1.7 - Added all novice maps. [L0ne_W0lf]
+//= 1.8 - Added nameless_i location. [Lupus]
+//= 1.8a - Removed duplicate gef_cas nomemo mapflags. [Yommy]
+//= 1.8b - Removed duplicate arug_dun01 & schg_dun01 entries. [Gepard]
+//============================================================
 
 // Towns  ====================
 ayo_in01	mapflag	nomemo
@@ -489,13 +496,13 @@ force_4-1	mapflag	nomemo
 force_5-1	mapflag	nomemo
 ordeal_1-1	mapflag	nomemo
 ordeal_1-2	mapflag	nomemo
-ordeal_1-3	mapflag	nomemo
+//ordeal_1-3	mapflag	nomemo
 ordeal_2-1	mapflag	nomemo
 ordeal_2-2	mapflag	nomemo
-ordeal_2-3	mapflag	nomemo
+//ordeal_2-3	mapflag	nomemo
 ordeal_3-1	mapflag	nomemo
 ordeal_3-2	mapflag	nomemo
-ordeal_3-3	mapflag	nomemo
+//ordeal_3-3	mapflag	nomemo
 pvp_c_room	mapflag	nomemo
 quiz_00	mapflag	nomemo
 quiz_01	mapflag	nomemo
@@ -769,3 +776,9 @@ moc_prydn2	mapflag	nomemo
 // Poring War ====================
 poring_w01	mapflag	nomemo
 poring_w02	mapflag	nomemo
+
+// Bossnia (custom) ==============
+bossnia_01	mapflag	nomemo
+bossnia_02	mapflag	nomemo
+bossnia_03	mapflag	nomemo
+bossnia_04	mapflag	nomemo

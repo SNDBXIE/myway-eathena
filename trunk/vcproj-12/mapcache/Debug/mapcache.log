@@ -1,0 +1,10 @@
+﻿  core.c
+  des.c
+  grfio.c
+  malloc.c
+c:\mocharo\src\common\malloc.c : warning C4819: The file contains a character that cannot be represented in the current code page (874). Save the file in Unicode format to prevent data loss
+  showmsg.c
+  strlib.c
+  utils.c
+  mapcache.c
+  mapcache.vcxproj -> C:\mocharo\vcproj-12\..\mapcache.exe

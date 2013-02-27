@@ -4,11 +4,11 @@
 //= (Aegis) Translated by yoshiki, converted by kobra_k88
 //= Further bugfixed and tested by Lupus
 //===== Current Version: ===================================== 
-//= 3.2
+//= 3.3
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
-//= [Aegis Conversion]
+//= [Official Conversion]
 //= Job Change quest for Wizard class.
 //===== Additional Comments: ================================= 
 //= 2.4 Rescripted to Aegis 10.3 standards. [L0ne_W0lf]
@@ -26,6 +26,7 @@
 //= 3.0 Added Quest Log commands. [Kisuka]
 //= 3.1 Removed the need for use of 'goto.' [L0ne_W0lf]
 //= 3.2 Modified the quest to renewal. [Vali] (Thanks to Muad_Dib for the necessary info).
+//= 3.3 Fixed waitingroom bug. [Euphy]
 //============================================================ 
 
 gef_tower,111,37,4	script	Wizard Guildsman	70,{
@@ -1067,11 +1068,9 @@ job_wiz,50,165,4	script	Arena Assistant	700,{
 	mes "Each person may take approximately 5 to 10 minutes.";
 	mes "If you would like to leave the arena, please log off anytime.";
 	close;
-}
 
-job_wiz,50,165,4	script	Waiting Room#wiz	700,{
 OnInit:
-	waitingroom "Waiting Room",20,"Waiting Room#wiz::OnStartArena",1;
+	waitingroom "Waiting Room",20,"Arena Assistant::OnStartArena",1;
 	enablewaitingroomevent;
 	end;
 
@@ -1079,7 +1078,6 @@ OnStartArena:
 	killmonsterall "job_wiz";
 	warpwaitingpc "job_wiz",114,169;
 	donpcevent "Room of Water::OnEnable";
-	disablenpc "Waiting Room#wiz";
 	disablewaitingroomevent;
 	end;
 
@@ -1097,7 +1095,12 @@ OnInit:
 
 OnEnable:
 	enablenpc "Room of Water";
-	set .MyMobs,7;
+	if (!checkre(0)) {
+		set .MyMobs,8;
+		monster "job_wiz",129,170,"Obeaune",1044,1,"Room of Water::OnMyMobDead";
+	}
+	else
+		set .MyMobs,7;
 	monster "job_wiz",109,174,"Phen",1158,1,"Room of Water::OnMyMobDead";
 	monster "job_wiz",118,174,"Shellfish",1074,1,"Room of Water::OnMyMobDead";
 	monster "job_wiz",109,165,"Vadon",1066,1,"Room of Water::OnMyMobDead";
@@ -1175,7 +1178,7 @@ OnTimer185000:
 OnTimer186000:
 	disablenpc "Room of Water#Failed";
 	donpcevent "Room of Water::OnDisable";
-	donpcevent "Waiting Room#wiz::OnStart";
+	donpcevent "Arena Assistant::OnStart";
 	end;
 }
 
@@ -1241,7 +1244,7 @@ OnTimer62000:
 OnTimer63000:
 	disablenpc "Room of Water#Failed";
 	donpcevent "Room of Water#Door::OnDisable";
-	donpcevent "Waiting Room#wiz::OnStart";
+	donpcevent "Arena Assistant::OnStart";
 	end;
 }
 
@@ -1265,7 +1268,14 @@ OnInit:
 
 OnEnable:
 	enablenpc "Room of Earth";
-	set .MyMobs,7;
+	if (!checkre(0)) {
+		set .MyMobs,10;
+		monster "job_wiz",120,102,"Hode",1127,1,"Room of Earth::OnMyMobDead";
+		monster "job_wiz",111,93,"Savage",1166,1,"Room of Earth::OnMyMobDead";
+		monster "job_wiz",127,86,"Mantis",1139,1,"Room of Earth::OnMyMobDead";
+	}
+	else
+		set .MyMobs,7;
 	monster "job_wiz",111,102,"Yoyo",1057,1,"Room of Earth::OnMyMobDead";
 	monster "job_wiz",120,102,"Deniro",1105,1,"Room of Earth::OnMyMobDead";
 	monster "job_wiz",111,102,"Caramel",1103,1,"Room of Earth::OnMyMobDead";
@@ -1342,7 +1352,7 @@ OnTimer185000:
 OnTimer186000:
 	disablenpc "Room of Earth#Failed";
 	donpcevent "Room of Earth::OnDisable";
-	donpcevent "Waiting Room#wiz::OnStart";
+	donpcevent "Arena Assistant::OnStart";
 	end;
 }
 
@@ -1354,7 +1364,12 @@ OnInit:
 OnEnable:
 	enablenpc "Room of Earth#Door";
 	donpcevent "Room of Earth::OnDisable";
-	set .MyMobs,6;
+	if (!checkre(0)) {
+		set .MyMobs,7;
+		monster "job_wiz",116,97,"Flora",1118,1,"Room of Earth#Door::OnMyMobDead";
+	}
+	else
+		set .MyMobs,6;
 	monster "job_wiz",114,95,"Mandragora",1020,1,"Room of Earth#Door::OnMyMobDead";
 	monster "job_wiz",118,95,"Mandragora",1020,1,"Room of Earth#Door::OnMyMobDead";
 	monster "job_wiz",114,99,"Mandragora",1020,1,"Room of Earth#Door::OnMyMobDead";
@@ -1409,7 +1424,7 @@ OnTimer62000:
 OnTimer63000:
 	disablenpc "Room of Earth#Failed";
 	donpcevent "Room of Earth#Door::OnDisable";
-	donpcevent "Waiting Room#wiz::OnStart";
+	donpcevent "Arena Assistant::OnStart";
 	end;
 }
 
@@ -1433,7 +1448,13 @@ OnInit:
 
 OnEnable:
 	enablenpc "Room of Fire";
-	set .MyMobs,6;
+	if (!checkre(0)) {
+		set .MyMobs,8;
+		monster "job_wiz",58,110,"Zerom",1178,1,"Room of Fire::OnMyMobDead";
+		monster "job_wiz",54,89,"Desert Wolf",1106,1,"Room of Fire::OnMyMobDead";
+	}
+	else
+		set .MyMobs,6;
 	monster "job_wiz",33,110,"Goblin",1123,1,"Room of Fire::OnMyMobDead";
 	monster "job_wiz",40,103,"Scorpion",1001,1,"Room of Fire::OnMyMobDead";
 	monster "job_wiz",51,103,"Frilldora",1119,1,"Room of Fire::OnMyMobDead";
@@ -1509,7 +1530,7 @@ OnTimer185000:
 OnTimer186000:
 	disablenpc "Room of Fire#Failed";
 	donpcevent "Room of Fire::OnDisable";
-	donpcevent "Waiting Room#wiz::OnStart";
+	donpcevent "Arena Assistant::OnStart";
 	end;
 }
 
@@ -1523,8 +1544,14 @@ OnEnable:
 	donpcevent "Room of Fire::OnDisable";
 	set .MyMobs,3;
 	monster "job_wiz",44,99,"Greatest General",1277,1,"Room of Fire#Door::OnMyMobDead";
-	monster "job_wiz",43,99,"Greatest General",1277,1,"Room of Fire#Door::OnMyMobDead";
-	monster "job_wiz",45,99,"Greatest General",1277,1,"Room of Fire#Door::OnMyMobDead";
+	if (checkre(0)) {
+		monster "job_wiz",43,99,"Greatest General",1277,1,"Room of Fire#Door::OnMyMobDead";
+		monster "job_wiz",45,99,"Greatest General",1277,1,"Room of Fire#Door::OnMyMobDead";
+	}
+	else {
+		monster "job_wiz",43,99,"Horong",1129,1,"Room of Fire#Door::OnMyMobDead";
+		monster "job_wiz",45,99,"Horong",1129,1,"Room of Fire#Door::OnMyMobDead";
+	}
 	initnpctimer;
 	end;
 
@@ -1581,7 +1608,7 @@ OnTimer122000:
 OnTimer123000:
 	disablenpc "Room of Fire#Failed";
 	donpcevent "Room of Fire#Door::OnDisable";
-	donpcevent "Waiting Room#wiz::OnStart";
+	donpcevent "Arena Assistant::OnStart";
 }
 
 job_wiz,46,99,0	script	Room of Fire#Failed	-1,16,16,{
@@ -1627,7 +1654,7 @@ OnTimer7000:
 
 OnTimer9000:
 	donpcevent "Test Helper#wiz::OnDisable";
-	donpcevent "Waiting Room#wiz::OnStart";
+	donpcevent "Arena Assistant::OnStart";
 	stopnpctimer;
 	end;
 }

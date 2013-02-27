@@ -9,7 +9,7 @@
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
-//= [Aegis Conversion]
+//= [Official Conversion]
 //= Job quest for Sage classes
 //===== Additional Comments: ================================= 
 //= 2.1 Rescripted to Aegis 10.3 stadards. [L0ne_W0lf]
@@ -2560,6 +2560,8 @@ job_sage,50,165,4	script	Test Helper#talk	700,{
 }
 
 job_sage,50,165,4	script	Waiting Room#sg	700,{
+	end;
+
 OnInit:
 	disablenpc "Waiting Room#sg";
 	waitingroom "Waiting Room",20,"Waiting Room#sg::OnStartArena",1;
@@ -2890,10 +2892,6 @@ OnTimer9000:
 	stopnpctimer;
 	end;
 }
-
-//============================================================ 
-// Mapflag
-//============================================================ 
 
 //============================================================ 
 // Old changelog

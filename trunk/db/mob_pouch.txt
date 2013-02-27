@@ -1,8 +1,8 @@
 // Red Pouch of Surprise Summonable Monsters Database
 //
 // Structure of Database:
-// Mob_ID,Label,Chance (100% = 1000000)
-//==============================================================
+// MobID,DummyName,Rate
+
 0,Poring,1002
 1001,Scorpion,214285
 1002,Poring,1000000
@@ -315,7 +315,7 @@
 1512,Yao Jun,71428
 1513,Mao Guai,71428
 1514,Zhu Po Long,71428
-1515,Garm Baby,71428
+1515,Baby Hatii,71428
 1516,Mi Gao,71428
 1517,Jing Guai,71428
 1519,Green Maiden,71428
@@ -333,4 +333,4 @@
 1619,Porcellio,71428
 1620,Noxious,71428
 1621,Venomous,71428
-1622,Teddy Bear,71428
+1622,Teddy Bear,142857

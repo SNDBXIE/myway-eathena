@@ -109,7 +109,7 @@ nif_in,16,30,4	script	Undead Familiar#nif	799,{
 	close;
 }
 
-nif_in,156,93,5	script	Child#nifflheim	793,{
+nif_in,156,93,5	script	Child#niflheim	793,{
 	mes "[Alakina Ann]";
 	mes "Where...where am I...?";
 	mes "I remember I was sleeping";

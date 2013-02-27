@@ -21,10 +21,9 @@
 //= 1.6 removed swordman quest map warps. They are now contained in the swordman quest. [L0ne_W0lf]
 //= 1.7 Updated some 2-2 job quest related warps. [L0ne_W0lf]
 //= 1.8 Corrected NPC names to fall within proper restrictions. [L0ne_W0lf]
-//= 1.9 Added Gungslinger and NInja warps. [L0ne_W0lf]
+//= 1.9 Added Gungslinger and Ninja warps. [L0ne_W0lf]
 //= 2.0 Updated Novice warps to use correct maps. [L0ne_W0lf]
 //============================================================
-
 
 //==============================================================================
 //Novice
@@ -40,7 +39,6 @@ new_1-2,46,172,0	warp	newwarp6006	2,2,new_1-2,78,106
 //Thief
 //==============================================================================
 job_thief1,180,15,0	warp	jthf	7,1,moc_ruins,145,117
-
 
 //==============================================================================
 // Assassin

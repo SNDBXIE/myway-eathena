@@ -7,7 +7,7 @@
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: =========================================
-//= [Aegis Conversion]
+//= [Official Conversion]
 //= Cool Event Corp NPCs vs. Kafra Dungeon Teleport Service and voting system.
 //= This is a special event on official servers where there's a
 //= big competition between Kafra Corp. and Cool Event Corp.
@@ -1180,7 +1180,7 @@ sec_in02,17,160,4	script	Vote Globalvar Girl#yuno	864,{
 	mes "Lady Christy!";
 	next;
 	input .@input,0,9000;
-	if (input == 1854) {
+	if (.@input == 1854) {
 		mes "[Christy's Maid]";
 		mes "I am Lady Christy's Maid.";
 		next;

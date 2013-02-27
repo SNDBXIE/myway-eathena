@@ -3,7 +3,7 @@
 //===== By: ================================================== 
 //= Gepard
 //===== Current Version: ===================================== 
-//= 1.1
+//= 1.1a
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
@@ -12,16 +12,17 @@
 //===== Additional Comments: ================================= 
 //= 1.0 First version.
 //= 1.1 Duplicates now spawn from floating NPCs. [L0ne_W0lf]
+//= 1.1a Added 'disable_items' command. [Euphy]
 //============================================================ 
 
 -	script	Leablem#dummy::SocketEnchant2	-1,{
 	if (checkweight(1201,1) == 0)
 	{
-		mes "- Wait a seconds !! -";
-		mes "- You have carried too many items -";
-		mes "- so, you can't get more items. -";
-		mes "- Make your weight as low -";
-		mes "- after then try it again. -";
+		mes "- Wait a minute !! -";
+		mes "- Currently you're carrying -";
+		mes "- too many items with you. -";
+		mes "- Please try again -";
+		mes "- after you lose some weight. -";
 		close;
 	}
 	mes "[Leablem]";
@@ -380,11 +381,12 @@
 
 payon,236,199,3	duplicate(SocketEnchant2)	Leablem#pay	86
 lighthalzen,96,137,3	duplicate(SocketEnchant2)	Leablem#lhz	86
-prontera,244,169,5	duplicate(SocketEnchant2)	Leablem#prt	86
+prt_in,22,60,6	duplicate(SocketEnchant2)	Leablem#prt	86
 moc_ruins,154,86,3	duplicate(SocketEnchant2)	Leablem#moc	86
 
 function	script	Func_Socket2	{
 
+	disable_items;
 	mes "[Leablem]";
 	if(getarg(7,0) != 0 && getarg(8,0) != 0)
 	{
