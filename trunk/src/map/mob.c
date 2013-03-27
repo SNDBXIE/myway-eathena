@@ -415,7 +415,7 @@ bool mob_ksprotected (struct block_list *src, struct block_list *target)
 		return true;
 	} while(0);
 
-	status_change_start(target, SC_KSPROTECTED, 10000, sd->bl.id, sd->state.noks, sd->status.party_id, sd->status.guild_id, battle_config.ksprotection, 0);
+	status_change_start(src, target, SC_KSPROTECTED, 10000, sd->bl.id, sd->state.noks, sd->status.party_id, sd->status.guild_id, battle_config.ksprotection, 0);
 
 	return false;
 }
@@ -505,7 +505,7 @@ int mob_once_spawn(struct map_session_data* sd, int16 m, int16 x, int16 y, const
 		if (class_ < 0 && battle_config.dead_branch_active)
 			//Behold Aegis's masterful decisions yet again...
 			//"I understand the "Aggressive" part, but the "Can Move" and "Can Attack" is just stupid" - Poki#3
-			sc_start4(&md->bl, SC_MODECHANGE, 100, 1, 0, MD_AGGRESSIVE|MD_CANATTACK|MD_CANMOVE|MD_ANGRY, 0, 60000);
+			sc_start4(NULL,&md->bl, SC_MODECHANGE, 100, 1, 0, MD_AGGRESSIVE|MD_CANATTACK|MD_CANMOVE|MD_ANGRY, 0, 60000);
 	}
 
 	return (md) ? md->bl.id : 0; // id of last spawned mob
@@ -919,7 +919,14 @@ int mob_spawn (struct mob_data *md)
 		md->bl.m = md->spawn->m;
 		md->bl.x = md->spawn->x;
 		md->bl.y = md->spawn->y;
-
+		
+		//Boss Delay on restart [clydelion]
+		if (md->spawn->spawn_status == 0 && md->db->mexp) {
+			md->spawn->spawn_status = 1;
+			md->spawn_timer = add_timer(tick+1000*60*5+(rand()%1000*60*40), mob_delayspawn, md->bl.id, 0); // 5-45 minutes, adjust this to your desired delay
+			return 1;
+		}
+		
 		if( (md->bl.x == 0 && md->bl.y == 0) || md->spawn->xs || md->spawn->ys )
 		{	//Monster can be spawned on an area.
 			if( !map_search_freecell(&md->bl, -1, &md->bl.x, &md->bl.y, md->spawn->xs, md->spawn->ys, battle_config.no_spawn_on_player?4:0) )
@@ -1836,7 +1843,7 @@ static int mob_delay_item_drop(int tid, unsigned int tick, int id, intptr_t data
  * Sets the item_drop into the item_drop_list.
  * Also performs logging and autoloot if enabled.
  * rate is the drop-rate of the item, required for autoloot.
- * flag : Killed only by AI (Mer-Hom)?
+ * flag : Killed only by homunculus?
  *------------------------------------------*/
 static void mob_item_drop(struct mob_data *md, struct item_drop_list *dlist, struct item_drop *ditem, int loot, int drop_rate, unsigned short flag)
 {
@@ -2295,7 +2302,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			{
 				if( md->dmglog[i].flag != MDLF_PET || battle_config.pet_attack_exp_to_master ) {
 #ifdef RENEWAL_EXP
-					int rate = pc_level_penalty_mod(tmpsd[i], md, 1);
+					int rate = pc_level_penalty_mod(tmpsd[i], md->level, md->status.race, md->status.mode, 1);
 					base_exp = (unsigned int)cap_value(base_exp * rate / 100, 1, UINT_MAX);
 					job_exp = (unsigned int)cap_value(job_exp * rate / 100, 1, UINT_MAX);
 #endif
@@ -2325,9 +2332,9 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 		struct item_data* it = NULL;
 		int drop_rate,temp_rate;
 #ifdef RENEWAL_DROP
-		int drop_modifier = mvp_sd    ? pc_level_penalty_mod(mvp_sd, md, 2)   :
-							second_sd ? pc_level_penalty_mod(second_sd, md, 2):
-							third_sd  ? pc_level_penalty_mod(third_sd, md, 2) :
+		int drop_modifier = mvp_sd    ? pc_level_penalty_mod(mvp_sd, md->level, md->status.race, md->status.mode, 2)   :
+							second_sd ? pc_level_penalty_mod(second_sd, md->level, md->status.race, md->status.mode, 2):
+							third_sd  ? pc_level_penalty_mod(third_sd, md->level, md->status.race, md->status.mode, 2) :
 							100;/* no player was attached, we dont use any modifier (100 = rates are not touched) */
 #endif
 		dlist->m = md->bl.m;
@@ -2420,9 +2427,36 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				//MSG: "'%s' won %s's %s (chance: %0.02f%%)"
 				intif_broadcast(message,strlen(message)+1,0);
 			}
+			
+			//specify drop item announce
+			if(mvp_sd) 
+			{
+                struct item_data *dd = NULL;
+                char anme[128];
+                dd = itemdb_search(ditem->item_data.nameid);
+            	if(dd->ann==1){
+                    sprintf (anme, msg_txt(541), mvp_sd->status.name, md->name, dd->jname, (float)drop_rate/100);
+                    //MSG: "'%s' won %s's %s (chance: %0.02f%%)"
+                	intif_broadcast(anme,strlen(anme)+1,0);
+				}
+			}  
+			
 			// Announce first, or else ditem will be freed. [Lance]
 			// By popular demand, use base drop rate for autoloot code. [Skotlex]
 			mob_item_drop(md, dlist, ditem, 0, md->db->dropitem[i].p, homkillonly);
+		}
+		
+		// Mapflag 'mobitemadder' (Zephyr)
+		if( map[m].mobitemadder_droplist[0].mob_id == md->class_ ) {
+			for( i = 1; i < sizeof( map[m].mobitemadder_droplist ); i = i + 1 ) {
+				drop_rate = map[m].mobitemadder_droplist[i].item_per;
+				if( rand() % 10000 > drop_rate )
+					continue;
+				if( !ditem || !itemdb_exists( map[m].mobitemadder_droplist[i].item_id ) )
+					continue;
+				ditem = mob_setdropitem( map[m].mobitemadder_droplist[i].item_id, 1 );
+				mob_item_drop(md, dlist, ditem, 0, map[m].mobitemadder_droplist[i].item_per, homkillonly);
+			}
 		}
 
 		// Ore Discovery [Celest]
@@ -2559,6 +2593,19 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 					//MSG: "'%s' won %s's %s (chance: %0.02f%%)"
 					intif_broadcast(message,strlen(message)+1,0);
 				}
+				
+				//specify drop item announce
+				if(mvp_sd) 
+				{
+					struct item_data *dd = NULL;
+                    char anme[128];
+                    dd = itemdb_search(item.nameid);
+                    if(dd->ann==1){
+                    	sprintf (anme, msg_txt(541), mvp_sd->status.name, md->name, dd->jname, (float)temp/100);
+                        //MSG: "'%s' won %s's %s (chance: %0.02f%%)"
+                        intif_broadcast(anme,strlen(anme)+1,0);
+					}
+            	}
 
 				if((temp = pc_additem(mvp_sd,&item,1,LOG_TYPE_PICKDROP_PLAYER)) != 0) {
 					clif_additem(mvp_sd,0,0,temp);
@@ -2582,11 +2629,13 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 	if( !rebirth ) { // Only trigger event on final kill
 		md->status.hp = 0; //So that npc_event invoked functions KNOW that mob is dead
 		if( src ) {
-			switch( src->type ) {
-				case BL_PET: sd = ((TBL_PET*)src)->msd; break;
-				case BL_HOM: sd = ((TBL_HOM*)src)->master; break;
-				case BL_MER: sd = ((TBL_MER*)src)->master; break;
-				case BL_ELEM: sd = ((TBL_ELEM*)src)->master; break;
+			switch( src->type ) { //allowed type
+				case BL_PET:
+				case BL_HOM:
+				case BL_MER:
+				case BL_ELEM:
+				case BL_MOB:
+				    sd = BL_CAST(BL_PC,battle_get_master(src));
 			}
 		}
 
@@ -2958,17 +3007,17 @@ int mob_summonslave(struct mob_data *md2,int *value,int amount,uint16 skill_id)
 			switch (battle_config.slaves_inherit_mode) {
 			case 1: //Always aggressive
 				if (!(md->status.mode&MD_AGGRESSIVE))
-					sc_start4(&md->bl, SC_MODECHANGE, 100,1,0, MD_AGGRESSIVE, 0, 0);
+					sc_start4(NULL,&md->bl, SC_MODECHANGE, 100,1,0, MD_AGGRESSIVE, 0, 0);
 				break;
 			case 2: //Always passive
 				if (md->status.mode&MD_AGGRESSIVE)
-					sc_start4(&md->bl, SC_MODECHANGE, 100,1,0, 0, MD_AGGRESSIVE, 0);
+					sc_start4(NULL,&md->bl, SC_MODECHANGE, 100,1,0, 0, MD_AGGRESSIVE, 0);
 				break;
 			default: //Copy master.
 				if (md2->status.mode&MD_AGGRESSIVE)
-					sc_start4(&md->bl, SC_MODECHANGE, 100,1,0, MD_AGGRESSIVE, 0, 0);
+					sc_start4(NULL,&md->bl, SC_MODECHANGE, 100,1,0, MD_AGGRESSIVE, 0, 0);
 				else
-					sc_start4(&md->bl, SC_MODECHANGE, 100,1,0, 0, MD_AGGRESSIVE, 0);
+					sc_start4(NULL,&md->bl, SC_MODECHANGE, 100,1,0, 0, MD_AGGRESSIVE, 0);
 				break;
 			}
 		}

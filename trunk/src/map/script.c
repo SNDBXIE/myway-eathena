@@ -401,7 +401,8 @@ enum {
 	MF_MONSTER_NOTELEPORT,
 	MF_PVP_NOCALCRANK,	//50
 	MF_BATTLEGROUND,
-	MF_RESET
+	MF_RESET,
+	MF_MOBCANTATTACKPLAYER
 };
 
 const char* script_op2name(int op)
@@ -4395,7 +4396,7 @@ BUILDIN_FUNC(close)
 	if( sd == NULL )
 		return 0;
 
-	st->state = CLOSE;
+	st->state = END; //Should be CLOSE, but breaks backwards compatibility.
 	clif_scriptclose(sd, st->oid);
 	return 0;
 }
@@ -7966,6 +7967,29 @@ BUILDIN_FUNC(downrefitem)
 }
 
 /*==========================================
+ * Delete the item equipped at pos.
+ *------------------------------------------*/
+BUILDIN_FUNC(delequip)
+{
+	int i=-1,num;
+	TBL_PC *sd;
+
+	num = script_getnum(st,2);
+	sd = script_rid2sd(st);
+	if( sd == NULL )
+		return 0;
+
+	if (num > 0 && num <= ARRAYLENGTH(equip))
+		i=pc_checkequip(sd,equip[num-1]);
+	if(i >= 0) {
+		pc_unequipitem(sd,i,3); //recalculate bonus
+		pc_delitem(sd,i,1,0,2,LOG_TYPE_SCRIPT);
+	}
+
+	return 0;
+}
+
+/*==========================================
  *
  *------------------------------------------*/
 BUILDIN_FUNC(statusup)
@@ -10034,7 +10058,7 @@ BUILDIN_FUNC(sc_start)
 	}
 
 	if( bl )
-		status_change_start(bl, type, 10000, val1, 0, 0, val4, tick, 2);
+		status_change_start(NULL, bl, type, 10000, val1, 0, 0, val4, tick, 2);
 
 	return 0;
 }
@@ -10073,7 +10097,7 @@ BUILDIN_FUNC(sc_start2)
 	}
 
 	if( bl )
-		status_change_start(bl, type, rate, val1, 0, 0, val4, tick, 2);
+		status_change_start(NULL, bl, type, rate, val1, 0, 0, val4, tick, 2);
 
 	return 0;
 }
@@ -10114,7 +10138,7 @@ BUILDIN_FUNC(sc_start4)
 	}
 
 	if( bl )
-		status_change_start(bl, type, 10000, val1, val2, val3, val4, tick, 2);
+		status_change_start(NULL, bl, type, 10000, val1, val2, val3, val4, tick, 2);
 
 	return 0;
 }
@@ -10186,7 +10210,7 @@ BUILDIN_FUNC(getscrate)
 		bl = map_id2bl(st->rid);
 
 	if (bl)
-		rate = status_get_sc_def(bl, (sc_type)type, 10000, 10000, 0);
+		rate = status_get_sc_def(NULL,bl, (sc_type)type, 10000, 10000, 0);
 
 	script_pushint(st,rate);
 	return 0;
@@ -10881,6 +10905,7 @@ BUILDIN_FUNC(getmapflag)
 			case MF_PVP_NOCALCRANK:		script_pushint(st,map[m].flag.pvp_nocalcrank); break;
 			case MF_BATTLEGROUND:		script_pushint(st,map[m].flag.battleground); break;
 			case MF_RESET:				script_pushint(st,map[m].flag.reset); break;
+			case MF_MOBCANTATTACKPLAYER:	script_pushint(st,map[m].flag.mobcantattackplayer); break;
 		}
 	}
 
@@ -10980,6 +11005,7 @@ BUILDIN_FUNC(setmapflag)
 			case MF_PVP_NOCALCRANK:		map[m].flag.pvp_nocalcrank = 1; break;
 			case MF_BATTLEGROUND:		map[m].flag.battleground = (val <= 0 || val > 2) ? 1 : val; break;
 			case MF_RESET:				map[m].flag.reset = 1; break;
+			case MF_MOBCANTATTACKPLAYER:	map[m].flag.mobcantattackplayer = 1; break;
 		}
 	}
 
@@ -11066,6 +11092,7 @@ BUILDIN_FUNC(removemapflag)
 			case MF_PVP_NOCALCRANK:		map[m].flag.pvp_nocalcrank = 0; break;
 			case MF_BATTLEGROUND:		map[m].flag.battleground = 0; break;
 			case MF_RESET:				map[m].flag.reset = 0; break;
+			case MF_MOBCANTATTACKPLAYER:	map[m].flag.mobcantattackplayer = 0; break;
 		}
 	}
 
@@ -13375,7 +13402,7 @@ BUILDIN_FUNC(summon)
 		md->deletetimer = add_timer(tick+(timeout>0?timeout*1000:60000),mob_timer_delete,md->bl.id,0);
 		mob_spawn (md); //Now it is ready for spawning.
 		clif_specialeffect(&md->bl,344,AREA);
-		sc_start4(&md->bl, SC_MODECHANGE, 100, 1, 0, MD_AGGRESSIVE, 0, 60000);
+		sc_start4(NULL,&md->bl, SC_MODECHANGE, 100, 1, 0, MD_AGGRESSIVE, 0, 60000);
 	}
 	return 0;
 }
@@ -15933,7 +15960,7 @@ BUILDIN_FUNC(mercenary_sc_start)
 	tick = script_getnum(st,3);
 	val1 = script_getnum(st,4);
 
-	status_change_start(&sd->md->bl, type, 10000, val1, 0, 0, 0, tick, 2);
+	status_change_start(NULL, &sd->md->bl, type, 10000, val1, 0, 0, 0, tick, 2);
 	return 0;
 }
 
@@ -16937,6 +16964,13 @@ BUILDIN_FUNC(buyingstore)
 		return 0;
 	}
 
+	if( npc_isnear(&sd->bl) ) {
+		char output[150];
+		sprintf(output, msg_txt(662), battle_config.min_npc_vendchat_distance);
+		clif_displaymessage(sd->fd, output);
+		return 0;
+	}
+
 	buyingstore_setup(sd, script_getnum(st,2));
 	return 0;
 }
@@ -17563,6 +17597,36 @@ BUILDIN_FUNC(consumeitem)
 	return 0;
 }
 
+/* Make a player sit/stand.
+ * sit {"<character name>"};
+ * stand {"<character name>"};
+ * Note: Use readparam(Sitting) which returns 1 or 0 (sitting or standing). */
+BUILDIN_FUNC(sit)
+{
+	TBL_PC *sd;
+
+	if( script_hasdata(st, 2) )
+		sd = map_nick2sd(script_getstr(st, 2));
+	else
+		sd = script_rid2sd(st);
+
+	if( sd == NULL)
+		return 0;
+
+	if( pc_issit(sd) ) {
+		pc_setstand(sd);
+		skill_sit(sd, 0);
+		clif_standing(&sd->bl);
+	} else {
+		unit_stop_walking(&sd->bl, 1|4);
+		pc_setsit(sd);
+		skill_sit(sd, 1);
+		clif_sitting(&sd->bl);
+	}
+
+	return 0;
+}
+
 //Monster Defence [Goddameit]
 BUILDIN_FUNC(getmobxy)
 {
@@ -17639,6 +17703,123 @@ BUILDIN_FUNC(getequippedon)
 	}
 	else
 		script_pushint(st,0);
+	return 0;
+}
+
+/*==========================================
+ * send mail via scriptcommand [clydelion]
+ * usage:
+ * sendmail <Recipient's Char ID>,"<Sender's Name>","<Title>","<Body>",<zeny>,<item_id>,<amount>{,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>};
+ *------------------------------------------*/
+BUILDIN_FUNC(sendmail) {
+	struct mail_message msg;
+	struct item item_tmp;
+	struct item_data *item_data;
+	int item,amount,a,zeny;
+	int ref = 0,attr = 0, c1 = 0, c2 = 0, c3 = 0, c4 = 0;
+	const char* b;
+	const char* c;
+	const char* d;
+	TBL_PC *sd;
+	struct script_data *data;
+
+	memset(&msg,0,sizeof(msg));
+	
+	a=script_getnum(st,2); //Recipient's Char ID
+	b=script_getstr(st,3); //Sender's Name
+	c=script_getstr(st,4); //Title
+	d=script_getstr(st,5); //Body
+	zeny=script_getnum(st,6); //zeny amount
+	
+	data=script_getdata(st,7); //Item name/ID
+	get_val(st,data);
+	if( data_isstring(data) ){
+		const char *name=conv_str(st,data);
+		struct item_data *item_data = itemdb_searchname(name);
+		if( item_data )
+			item=item_data->nameid;
+		else
+			item=UNKNOWN_ITEM_ID;
+	}else
+		item=conv_num(st,data);
+	
+	//Amount
+	amount=script_getnum(st,8);
+	
+	//Refine
+	if( script_hasdata(st,9) )
+		ref=script_getnum(st,9);
+	
+	// Attribute
+	if( script_hasdata(st,10) )
+		attr=script_getnum(st,10);
+	
+	// Cards
+	if( script_hasdata(st,11) ) 
+		c1=(short)script_getnum(st,11);
+	if( script_hasdata(st,12) )
+		c2=(short)script_getnum(st,12);
+	if( script_hasdata(st,13) )
+		c3=(short)script_getnum(st,13);
+	if( script_hasdata(st,14) )
+		c4=(short)script_getnum(st,14);
+
+	if(!(sd = map_charid2sd(a)))
+		return 0;
+
+	msg.id = 0;
+	msg.send_id = 0;
+	msg.dest_id = a;
+	if(strlen(b) > 0) //Sender's Name
+		safestrncpy(msg.send_name, b, NAME_LENGTH);
+	else
+		safestrncpy(msg.send_name, wisp_server_name, NAME_LENGTH);
+
+	safestrncpy(msg.dest_name, sd->status.name, NAME_LENGTH);
+	
+	if(strlen(c) > 0) //Title
+		safestrncpy(msg.title, c, MAIL_TITLE_LENGTH);
+	else
+	{
+		static char c2[256];
+		snprintf(c2, sizeof(c2), "noreply@%s", wisp_server_name);
+		safestrncpy(msg.title, c2, MAIL_TITLE_LENGTH);
+	}
+	
+	if((item_data=itemdb_exists(item)) && amount > 0)
+	{
+		memset(&item_tmp,0,sizeof(item_tmp));
+		if (item_data == NULL)
+			return -1;
+		if(item_data->type==IT_WEAPON || item_data->type==IT_ARMOR){
+			if(ref > MAX_REFINE) ref = MAX_REFINE;
+		}
+		else if(item_data->type==IT_PETEGG)
+			ref = 0;
+		else
+			ref = attr = 0;
+
+		if (!itemdb_isstackable(item))
+			amount = 1;
+		item_tmp.nameid   = item;
+		item_tmp.identify = 1;
+		item_tmp.amount = amount;
+		item_tmp.refine=ref;
+		item_tmp.attribute=attr;
+		item_tmp.card[0]=(short)c1;
+		item_tmp.card[1]=(short)c2;
+		item_tmp.card[2]=(short)c3;
+		item_tmp.card[3]=(short)c4;
+		memcpy(&msg.item, &item_tmp, sizeof(struct item));
+	}
+	msg.zeny = zeny;
+	
+	safestrncpy(msg.body, d, MAIL_BODY_LENGTH);
+	
+	msg.timestamp = time(NULL);
+	
+	intif_Mail_send(sd->status.account_id, &msg);
+	
 	return 0;
 }
 
@@ -18087,6 +18268,9 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF2(cleanmap,"cleanarea","siiii"),
 	BUILDIN_DEF(npcskill,"viii"),
 	BUILDIN_DEF(consumeitem,"v"),
+	BUILDIN_DEF(delequip,"i"),
+	BUILDIN_DEF(sit,"?"),
+	BUILDIN_DEF2(sit,"stand","?"),
 	/**
 	 * @commands (script based)
 	 **/
@@ -18107,5 +18291,6 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getmapmobs,"s"),
 
 	BUILDIN_DEF(getequippedon,""),
+	BUILDIN_DEF(sendmail,"isssivi??????"), // [clydelion]
 	{NULL,NULL,NULL},
 };

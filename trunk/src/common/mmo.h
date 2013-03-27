@@ -98,7 +98,7 @@
 #define MAX_GUILDSKILL	15 // increased max guild skills because of new skills [Sara-chan]
 #define MAX_GUILDLEVEL 50
 #define MAX_GUARDIANS 8	//Local max per castle. [Skotlex]
-#define MAX_QUEST_DB 2300 //Max quests that the server will load
+#define MAX_QUEST_DB 2400 //Max quests that the server will load
 #define MAX_QUEST_OBJECTIVES 3 //Max quest objectives for a quest
 
 // for produce
@@ -152,7 +152,7 @@
 //Mercenary System
 #define MC_SKILLBASE 8201
 #define MAX_MERCSKILL 40
-#define MAX_MERCENARY_CLASS 44
+#define MAX_MERCENARY_CLASS 61
 
 //Elemental System
 #define MAX_ELEMENTALSKILL 42
@@ -382,6 +382,9 @@ struct mmo_charstatus {
 	short rename;
 
 	time_t delete_date;
+
+	// Char server addon system
+	unsigned int character_moves;
 };
 
 typedef enum mail_status {
@@ -610,6 +613,7 @@ enum {
 	JOB_NINJA,
 	JOB_XMAS,
 	JOB_SUMMER,
+	JOB_HANBOK,
 	JOB_MAX_BASIC,
 
 	JOB_NOVICE_HIGH = 4001,
@@ -713,7 +717,6 @@ enum {
 	JOB_BABY_BISHOP,
 	JOB_BABY_MECHANIC,
 	JOB_BABY_CROSS,
-
 	JOB_BABY_GUARD,
 	JOB_BABY_SORCERER,
 	JOB_BABY_MINSTREL,

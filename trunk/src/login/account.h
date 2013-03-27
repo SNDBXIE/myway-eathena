@@ -42,6 +42,7 @@ struct mmo_account
 	char sex;               // gender (M/F/S)
 	char email[40];         // e-mail (by default: a@a.com)
 	int group_id;           // player group id
+	uint8 char_slots;       // this accounts maximum character slots (maximum is limited to MAX_CHARS define in char server)
 	unsigned int state;     // packet 0x006a value + 1 (0: compte OK)
 	time_t unban_time;      // (timestamp): ban time limit of the account (0 = no ban)
 	time_t expiration_time; // (timestamp): validity limit of the account (0 = unlimited)
@@ -49,6 +50,8 @@ struct mmo_account
 	char lastlogin[24];     // date+time of last successful login
 	char last_ip[16];       // save of last IP of connection
 	char birthdate[10+1];   // assigned birth date (format: YYYY-MM-DD, default: 0000-00-00)
+	char pincode[4+1];		// pincode system
+	time_t pincode_change;	// (timestamp): last time of pincode change
 	int account_reg2_num;
 	struct global_reg account_reg2[ACCOUNT_REG2_NUM]; // account script variables (stored on login server)
 };

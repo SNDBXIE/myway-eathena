@@ -105,6 +105,7 @@ enum {
 	MAPID_NINJA,
 	MAPID_XMAS,
 	MAPID_SUMMER,
+	MAPID_HANBOK,
 	MAPID_GANGSI,
 //2-1 Jobs
 	MAPID_SUPER_NOVICE = JOBL_2_1|0x0,
@@ -116,7 +117,7 @@ enum {
 	MAPID_ASSASSIN,
 	MAPID_STAR_GLADIATOR,
 	MAPID_KAGEROUOBORO = JOBL_2_1|0x0A,
-	MAPID_DEATH_KNIGHT = JOBL_2_1|0x0D,
+	MAPID_DEATH_KNIGHT = JOBL_2_1|0x0E,
 //2-2 Jobs
 	MAPID_CRUSADER = JOBL_2_2|0x1,
 	MAPID_SAGE,
@@ -125,7 +126,7 @@ enum {
 	MAPID_ALCHEMIST,
 	MAPID_ROGUE,
 	MAPID_SOUL_LINKER,
-	MAPID_DARK_COLLECTOR = JOBL_2_2|0x0D,
+	MAPID_DARK_COLLECTOR = JOBL_2_2|0x0E,
 //Trans Novice And Trans 1-1 Jobs
 	MAPID_NOVICE_HIGH = JOBL_UPPER|0x0,
 	MAPID_SWORDMAN_HIGH,
@@ -342,6 +343,7 @@ struct spawn_data {
 		unsigned int boss : 1; //0: Non-boss monster | 1: Boss monster
 	} state;
 	char name[NAME_LENGTH], eventname[EVENT_NAME_LENGTH]; //Name/event
+	unsigned int spawn_status;	// Boss Delay on restart [clydelion]
 };
 
 struct flooritem_data {
@@ -368,6 +370,8 @@ enum _sp {
 	SP_BASECLASS=120,	//Hmm.. why 100+19? I just use the next one... [Skotlex]
 	SP_KILLERRID=121,
 	SP_KILLEDRID=122,
+	SP_SITTING=123,
+	SP_CHARMOVE=124,
 
 	// Mercenaries
 	SP_MERCFLEE=165, SP_MERCKILLS=189, SP_MERCFAITH=190,
@@ -428,9 +432,10 @@ enum _look {
 	LOOK_CLOTHES_COLOR,
 	LOOK_SHIELD,
 	LOOK_SHOES,
-	LOOK_BODY,
-	LOOK_FLOOR,
+	LOOK_BODY,			//Purpose Unknown. Doesen't appear to do anything.
+	LOOK_RESET_COSTUMES,//Makes all headgear sprites on player vanish when activated.
 	LOOK_ROBE,
+	LOOK_FLOOR
 };
 
 // used by map_setcell()
@@ -570,6 +575,8 @@ struct map_data {
 		unsigned guildlock :1;
 		unsigned src4instance : 1; // To flag this map when it's used as a src map for instances
 		unsigned reset :1; // [Daegaladh]
+		unsigned mobcantattackplayer : 1; // [Goddameit]
+		unsigned mobitemadder :1; // mobitemadder (Zephyr)
 	} flag;
 	struct point save;
 	struct npc_data *npc[MAX_NPC_PER_MAP];
@@ -578,6 +585,12 @@ struct map_data {
 		int drop_type;
 		int drop_per;
 	} drop_list[MAX_DROP_PER_MAP];
+
+	struct {
+		int mob_id;
+		int item_id;
+		int item_per;
+	} mobitemadder_droplist[100]; // mobitemadder (Zephyr)
 
 	struct spawn_data *moblist[MAX_MOB_LIST_PER_MAP]; // [Wizputer]
 	int mob_delete_timer;	// [Skotlex]

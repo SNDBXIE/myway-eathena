@@ -145,6 +145,7 @@ struct map_session_data {
 		struct guild *gmaster_flag;
 		unsigned int prevend : 1;//used to flag wheather you've spent 40sp to open the vending or not.
 		unsigned int warping : 1;//states whether you're in the middle of a warp processing
+		unsigned int pk_mode : 1; //@pkmode by malufett
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;
@@ -547,10 +548,18 @@ enum equip_pos {
 	EQP_GARMENT  = 0x0004,
 	EQP_ACC_L    = 0x0008,
 	EQP_ACC_R    = 0x0080, //128
-	EQP_COSTUME_HEAD_TOP = 0x0400,
-	EQP_COSTUME_HEAD_MID = 0x0800,
-	EQP_COSTUME_HEAD_LOW = 0x1000,
 	EQP_AMMO     = 0x8000, //32768
+	EQP_COSTUME_HEAD_LOW	= 0x1000,
+	EQP_COSTUME_HEAD_MID	= 0x0800,
+	EQP_COSTUME_HEAD_TOP	= 0x0400,
+	//EQP_COSTUME_GARMENT	= 0x2000,
+	//EQP_COSTUME_FLOOR	= 0x4000,
+	//EQP_SHADOW_ARMOR	= 0x10000,//Shadow equip slots will be left disabled until client's supporting them are usable. [Rytech]
+	//EQP_SHADOW_WEAPON	= 0x20000,
+	//EQP_SHADOW_SHIELD	= 0x40000,
+	//EQP_SHADOW_SHOES	= 0x80000,
+	//EQP_SHADOW_ACC_R	= 0x100000,
+	//EQP_SHADOW_ACC_L	= 0x200000,
 };
 
 #define EQP_WEAPON EQP_HAND_R
@@ -559,6 +568,7 @@ enum equip_pos {
 #define EQP_HELM (EQP_HEAD_LOW|EQP_HEAD_MID|EQP_HEAD_TOP)
 #define EQP_ACC (EQP_ACC_L|EQP_ACC_R)
 #define EQP_COSTUME (EQP_COSTUME_HEAD_TOP|EQP_COSTUME_HEAD_MID|EQP_COSTUME_HEAD_LOW)
+//#define EQP_SHADOW_GEAR (EQP_SHADOW_ARMOR|EQP_SHADOW_WEAPON|EQP_SHADOW_SHIELD|EQP_SHADOW_SHOES|EQP_SHADOW_ACC_R|EQP_SHADOW_ACC_L)
 
 /// Equip positions that use a visible sprite
 #if PACKETVER < 20110111
@@ -593,10 +603,10 @@ enum equip_index {
 #define pc_issit(sd)          ( (sd)->vd.dead_sit == 2 )
 #define pc_isidle(sd)         ( (sd)->chatID || (sd)->state.vending || (sd)->state.buyingstore || DIFF_TICK(last_tick, (sd)->idletime) >= battle_config.idle_no_share )
 #define pc_istrading(sd)      ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || (sd)->state.trading )
-#define pc_cant_act(sd)       ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || (sd)->chatID || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag )
+#define pc_cant_act(sd)       ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || (sd)->chatID || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend )
 
 /* equals pc_cant_act except it doesn't check for chat rooms */
-#define pc_cant_act2(sd)       ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag )
+#define pc_cant_act2(sd)       ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend )
 
 #define pc_setdir(sd,b,h)     ( (sd)->ud.dir = (b) ,(sd)->head_dir = (h) )
 #define pc_setchatid(sd,n)    ( (sd)->chatID = n )
@@ -928,6 +938,6 @@ int pc_del_talisman(struct map_session_data *sd,int count,int type);
 void pc_baselevelchanged(struct map_session_data *sd);
 
 #if defined(RENEWAL_DROP) || defined(RENEWAL_EXP)
-int pc_level_penalty_mod(struct map_session_data *sd, struct mob_data * md, int type);
+int pc_level_penalty_mod(struct map_session_data *sd, int mob_level, uint32 mob_race, uint32 mob_mode, int type);
 #endif
 #endif /* _PC_H_ */

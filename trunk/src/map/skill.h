@@ -297,8 +297,8 @@ int skill_addtimerskill(struct block_list *src,unsigned int tick,int target,int 
 int skill_additional_effect( struct block_list* src, struct block_list *bl,uint16 skill_id,uint16 skill_lv,int attack_type,int dmg_lv,unsigned int tick);
 int skill_counter_additional_effect( struct block_list* src, struct block_list *bl,uint16 skill_id,uint16 skill_lv,int attack_type,unsigned int tick);
 int skill_blown(struct block_list* src, struct block_list* target, int count, int8 dir, int flag);
-int skill_break_equip(struct block_list *bl, unsigned short where, int rate, int flag);
-int skill_strip_equip(struct block_list *bl, unsigned short where, int rate, int lv, int time);
+int skill_break_equip(struct block_list *src,struct block_list *bl, unsigned short where, int rate, int flag);
+int skill_strip_equip(struct block_list *src,struct block_list *bl, unsigned short where, int rate, int lv, int time);
 // Skills unit
 struct skill_unit_group* skill_id2group(int group_id);
 struct skill_unit_group *skill_unitsetting(struct block_list* src, uint16 skill_id, uint16 skill_lv, short x, short y, int flag);
@@ -409,8 +409,6 @@ enum {
 	ST_ELEMENTALSPIRIT,
 	ST_POISONINGWEAPON,
 	ST_ROLLINGCUTTER,
-	ST_MH_FIGHTING,
-	ST_MH_GRAPPLING,
 	ST_PECO,
 };
 
@@ -1163,6 +1161,18 @@ enum e_skill {
 	NPC_VENOMFOG,
 	NPC_MILLENNIUMSHIELD,
 	NPC_COMET,
+	NPC_ICEMINE,
+	NPC_ICEEXPLO,
+	NPC_FLAMECROSS,
+	NPC_PULSESTRIKE2,
+	NPC_DANCINGBLADE,
+	NPC_DANCINGBLADE_ATK,
+	NPC_DARKPIERCING,
+	NPC_MAXPAIN,
+	NPC_MAXPAIN_ATK,
+	NPC_DEATHSUMMON,
+	NPC_HELLBURNING,
+	NPC_JACKFROST,
 
 	KN_CHARGEATK = 1001,
 	CR_SHRINK,
@@ -1500,6 +1510,10 @@ enum e_skill {
 	ALL_TETANY,
 	ALL_RAY_OF_PROTECTION,
 	MC_CARTDECORATE,
+	GM_ITEM_ATKMAX,
+	GM_ITEM_ATKMIN,
+	GM_ITEM_MATKMAX,
+	GM_ITEM_MATKMIN,
 
 	KO_YAMIKUMO = 3001,
 	KO_RIGHT,
@@ -1536,6 +1550,25 @@ enum e_skill {
 	ECL_SADAGUI,
 	ECL_SEQUOIADUST,
 	ECLAGE_RECALL,
+
+	GC_DARKCROW = 5001,
+	RA_UNLIMIT,
+	GN_ILLUSIONDOPING,
+	RK_DRAGONBREATH_WATER,
+	RK_LUXANIMA,
+	NC_MAGMA_ERUPTION,
+	WM_FRIGG_SONG,
+	SO_ELEMENTAL_SHIELD,
+	SR_FLASHCOMBO,
+	SC_ESCAPE,
+	AB_OFFERTORIUM,
+	WL_TELEKINESIS_INTENSE,
+	LG_KINGS_GRACE,
+	ALL_FULL_THROTTLE,
+	SR_FLASHCOMBO_ATK_STEP1,
+	SR_FLASHCOMBO_ATK_STEP2,
+	SR_FLASHCOMBO_ATK_STEP3,
+	SR_FLASHCOMBO_ATK_STEP4,
 
 	HLIF_HEAL = 8001,
 	HLIF_AVOID,
@@ -1621,6 +1654,7 @@ enum e_skill {
 	MER_KYRIE,
 	MER_BLESSING,
 	MER_INCAGI,
+	MER_INVINCIBLEOFF2,
 
 	EL_CIRCLE_OF_FIRE = 8401,
 	EL_FIRE_CLOAK,
@@ -1796,6 +1830,10 @@ enum {
 	UNT_ZENKAI_WIND,
 	UNT_MAKIBISHI,
 	UNT_VENOMFOG,
+	UNT_ICEMINE,
+	UNT_FLAMECROSS,
+	UNT_HELLBURNING,
+	UNT_MAGMA_ERUPTION,
 
 	/**
 	 * Guild Auras

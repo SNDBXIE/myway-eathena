@@ -1441,7 +1441,7 @@ int pc_calc_skilltree(struct map_session_data *sd)
 				sd->status.skill[id].id = id;
 				sd->status.skill[id].flag = SKILL_FLAG_TEMPORARY; // So it is not saved, and tagged as a "bonus" skill.
 			}
-			else
+			else if( id != NV_BASIC)
 			{
 				sd->status.skill[id].flag = SKILL_FLAG_REPLACED_LV_0 + sd->status.skill[id].lv; // Remember original level
 			}
@@ -1638,9 +1638,9 @@ int pc_updateweightstatus(struct map_session_data *sd)
 
 	// start new status change
 	if( new_overweight == 1 )
-		sc_start(&sd->bl, SC_WEIGHT50, 100, 0, 0);
+		sc_start(&sd->bl,&sd->bl, SC_WEIGHT50, 100, 0, 0);
 	else if( new_overweight == 2 )
-		sc_start(&sd->bl, SC_WEIGHT90, 100, 0, 0);
+		sc_start(&sd->bl,&sd->bl, SC_WEIGHT90, 100, 0, 0);
 
 	// update overweight status
 	sd->regen.state.overweight = new_overweight;
@@ -3857,7 +3857,7 @@ int pc_additem(struct map_session_data *sd,struct item *item_data,int amount,e_l
 			}
 		}
 	}
-	
+
 	if( i >= MAX_INVENTORY )
 	{
 		i = pc_search_inventory(sd,0);
@@ -5043,6 +5043,7 @@ int pc_jobid2mapid(unsigned short b_class)
 		case JOB_NINJA:                 return MAPID_NINJA;
 		case JOB_XMAS:                  return MAPID_XMAS;
 		case JOB_SUMMER:                return MAPID_SUMMER;
+		case JOB_HANBOK:                return MAPID_HANBOK;
 		case JOB_GANGSI:                return MAPID_GANGSI;
 	//2-1 Jobs
 		case JOB_SUPER_NOVICE:          return MAPID_SUPER_NOVICE;
@@ -5184,6 +5185,7 @@ int pc_mapid2jobid(unsigned short class_, int sex)
 		case MAPID_NINJA:                 return JOB_NINJA;
 		case MAPID_XMAS:                  return JOB_XMAS;
 		case MAPID_SUMMER:                return JOB_SUMMER;
+		case MAPID_HANBOK:                return JOB_HANBOK;
 		case MAPID_GANGSI:                return JOB_GANGSI;
 	//2-1 Jobs
 		case MAPID_SUPER_NOVICE:          return JOB_SUPER_NOVICE;
@@ -5346,6 +5348,9 @@ const char* job_name(int class_)
 
 	case JOB_SUMMER:
 		return msg_txt(621);
+
+	case JOB_HANBOK:
+		return msg_txt(694);
 
 	case JOB_NOVICE_HIGH:
 	case JOB_SWORDMAN_HIGH:
@@ -5616,16 +5621,16 @@ int pc_checkbaselevelup(struct map_session_data *sd) {
 	status_percent_heal(&sd->bl,100,100);
 
 	if((sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE) {
-		sc_start(&sd->bl,status_skill2sc(PR_KYRIE),100,1,skill_get_time(PR_KYRIE,1));
-		sc_start(&sd->bl,status_skill2sc(PR_IMPOSITIO),100,1,skill_get_time(PR_IMPOSITIO,1));
-		sc_start(&sd->bl,status_skill2sc(PR_MAGNIFICAT),100,1,skill_get_time(PR_MAGNIFICAT,1));
-		sc_start(&sd->bl,status_skill2sc(PR_GLORIA),100,1,skill_get_time(PR_GLORIA,1));
-		sc_start(&sd->bl,status_skill2sc(PR_SUFFRAGIUM),100,1,skill_get_time(PR_SUFFRAGIUM,1));
+		sc_start(&sd->bl,&sd->bl,status_skill2sc(PR_KYRIE),100,1,skill_get_time(PR_KYRIE,1));
+		sc_start(&sd->bl,&sd->bl,status_skill2sc(PR_IMPOSITIO),100,1,skill_get_time(PR_IMPOSITIO,1));
+		sc_start(&sd->bl,&sd->bl,status_skill2sc(PR_MAGNIFICAT),100,1,skill_get_time(PR_MAGNIFICAT,1));
+		sc_start(&sd->bl,&sd->bl,status_skill2sc(PR_GLORIA),100,1,skill_get_time(PR_GLORIA,1));
+		sc_start(&sd->bl,&sd->bl,status_skill2sc(PR_SUFFRAGIUM),100,1,skill_get_time(PR_SUFFRAGIUM,1));
 		if (sd->state.snovice_dead_flag)
 			sd->state.snovice_dead_flag = 0; //Reenable steelbody resurrection on dead.
 	} else if( (sd->class_&MAPID_BASEMASK) == MAPID_TAEKWON ) {
-		sc_start(&sd->bl,status_skill2sc(AL_INCAGI),100,10,600000);
-		sc_start(&sd->bl,status_skill2sc(AL_BLESSING),100,10,600000);
+		sc_start(&sd->bl,&sd->bl,status_skill2sc(AL_INCAGI),100,10,600000);
+		sc_start(&sd->bl,&sd->bl,status_skill2sc(AL_BLESSING),100,10,600000);
 	}
 	clif_misceffect(&sd->bl,0);
 	npc_script_event(sd, NPCE_BASELVUP); //LORDALFA - LVLUPEVENT
@@ -6658,7 +6663,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 		if (battle_config.pk_mode&2) {
 			ssd->status.manner -= 5;
 			if(ssd->status.manner < 0)
-				sc_start(src,SC_NOCHAT,100,0,0);
+				sc_start(&sd->bl,src,SC_NOCHAT,100,0,0);
 #if 0
 			// PK/Karma system code (not enabled yet) [celest]
 			// originally from Kade Online, so i don't know if any of these is correct ^^;
@@ -6711,7 +6716,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			clif_resurrection(&sd->bl, 1);
 			if(battle_config.pc_invincible_time)
 				pc_setinvincibletimer(sd, battle_config.pc_invincible_time);
-			sc_start(&sd->bl,status_skill2sc(MO_STEELBODY),100,1,skill_get_time(MO_STEELBODY,1));
+			sc_start(&sd->bl,&sd->bl,status_skill2sc(MO_STEELBODY),100,1,skill_get_time(MO_STEELBODY,1));
 			if(map_flag_gvg(sd->bl.m))
 				pc_respawn_timer(INVALID_TIMER, gettick(), sd->bl.id, 0);
 			return 0;
@@ -6915,6 +6920,8 @@ int pc_readparam(struct map_session_data* sd,int type)
 		case SP_FAME:            val = sd->status.fame; break;
 		case SP_KILLERRID:       val = sd->killerrid; break;
 		case SP_KILLEDRID:       val = sd->killedrid; break;
+		case SP_SITTING:         val = pc_issit(sd)?1:0; break;
+		case SP_CHARMOVE:		 val = sd->status.character_moves; break;
 		case SP_CRITICAL:        val = sd->battle_status.cri/10; break;
 		case SP_ASPD:            val = (2000-sd->battle_status.amotion)/10; break;
 		case SP_BASE_ATK:	     val = sd->battle_status.batk; break;
@@ -6928,7 +6935,7 @@ int pc_readparam(struct map_session_data* sd,int type)
 		case SP_DEFELE:		     val = sd->battle_status.def_ele; break;
 #ifndef RENEWAL_CAST
 		case SP_VARCASTRATE:
-#endif	
+#endif
 		case SP_CASTRATE:
 				val = sd->castrate+=val;
 			break;
@@ -7155,6 +7162,9 @@ int pc_setparam(struct map_session_data *sd,int type,int val)
 	case SP_KILLEDRID:
 		sd->killedrid = val;
 		return 1;
+	case SP_CHARMOVE:
+		sd->status.character_moves = val;
+		return 1;
 	default:
 		ShowError("pc_setparam: Attempted to set unknown parameter '%d'.\n", type);
 		return 0;
@@ -7379,6 +7389,19 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
 		pc_setglobalreg(sd, "REPRODUCE_SKILL_LV",0);
 	}
 
+	// Give or reduce transcendent status points
+	if( (b_class&JOBL_UPPER) && !(sd->class_&JOBL_UPPER) ){ // Change from a non t class to a t class -> give points
+		sd->status.status_point += 52;
+		clif_updatestatus(sd,SP_STATUSPOINT);
+	}else if( !(b_class&JOBL_UPPER) && (sd->class_&JOBL_UPPER) ){ // Change from a t class to a non t class -> remove points
+		if( sd->status.status_point < 52 ){
+			// The player already used his bonus points, so we have to reset his status points
+			pc_resetstate(sd);
+		}
+		sd->status.status_point -= 52;
+		clif_updatestatus(sd,SP_STATUSPOINT);
+	}
+
 	if ( (b_class&MAPID_UPPERMASK) != (sd->class_&MAPID_UPPERMASK) ) { //Things to remove when changing class tree.
 		const int class_ = pc_class2idx(sd->status.class_);
 		short id;
@@ -7394,7 +7417,7 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
 		/* going off star glad lineage, reset feel to not store no-longer-used vars in the database */
 		pc_resetfeel(sd);
 	}
-	
+
 	sd->status.class_ = job;
 	fame_flag = pc_famerank(sd->status.char_id,sd->class_&MAPID_UPPERMASK);
 	sd->class_ = (unsigned short)b_class;
@@ -7721,7 +7744,7 @@ int pc_setcart(struct map_session_data *sd,int type) {
 			if( !sd->sc.data[SC_PUSH_CART] ) /* first time, so fill cart data */
 				clif_cartlist(sd);
 			clif_updatestatus(sd, SP_CARTINFO);
-			sc_start(&sd->bl, SC_PUSH_CART, 100, type, 0);
+			sc_start(&sd->bl,&sd->bl, SC_PUSH_CART, 100, type, 0);
 			clif_status_load_notick(&sd->bl, SI_ON_PUSH_CART,   2 , type, 0, 0);
 			if( sd->sc.data[SC_PUSH_CART] )/* forcefully update */
 				sd->sc.data[SC_PUSH_CART]->val1 = type;
@@ -8408,7 +8431,7 @@ int pc_load_combo(struct map_session_data *sd) {
  *------------------------------------------*/
 int pc_equipitem(struct map_session_data *sd,int n,int req_pos)
 {
-	int i,pos,flag=0;
+	int i,pos,flag=0,iflag;
 	struct item_data *id;
 
 	nullpo_ret(sd);
@@ -8559,6 +8582,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int req_pos)
 	}
 
 	pc_checkallowskill(sd); //Check if status changes should be halted.
+	iflag = sd->npc_item_flag;
 
 	/* check for combos (MUST be before status_calc_pc) */
 	if ( id ) {
@@ -8601,6 +8625,8 @@ int pc_equipitem(struct map_session_data *sd,int n,int req_pos)
 			}
 		}
 	}
+	sd->npc_item_flag = iflag;
+
 	return 0;
 }
 
@@ -8612,7 +8638,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int req_pos)
  * 2 - force unequip
  *------------------------------------------*/
 int pc_unequipitem(struct map_session_data *sd,int n,int flag) {
-	int i;
+	int i,iflag;
 	bool status_cacl = false;
 	nullpo_ret(sd);
 
@@ -8711,6 +8737,7 @@ int pc_unequipitem(struct map_session_data *sd,int n,int flag) {
 		sd->state.autobonus &= ~sd->status.inventory[n].equip; //Check for activated autobonus [Inkfish]
 
 	sd->status.inventory[n].equip=0;
+	iflag = sd->npc_item_flag;
 
 	/* check for combos (MUST be before status_calc_pc) */
 	if ( sd->inventory_data[n] ) {
@@ -8762,6 +8789,7 @@ int pc_unequipitem(struct map_session_data *sd,int n,int flag) {
 			}
 		}
 	}
+	sd->npc_item_flag = iflag;
 
 	return 0;
 }
@@ -9202,9 +9230,9 @@ void pc_overheat(struct map_session_data *sd, int val) {
 
 	heat = max(0,heat); // Avoid negative HEAT
 	if( heat >= limit[skill] )
-		sc_start(&sd->bl,SC_OVERHEAT,100,0,1000);
+		sc_start(&sd->bl,&sd->bl,SC_OVERHEAT,100,0,1000);
 	else
-		sc_start(&sd->bl,SC_OVERHEAT_LIMITPOINT,100,heat,30000);
+		sc_start(&sd->bl,&sd->bl,SC_OVERHEAT_LIMITPOINT,100,heat,30000);
 
 	return;
 }
@@ -9346,14 +9374,13 @@ int pc_del_talisman(struct map_session_data *sd,int count,int type)
  * Renewal EXP/Itemdrop rate modifier base on level penalty
  * 1=exp 2=itemdrop
  *------------------------------------------*/
-int pc_level_penalty_mod(struct map_session_data *sd, struct mob_data *md, int type)
+int pc_level_penalty_mod(struct map_session_data *sd, int mob_level, uint32 mob_race, uint32 mob_mode, int type)
 {
 	int diff, rate = 100, i;
 
 	nullpo_ret(sd);
-	nullpo_ret(md);
-
-	diff = md->level - sd->status.base_level;
+	
+	diff = mob_level - sd->status.base_level;
 
 	if( diff < 0 )
 		diff = MAX_LEVEL + ( ~diff + 1 );
@@ -9361,8 +9388,8 @@ int pc_level_penalty_mod(struct map_session_data *sd, struct mob_data *md, int t
 	for(i=0; i<RC_MAX; i++){
 		int tmp;
 
-		if( md->status.race != i ){
-			if( md->status.mode&MD_BOSS && i < RC_BOSS )
+		if( mob_race != i ){
+			if( mob_mode&MD_BOSS && i < RC_BOSS )
 				i = RC_BOSS;
 			else if( i <= RC_BOSS )
 				continue;
@@ -9602,13 +9629,13 @@ int pc_readdb(void)
 	fclose(fp);
 	for (i = 0; i < JOB_MAX; i++) {
 		if (!pcdb_checkid(i)) continue;
-		if (i == JOB_WEDDING || i == JOB_XMAS || i == JOB_SUMMER)
+		if (i == JOB_WEDDING || i == JOB_XMAS || i == JOB_SUMMER || i == JOB_HANBOK)
 			continue; //Classes that do not need exp tables.
 		j = pc_class2idx(i);
 		if (!max_level[j][0])
-			ShowWarning("Class %s (%d) does not has a base exp table.\n", job_name(i), i);
+			ShowWarning("Class %s (%d) does not have a base exp table.\n", job_name(i), i);
 		if (!max_level[j][1])
-			ShowWarning("Class %s (%d) does not has a job exp table.\n", job_name(i), i);
+			ShowWarning("Class %s (%d) does not have a job exp table.\n", job_name(i), i);
 	}
 	ShowStatus("Done reading '"CL_WHITE"%s"CL_RESET"'.\n","exp.txt");
 

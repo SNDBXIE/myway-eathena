@@ -946,7 +946,7 @@ ACMD_FUNC(jobchange)
 		}
 	}
 
-    if (job == JOB_KNIGHT2 || job == JOB_CRUSADER2 || job == JOB_WEDDING || job == JOB_XMAS || job == JOB_SUMMER
+    if (job == JOB_KNIGHT2 || job == JOB_CRUSADER2 || job == JOB_WEDDING || job == JOB_XMAS || job == JOB_SUMMER || job == JOB_HANBOK
         || job == JOB_LORD_KNIGHT2 || job == JOB_PALADIN2 || job == JOB_BABY_KNIGHT2 || job == JOB_BABY_CRUSADER2 || job == JOB_STAR_GLADIATOR2
 		 || (job >= JOB_RUNE_KNIGHT2 && job <= JOB_MECHANIC_T2) || (job >= JOB_BABY_RUNE2 && job <= JOB_BABY_MECHANIC2)
 	) // Deny direct transformation into dummy jobs
@@ -1123,6 +1123,16 @@ ACMD_FUNC(item)
 	    (item_data = itemdb_exists(atoi(item_name))) == NULL)
 	{
 		clif_displaymessage(fd, msg_txt(19)); // Invalid item ID or name.
+		return -1;
+	}
+
+	//item_block_atcmd.txt
+	#ifdef _PC_GROUPS_H_
+	if(item_data->atcmd_block && sd->group_level < item_data->atcmd_block_minlvl) {
+	#else
+	if(item_data->atcmd_block && sd->gmlevel < item_data->atcmd_block_minlvl) {
+	#endif
+		clif_displaymessage(fd, "This item is not available."); // Invalid item ID or name.
 		return -1;
 	}
 
@@ -4514,7 +4524,7 @@ ACMD_FUNC(jail)
 	}
 
 	//Duration of INT_MAX to specify infinity.
-	sc_start4(&pl_sd->bl,SC_JAILED,100,INT_MAX,m_index,x,y,1000);
+	sc_start4(NULL,&pl_sd->bl,SC_JAILED,100,INT_MAX,m_index,x,y,1000);
 	clif_displaymessage(pl_sd->fd, msg_txt(117)); // GM has send you in jails.
 	clif_displaymessage(fd, msg_txt(118)); // Player warped in jails.
 	return 0;
@@ -4553,7 +4563,7 @@ ACMD_FUNC(unjail)
 	}
 
 	//Reset jail time to 1 sec.
-	sc_start(&pl_sd->bl,SC_JAILED,100,1,1000);
+	sc_start(NULL,&pl_sd->bl,SC_JAILED,100,1,1000);
 	clif_displaymessage(pl_sd->fd, msg_txt(120)); // A GM has discharged you from jail.
 	clif_displaymessage(fd, msg_txt(121)); // Player unjailed.
 	return 0;
@@ -4666,7 +4676,7 @@ ACMD_FUNC(jailfor)
 			break;
 	}
 
-	sc_start4(&pl_sd->bl,SC_JAILED,100,jailtime,m_index,x,y,jailtime?60000:1000); //jailtime = 0: Time was reset to 0. Wait 1 second to warp player out (since it's done in status_change_timer).
+	sc_start4(NULL,&pl_sd->bl,SC_JAILED,100,jailtime,m_index,x,y,jailtime?60000:1000); //jailtime = 0: Time was reset to 0. Wait 1 second to warp player out (since it's done in status_change_timer).
 	return 0;
 }
 
@@ -5617,7 +5627,7 @@ ACMD_FUNC(autotrade)
 	sd->state.autotrade = 1;
 	if( battle_config.at_timeout ) {
 		int timeout = atoi(message);
-		status_change_start(&sd->bl, SC_AUTOTRADE, 10000, 0, 0, 0, 0, ((timeout > 0) ? min(timeout,battle_config.at_timeout) : battle_config.at_timeout) * 60000, 0);
+		status_change_start(NULL,&sd->bl, SC_AUTOTRADE, 10000, 0, 0, 0, 0, ((timeout > 0) ? min(timeout,battle_config.at_timeout) : battle_config.at_timeout) * 60000, 0);
 	}
 	clif_authfail_fd(sd->fd, 15);
 
@@ -6093,7 +6103,7 @@ ACMD_FUNC(mobsearch)
 		if( md->spawn_timer == INVALID_TIMER )
 			snprintf(atcmd_output, sizeof(atcmd_output), "%2d[%3d:%3d] %s", number, md->bl.x, md->bl.y, md->name);
 		else
-			snprintf(atcmd_output, sizeof(atcmd_output), "%2d[%s] %s", number, "dead", md->name);
+			snprintf(atcmd_output, sizeof(atcmd_output), "%2d[%s] %s - Re-spawn in %d seconds", number, "dead", md->name, (get_timer(md->spawn_timer)->tick-gettick())/1000); // Boss Delay on restart - Display the delay in seconds [clydelion]
 		clif_displaymessage(fd, atcmd_output);
 	}
 	mapit_free(it);
@@ -6345,7 +6355,7 @@ ACMD_FUNC(summon)
 	md->deletetimer=add_timer(tick+(duration*60000),mob_timer_delete,md->bl.id,0);
 	clif_specialeffect(&md->bl,344,AREA);
 	mob_spawn(md);
-	sc_start4(&md->bl, SC_MODECHANGE, 100, 1, 0, MD_AGGRESSIVE, 0, 60000);
+	sc_start4(NULL,&md->bl, SC_MODECHANGE, 100, 1, 0, MD_AGGRESSIVE, 0, 60000);
 	clif_skill_poseffect(&sd->bl,AM_CALLHOMUN,1,md->bl.x,md->bl.y,tick);
 	clif_displaymessage(fd, msg_txt(39));	// All monster summoned!
 
@@ -6529,7 +6539,7 @@ ACMD_FUNC(mute)
 
 	if( pl_sd->status.manner < manner ) {
 		pl_sd->status.manner -= manner;
-		sc_start(&pl_sd->bl,SC_NOCHAT,100,0,0);
+		sc_start(NULL,&pl_sd->bl,SC_NOCHAT,100,0,0);
 	} else {
 		pl_sd->status.manner = 0;
 		status_change_end(&pl_sd->bl, SC_NOCHAT, INVALID_TIMER);
@@ -6662,6 +6672,7 @@ ACMD_FUNC(mobinfo)
 	struct mob_db *mob, *mob_array[MAX_SEARCH];
 	int count;
 	int i, j, k;
+	unsigned int base_exp, job_exp;
 
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
 	memset(atcmd_output2, '\0', sizeof(atcmd_output2));
@@ -6691,14 +6702,22 @@ ACMD_FUNC(mobinfo)
 	}
 	for (k = 0; k < count; k++) {
 		mob = mob_array[k];
+		base_exp = mob->base_exp;
+		job_exp = mob->job_exp;
 
+#ifdef RENEWAL_EXP
+		if( battle_config.atcommand_mobinfo_type ) {
+			base_exp = base_exp * pc_level_penalty_mod(sd, mob->lv, mob->status.race, mob->status.mode, 1) / 100;
+			job_exp = job_exp * pc_level_penalty_mod(sd, mob->lv, mob->status.race, mob->status.mode, 1) / 100;
+		}
+#endif
 		// stats
 		if (mob->mexp)
 			sprintf(atcmd_output, msg_txt(1240), mob->name, mob->jname, mob->sprite, mob->vd.class_); // MVP Monster: '%s'/'%s'/'%s' (%d)
 		else
 			sprintf(atcmd_output, msg_txt(1241), mob->name, mob->jname, mob->sprite, mob->vd.class_); // Monster: '%s'/'%s'/'%s' (%d)
 		clif_displaymessage(fd, atcmd_output);
-		sprintf(atcmd_output, msg_txt(1242), mob->lv, mob->status.max_hp, mob->base_exp, mob->job_exp,MOB_HIT(mob), MOB_FLEE(mob)); //  Lv:%d  HP:%d  Base EXP:%u  Job EXP:%u  HIT:%d  FLEE:%d
+		sprintf(atcmd_output, msg_txt(1242), mob->lv, mob->status.max_hp, base_exp, job_exp, MOB_HIT(mob), MOB_FLEE(mob)); //  Lv:%d  HP:%d  Base EXP:%u  Job EXP:%u  HIT:%d  FLEE:%d
 		clif_displaymessage(fd, atcmd_output);
 		sprintf(atcmd_output, msg_txt(1243), //  DEF:%d  MDEF:%d  STR:%d  AGI:%d  VIT:%d  INT:%d  DEX:%d  LUK:%d
 			mob->status.def, mob->status.mdef,mob->status.str, mob->status.agi,
@@ -6720,6 +6739,10 @@ ACMD_FUNC(mobinfo)
 				continue;
 			droprate = mob->dropitem[i].p;
 
+#ifdef RENEWAL_DROP
+			if( battle_config.atcommand_mobinfo_type )
+				droprate = droprate * pc_level_penalty_mod(sd, mob->lv, mob->status.race, mob->status.mode, 2) / 100;
+#endif
 			if (item_data->slot)
 				sprintf(atcmd_output2, " - %s[%d]  %02.02f%%", item_data->jname, item_data->slot, (float)droprate / 100);
 			else
@@ -7234,7 +7257,13 @@ ACMD_FUNC(whodrops)
 
 			for (j=0; j < MAX_SEARCH && item_data->mob[j].chance > 0; j++)
 			{
-				sprintf(atcmd_output, "- %s (%02.02f%%)", mob_db(item_data->mob[j].id)->jname, item_data->mob[j].chance/100.);
+				int dropchance = item_data->mob[j].chance;
+
+#ifdef RENEWAL_DROP
+				if( battle_config.atcommand_mobinfo_type )
+					dropchance = dropchance * pc_level_penalty_mod(sd, mob_db(item_data->mob[j].id)->lv, mob_db(item_data->mob[j].id)->status.race, mob_db(item_data->mob[j].id)->status.mode, 2) / 100;
+#endif
+				sprintf(atcmd_output, "- %s (%02.02f%%)", mob_db(item_data->mob[j].id)->jname, dropchance/100.);
 				clif_displaymessage(fd, atcmd_output);
 			}
 		}
@@ -7320,7 +7349,7 @@ static int atcommand_mutearea_sub(struct block_list *bl,va_list ap)
 	if (id != bl->id && !pc_get_group_level(pl_sd)) {
 		pl_sd->status.manner -= time;
 		if (pl_sd->status.manner < 0)
-			sc_start(&pl_sd->bl,SC_NOCHAT,100,0,0);
+			sc_start(NULL,&pl_sd->bl,SC_NOCHAT,100,0,0);
 		else
 			status_change_end(&pl_sd->bl, SC_NOCHAT, INVALID_TIMER);
 	}
@@ -7853,14 +7882,20 @@ ACMD_FUNC(cash)
 	{
 		if( value > 0 ) {
 			if( (ret=pc_getcash(sd, value, 0)) >= 0){
-			    sprintf(output, msg_txt(505), ret, sd->cashPoints);
-			    clif_disp_onlyself(sd, output, strlen(output));
+				// If this option is set, the message is already sent by pc function
+				if( !battle_config.cashshop_show_points ){
+					sprintf(output, msg_txt(505), ret, sd->cashPoints);
+					clif_disp_onlyself(sd, output, strlen(output));
+				}
 			}
 			else clif_displaymessage(fd, msg_txt(149)); // Unable to decrease the number/value.
 		} else {
 			if( (ret=pc_paycash(sd, -value, 0)) >= 0){
-			    sprintf(output, msg_txt(410), ret, sd->cashPoints);
-			    clif_disp_onlyself(sd, output, strlen(output));
+				// If this option is set, the message is already sent by pc function
+				if( !battle_config.cashshop_show_points ){
+					sprintf(output, msg_txt(410), ret, sd->cashPoints);
+					clif_disp_onlyself(sd, output, strlen(output));
+				}
 			}
 			else clif_displaymessage(fd, msg_txt(41)); // Unable to decrease the number/value.
 		}
@@ -8807,6 +8842,36 @@ ACMD_FUNC(cart) {
 	#undef MC_CART_MDFY
 }
 
+//@ignorebattle [Goddameit]
+ACMD_FUNC(ignorebattle) {	
+	int m;
+	m = sd->bl.m;
+	if( !map[m].flag.mobcantattackplayer )
+	{
+		clif_displaymessage(fd, "Battle ignore [on]");
+		map[m].flag.mobcantattackplayer = 1;
+	}else{
+		clif_displaymessage(fd, "Battle ignore [off]");
+		map[m].flag.mobcantattackplayer = 0;
+	}
+	return 0;
+}
+
+//@pkmode by malufett
+ACMD_FUNC(pkmode) {	
+	nullpo_retr(-1, sd);
+
+	if (!sd->state.pk_mode) {
+		sd->state.pk_mode = 1;
+		clif_displaymessage(sd->fd, "You are now no longer in PK mode.");
+	} else {
+		sd->state.pk_mode = 0;
+		clif_displaymessage(sd->fd, "Returned to normal state.");
+	}
+
+	return 0;
+}
+
 /**
  * Fills the reference of available commands in atcommand DBMap
  **/
@@ -9067,7 +9132,9 @@ void atcommand_basecommands(void) {
 		ACMD_DEF2("rmvperm", addperm),
 		ACMD_DEF(unloadnpcfile),
 		ACMD_DEF(cart),
-		ACMD_DEF(mount2)
+		ACMD_DEF(mount2),
+		ACMD_DEF2("ignorebattle", ignorebattle),	// [Goddameit]
+		ACMD_DEF2("pk",pkmode),
 	};
 	AtCommandInfo* atcommand;
 	int i;
