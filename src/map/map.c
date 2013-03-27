@@ -2905,6 +2905,8 @@ void map_flags_init(void)
 		map[i].jexp      = 100;  // per map job exp multiplicator
 		memset(map[i].drop_list, 0, sizeof(map[i].drop_list));  // pvp nightmare drop list
 
+		memset( map[i].mobitemadder_droplist, 0, sizeof( map[i].mobitemadder_droplist ) ); // mobitemadder (Zephyr)
+		
 		// adjustments
 		if( battle_config.pk_mode )
 			map[i].flag.pvp = 1; // make all maps pvp for pk_mode [Valaris]

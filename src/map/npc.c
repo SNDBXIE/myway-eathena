@@ -112,6 +112,25 @@ struct view_data* npc_get_viewdata(int class_)
 	return NULL;
 }
 
+static int npc_isnear_sub(struct block_list* bl, va_list args)
+{
+	struct npc_data *nd = (struct npc_data*)bl;
+
+	if( nd->sc.option & (OPTION_HIDE|OPTION_INVISIBLE) )
+		return 0;
+
+	return 1;
+}
+
+bool npc_isnear(struct block_list * bl)
+{
+	if( battle_config.min_npc_vendchat_distance > 0 &&
+	    map_foreachinrange(npc_isnear_sub,bl, battle_config.min_npc_vendchat_distance, BL_NPC) )
+		return true;
+
+	return false;
+}
+
 int npc_ontouch_event(struct map_session_data *sd, struct npc_data *nd)
 {
 	char name[EVENT_NAME_LENGTH];
@@ -3406,6 +3425,26 @@ static const char* npc_parse_mapflag(char* w1, char* w2, char* w3, char* w4, con
 	else if (!strcmpi(w3,"reset"))
 		map[m].flag.reset=state;
 	else
+	// mobitemadder (Zephyr)
+	if( !strcmpi( w3, "mobitemadder" ) ) {
+		if( state ) {
+			int j;
+			char *checkdroplist = NULL, *droplist = strdup( w4 );
+			checkdroplist = strtok( droplist, ", " );
+			map[m].mobitemadder_droplist[0].mob_id = atoi( checkdroplist );
+			j = 1;
+			do {
+				checkdroplist = strtok( '\0', ", " );
+				if( checkdroplist )
+					map[m].mobitemadder_droplist[j].item_id = atoi( checkdroplist );
+				checkdroplist = strtok( '\0', ", " );
+				if( checkdroplist )
+					map[m].mobitemadder_droplist[j].item_per = atoi( checkdroplist );
+				j++;
+			}
+			while( checkdroplist );
+		}
+	} else
 		ShowError("npc_parse_mapflag: unrecognized mapflag '%s' (file '%s', line '%d').\n", w3, filepath, strline(buffer,start-buffer));
 
 	return strchr(start,'\n');// continue

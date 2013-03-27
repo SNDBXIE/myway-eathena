@@ -415,8 +415,6 @@ extern struct Battle_Config
 	int sc_castcancel; // [Skotlex]
 	int pc_sc_def_rate; // [Skotlex]
 	int mob_sc_def_rate;
-	int pc_luk_sc_def;
-	int mob_luk_sc_def;
 	int pc_max_sc_def;
 	int mob_max_sc_def;
 
@@ -479,7 +477,7 @@ extern struct Battle_Config
 	int mvp_tomb_enabled;
 
 	int atcommand_suggestions_enabled;
-	int min_npc_vending_distance;
+	int min_npc_vendchat_distance;
 	int atcommand_mobinfo_type;
 
 	int mob_size_influence; // Enable modifications on earned experience, drop rates and monster status depending on monster size. [mkbu95]
@@ -492,6 +490,7 @@ extern struct Battle_Config
 	int block_relocation;
 	int magic_critical;
 	int tickdead_noexp;
+	int identify_drop;
 	
 	//Extra Bonuses [Lilith]
 	int enable_extra_bonus;

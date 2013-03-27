@@ -147,6 +147,9 @@ struct item_data {
 	/* bugreport:309 */
 	struct item_combo **combos;
 	unsigned char combos_count;
+	bool atcmd_block;
+	short atcmd_block_minlvl;
+	unsigned ann: 1;//annouce flag
 };
 
 struct item_group {

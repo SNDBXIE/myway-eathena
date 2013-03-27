@@ -3,9 +3,9 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Current Version: =====================================
-//= $Revision: 17163 $
+//= $Revision: 17205 $
 //===== Last Updated: ========================================
-//= $LastChangedDate: 2013-02-27 01:49:09 +0000 (Wed, 27 Feb 2013) $
+//= $LastChangedDate: 2013-03-21 22:33:07 +0000 (Thu, 21 Mar 2013) $
 //===== Description: =========================================
 //= A reference manual for the rAthena scripting language.
 //= Commands are sorted depending on their functionality.
@@ -2768,15 +2768,15 @@ It will return -1 if there is no such item.
 
 Valid types are:
 	0 - Buy Price; 1 - Sell Price; 2 - Item Type;
-	3 - maxchance (Max drop chance of this item e.g. 1 = 0.01% , etc..
+	3 - maxchance (max drop chance of this item, e.g. 1 = 0.01%)
 		if = 0, then monsters don't drop it at all (rare or a quest item)
 		if = 10000, then this item is sold in NPC shops only
 	4 - sex; 5 - equip; 6 - weight; 7 - atk; 8 - def; 9 - range;
-	10 - slot; 11 - look; 12 - elv; 13 - wlv; 14 - view id
+	10 - slot; 11 - look; 12 - elv; 13 - wlv; 14 - view id (from 'db/item_avail.txt')
 	
 	If RENEWAL is defined, 15 - matk
 
-Check sample in doc/sample/getiteminfo.txt
+See the sample in 'doc/sample/getiteminfo.txt'.
 
 ---------------------------------------
 
@@ -3887,9 +3887,9 @@ changing jobs, which can be checked for later in scripts.
 
 ---------------------------------------
 
-*jobname (<job number>)
+*jobname(<job number>)
 
-This command retrieves the name of the given job using the msg_athena entries 550->650.
+This command retrieves the name of the given job using the map_msg entries 550->655.
 
 	mes "[Kid]";
 	mes "I never thought I'd met a "+jobname(Class)+" here of all places.";
@@ -3897,17 +3897,17 @@ This command retrieves the name of the given job using the msg_athena entries 55
 
 ---------------------------------------
 
-*eaclass ({<job number>})
+*eaclass({<job number>})
 
-This commands returns the "eA job-number" corresponding to the given class (if none is given, it returns uses
-the invoking player's class as argument). The eA job-number is also a class number system, but it's one that
-comes with constants which make it easy to convert among classes. The command will return -1 if you pass it a
-job number which doesn't has a eA Job value equivalent.
+This commands returns the "eA job-number" corresponding to the given class, and
+uses the invoking player's class if none is given. The eA job-number is also a
+class number system, but it's one that comes with constants which make it easy
+to convert among classes. The command will return -1 if you pass it a job number
+which doesn't have an eA job-number equivalent.
 
 	set @eac, eaclass();
 	if ((@eac&EAJ_BASEMASK) == EAJ_SWORDMAN)
-		mes "You must be a swordman, knight, crusader, paladin, high swordman, lord knight, baby swordman,";
-		mes "baby knight or baby crusader.";
+		mes "Your base job is Swordman.";
 	if (@eac&EAJL_UPPER)
 		mes "You are a rebirth job.";
 	if ((@eac&EAJ_UPPERMASK) == EAJ_SWORDMAN)
@@ -3917,13 +3917,14 @@ For more information on the eA Job System, see the docs/ea_job_system.txt file.
 
 ---------------------------------------
 
-*roclass <job number> {,<gender>}
+*roclass(<job number>{,<gender>})
 
-Does the opposite of eaclass. That is, given a eA Job class, it returns which is the corresponding RO class number. 
-A gender is required because both Bard and Dancers share the same eA Job value (EAJ_BARDDANCER), if it isn't given, the
-gender of the executing player is taken (if there's no player running the script, male will be used by default).
-The command returns -1 when there isn't a valid class to represent the required job (for example, if you try to get the
-baby version of a Taekwon class).
+Does the opposite of eaclass. That is, given an eA job-number, it returns the
+corresponding RO class number. A gender is required because both Bard and Dancers
+share the same eA job-number (EAJ_BARDDANCER), and uses the invoking player's
+gender if none is given (if no player is attached, male will be used by default).
+The command will return -1 if there is no valid class to represent the specified
+job (for example, if you try to get the baby version of a Taekwon class).
 
 	set @eac, eaclass();
 	//Check if class is already rebirth
@@ -3942,14 +3943,11 @@ baby version of a Taekwon class).
 
 *changebase <job ID number>;
 
-This will change the appearance of the invoking character to that of a specified 
-job class. Nothing but appearance will change. This command is used in item 
-scripts for "Wedding Dress" and "Tuxedo" so the character like job 22, which is 
-the job number of the wedding sprites.
+This command will change the appearance of the invoking character to that of a
+specified job class. Nothing but appearance will change.
 
-It would be entered in the equip bonus section of an item
-
-2338,Wedding_Dress,Wedding Dress,5,43000,,500,,0,,0,119529470,7,0,16,,0,1,0,{ bonus bMdef,15; changebase 22; }
+	changebase Job_Novice; // Changes player to Novice sprite.
+	changebase Class; // Changes player back to default sprite.
 
 ---------------------------------------
 
@@ -4330,14 +4328,14 @@ As all the item commands, this one uses the ID of the item found inside
 own items and have an inventory of them, other as by destroying and recreating 
 them when needed.
 
-    delitem 502,10 // The person will lose 10 apples
-    delitem 617,1  // The person will lose 1 Old Violet Box
+    delitem 502,10; // The person will lose 10 apples
+    delitem 617,1;  // The person will lose 1 Old Violet Box
 
 It is always a good idea to check if the player actually has the items before you delete them.
 If you try to delete more items that the player has, the player will lose the ones he/she has 
-and the script will be terminated with an error.
+and the script will terminate with an error.
 
-Like 'getitem' this command will also accept an 'english name' field from the 
+Like 'getitem', this command will also accept an 'english name' field from the 
 database. If the name is not found, nothing will be deleted.
 
 ---------------------------------------
@@ -4345,7 +4343,7 @@ database. If the name is not found, nothing will be deleted.
 *delitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
 *delitem2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
 
-This command will take a specified amount of items from the invoking/target character. 
+This command will remove a specified amount of items from the invoking/target character. 
 Check 'getitem2' to understand its expanded parameters.
 
 ---------------------------------------
@@ -4591,9 +4589,9 @@ since jAthena, so probably nobody knows for sure why is it so.
 
 *downrefitem <equipment slot>;
 
-This command will downgrade an item by - 1 in the specified equipment slot of the 
-invoking character. So the item will not be destroyed unlike in the failedrefitem script command.
-This will also display a 'refine failure' effect on the character and put appropriate
+This command will downgrade an item in the specified equipment slot of the invoking
+character by -1. For a list of equipment slots see 'getequipid'. This command will
+also display a 'refine failure' effect on the character and put appropriate
 messages into their chat window.
 
 The official scripts seems to use the 'downrefitem' command as a function 
@@ -4610,6 +4608,14 @@ slots see 'getequipid'.
 
 If an item occupies several equipment slots, it will get unequipped from all of 
 them.
+
+---------------------------------------
+
+*delequip <equipment slot>;
+
+This command will destroy whatever is currently equipped in the invoking
+character's specified equipment slot. For a full list of possible equipment 
+slots see 'getequipid'.
 
 ---------------------------------------
 
@@ -5099,6 +5105,14 @@ This command will unequip anything equipped on the invoking character.
 
 It is not required to do this when changing jobs since 'jobchange' will unequip 
 everything not equippable by the new job class anyway.
+
+---------------------------------------
+
+*sit {"<character name>"};
+*stand {"<character name>"};
+
+These commands will make a character sit if standing and stand if sitting.
+If no character is specified, the command will run for the invoking character.
 
 ---------------------------------------
 
@@ -6832,46 +6846,47 @@ The first letter is position 0.
 *charat(<string>,<index>)
 
 Returns char at specified index. If index is out of range, returns empty string.
-	
+The first letter of a string is index 0.
+
 Example:
 	
 	charat("This is a string", 10); //returns "s"
-	
+
 ---------------------------------------
-	
+
 *setchar(<string>,<char>,<index>)
 
 Returns the original string with the char at the specified index set to the
 specified char. If index out of range, the original string will be returned.
 Only the 1st char in the <char> parameter will be used.
-	
+
 Example:
 	
 	setchar("Cat", "B", 0); //returns "Bat"
-	
+
 ---------------------------------------
 
 *insertchar(<string>,<char>,<index>)
-	
+
 Returns the original string with the specified char inserted at the specified
 index. If index is out of range, the char will be inserted on the end of the
 string that it is closest. Only the 1st char in the <char> parameter will be used.
-	
+
 Example:
 	
 	insertchar("laughter", "s", 0); //returns "slaughter"
-	
+
 ---------------------------------------
 
 *delchar(<string>,<index>)
 
 Returns the original string with the char at the specified index removed.
 If index is out of range, original string will be returned.
-	
+
 Example:
 	
 	delchar("Diet", 3); //returns "Die"
-	
+
 ---------------------------------------
 
 *strtoupper(<string>)
@@ -6879,7 +6894,7 @@ Example:
 
 Returns the specified string in it's uppercase/lowercase form.
 All non-alpha characters will be preserved.
-	
+
 Example:
 	
 	strtoupper("The duck is blue!!"); //returns "THE DUCK IS BLUE!!"
@@ -6890,16 +6905,16 @@ Example:
 *charislower(<string>,<index>)
 
 Returns 1 if character at specified index of specified string is
-uppercase/lowercase. Otherwise, 0. Characters not of the alphabelt will return 0.
+uppercase/lowercase. Otherwise, 0. Characters not of the alphabet will return 0.
 
 Example:
 	
 	charisupper("rAthena", 1); //returns 1
-	
+
 ---------------------------------------
 
 *substr(<string>,<start_index>,<end_index>)
-	
+
 Returns the sub-string of the specified string inclusively between the set
 indexes. If indexes are out of range, or the start index is after the end
 index, an empty string will be returned.
@@ -6907,7 +6922,7 @@ index, an empty string will be returned.
 Example:
 	
 	substr("foobar", 3, 5); //returns "bar"
-	
+
 ---------------------------------------
 
 *explode(<dest_array>,<string>,<delimiter>)
@@ -6933,28 +6948,28 @@ Example:
 
 Combines all substrings within the specified string array into a single string.
 If the glue parameter is specified, it will be inserted inbetween each substring.
-	
+
 Example:
 	setarray .@my_array$[0], "This", "is", "a", "test";
 	implode(.@my_array$, " "); //returns "This is a test"
 
 ---------------------------------------
 
-*sprintf(<format>[,param[,param[,...]]]) [Mirei]
+*sprintf(<format>[,param[,param[,...]]])
 
 C style sprintf. The resulting string is returned same as in PHP. All C format 
 specifiers are supported except %n. More info: sprintf @ www.cplusplus.com. 
 The number of params is only limited by rA's script engine.
 
 Example:
-	.@format$ = 'The %s contains %d monkeys';
+	set .@format$, "The %s contains %d monkeys";
 	dispbottom(sprintf(.@format$, "zoo", 5));        //prints "The zoo contains 5 monkeys"
 	dispbottom(sprintf(.@format$, "barrel", 82));    //prints "The barrel contains 82 monkeys"
-	
+
 ---------------------------------------
 
-*sscanf(<string>,<format>[,param[,param[,...]]]) [Mirei]
-	
+*sscanf(<string>,<format>[,param[,param[,...]]])
+
 C style sscanf. All C format specifiers are supported. 
 More info: sscanf @ www.cplusplus.com. The number of params is only limited 
 by rA's script engine.
@@ -6962,7 +6977,7 @@ by rA's script engine.
 Example:
 	sscanf("This is a test: 42 foobar", "This is a test: %d %s", .@num, .@str$);
 	dispbottom(.@num + " " + .@str$); //prints "42 foobar"
-	
+
 ---------------------------------------
 
 *strpos(<haystack>,<needle>{,<offset>})
@@ -6976,7 +6991,7 @@ Example:
 	strpos("foobar", "bar", 0); //returns 3
 	strpos("foobarfoo", "foo", 0); //returns 0
 	strpos("foobarfoo", "foo", 1); //returns 6
-	
+
 ---------------------------------------
 
 *replacestr(<input>, <search>, <replace>{, <usecase>{, <count>}})
@@ -6988,9 +7003,9 @@ in the count parameter.
 
 Example:
 	replacestr("testing tester", "test", "dash"); //returns "dashing dasher"
-	replacestr("Donkey", "don", "mon", 0);	//returns "monkey"
-	replacestr("test test test test test", "yay", 0, 3); //returns "yay yay yay test test"
-	
+	replacestr("Donkey", "don", "mon", 0); //returns "monkey"
+	replacestr("test test test test test", "test", "yay", 0, 3); //returns "yay yay yay test test"
+
 ---------------------------------------
 
 *countstr(<input>, <search>{, <usecase>})
@@ -7365,20 +7380,20 @@ If parameter "HUNTING" is supplied:
 *showevent <state>, <color>;
 
 Show a colored mark in the mini-map like "viewpoint" and an emotion on top of a NPC.
-This is used to indicate that a NPC has a quest or an event to certain player/s.
+This is used to indicate that a NPC has a quest or an event to certain players.
 
 state can be:
-	0 = disable ( Used to disable and remove the mark and the emotion from the NPC. )
-	1 = exclamation emotion ( Used to show an important quest event to certain player. )
-	2 = interrogation emotion ( Used to show an non-important quest event to certain player. )
-	Other value may cause client crashes.
+	0 = disable (Used to disable and remove the mark and the emotion from the NPC.)
+	1 = exclamation emotion (Used to show an important quest event to certain player.)
+	2 = interrogation emotion (Used to show an non-important quest event to certain player.)
+	Other values may cause client crashes.
 
 color can be:
 	0 = yellow "Quest"
 	1 = orange "Job"
 	2 = green "Event"
 	3 = an MVP flag
-	other values show a transparent mark in the mini-map.
+	Other values show a transparent mark in the mini-map.
 
 ---------------------------------------
 
@@ -7811,10 +7826,6 @@ for name and 0 for all other types.
 Whew.
 That's about all of them.
 
-*getequippedon()==<equipment slot>
-
-OnPCKillBossEvent
-
 ======================================
 String Manipulation Commands Ver 1.10
 Contributers: Mirei, ToastOfDoom
@@ -8024,3 +8035,23 @@ Command List:
 	Example:
 	countstr("test test test Test", "test"); //returns 3
 	countstr("cake Cake", "Cake", 0); //returns 2
+
+--------------------------------------------------------------------------------------------------------------
+-------------------------------Custom script ------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
+*mapname<TAB>mapflag<TAB>mobitemadder<TAB>mob_id,item_id,drop_per{,item_id,drop_per(...)}
+
+You can set up to ~50 more items for mobs.
+"drop_per" is the chance of drop, from 1 (0,01%) to 10000 (100%).
+
+---------------------------------------	
+*getequippedon()==<equipment slot>
+
+4490,Multislot_Card,Multislot Card,6,2,,10,,,,,,,,52,,,,,{ if(getequippedon()==EQP_ARMOR) { bonus bDef,4; } else if(getequippedon()==EQP_SHIELD) { bonus bMdef,3; } else bonus bFlee,10; },{},{}
+
+This card can be slotted in an Armor (16), a Shield (32) or a Garment (4) (16 + 32 + 4 = 52). However, let's say that you want the following effects to apply: 
+
+---------------------------------------	
+OnPCKillBossEvent
+
+OnPCStatCalcEvent

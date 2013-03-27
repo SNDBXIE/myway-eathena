@@ -1,0 +1,8 @@
+//==========================================================
+// Author: Tribb
+// Block item from atcmd @item
+// Example of use (item_id,min_level_to_get):
+// 501,60 //block item 501, but chars lvl >60 can still get it
+//==========================================================
+//501,60
+//502,99

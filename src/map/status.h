@@ -33,7 +33,7 @@ enum refine_type {
 
 int status_get_refine_chance(enum refine_type wlv, int refine);
 
-// Status changes listing. These code are for use by the server. 
+// Status changes listing. These code are for use by the server.
 typedef enum sc_type {
 	SC_NONE = -1,
 
@@ -51,7 +51,7 @@ typedef enum sc_type {
 	SC_BLEEDING,
 	SC_DPOISON, //10
 	SC_COMMON_MAX = 10, // end
-	
+
 	//Next up, we continue on 20, to leave enough room for additional "common" ailments in the future.
 	SC_PROVOKE = 20,
 	SC_ENDURE,
@@ -292,7 +292,7 @@ typedef enum sc_type {
 	SC_SUMMER,
 	SC_EXPBOOST,
 	SC_ITEMBOOST,
-	SC_BOSSMAPINFO, 
+	SC_BOSSMAPINFO,
 	SC_LIFEINSURANCE, //260
 	SC_INCCRI,
 	//SC_INCDEF,
@@ -631,23 +631,26 @@ typedef enum sc_type {
 	SC_ZANGETSU,
 	SC_GENSOU,
 	SC_AKAITSUKI,
-	
-	//homon S
-	SC_STYLE_CHANGE,        
-    SC_GOLDENE_FERSE,
-    SC_ANGRIFFS_MODUS,
-    SC_ERASER_CUTTER,
-    SC_OVERED_BOOST,        
-    SC_LIGHT_OF_REGENE,
-    SC_ASH,
-    SC_GRANITIC_ARMOR,
-    SC_MAGMA_FLOW,
-    SC_PYROCLASTIC,
-    SC_PARALYSIS,
-    SC_PAIN_KILLER,
 
-	
-#ifdef RENEWAL	
+	//homon S
+	SC_STYLE_CHANGE,
+	SC_TINDER_BREAKER, //@TODO rewritte me plz
+	SC_TINDER_BREAKER2, //for rewritte and other icone
+	SC_CBC,
+	SC_EQC,
+	SC_GOLDENE_FERSE,
+	SC_ANGRIFFS_MODUS,
+	SC_OVERED_BOOST,
+	SC_LIGHT_OF_REGENE,
+	SC_ASH,
+	SC_GRANITIC_ARMOR,
+	SC_MAGMA_FLOW,
+	SC_PYROCLASTIC,
+	SC_PARALYSIS,
+	SC_PAIN_KILLER,
+
+
+#ifdef RENEWAL
 	SC_EXTREMITYFIST2,
 #endif
 
@@ -1038,10 +1041,10 @@ enum si_type {
 	SI_NEUTRALBARRIER_MASTER = 378,
 	SI_STEALTHFIELD = 379,
 	SI_STEALTHFIELD_MASTER = 380,
-	SI_MANU_ATK = 381, 
-	SI_MANU_DEF = 382, 
-	SI_SPL_ATK = 383, 
-	SI_SPL_DEF = 384, 
+	SI_MANU_ATK = 381,
+	SI_MANU_DEF = 382,
+	SI_SPL_ATK = 383,
+	SI_SPL_DEF = 384,
 	SI_REPRODUCE = 385,
 	SI_MANU_MATK = 386,
 	SI_SPL_MATK = 387,
@@ -1358,6 +1361,34 @@ enum si_type {
 	SI_QUEST_BUFF3 = 707,
 	SI_REUSE_LIMIT_RECALL = 708,
 	SI_SAVEPOSITION = 709,
+	SI_HANDICAPSTATE_ICEEXPLO = 710,
+	SI_FENRIR_CARD = 711,
+	SI_REUSE_LIMIT_ASPD_POTION = 712,
+	SI_MAXPAIN = 713,
+	SI_PC_STOP = 714,
+	SI_FRIGG_SONG = 715,
+	SI_OFFERTORIUM = 716,
+	SI_TELEKINESIS_INTENSE = 717,
+	SI_MOONSTAR = 718,
+	SI_STRANGELIGHTS = 719,
+	SI_FULL_THROTTLE = 720,
+	SI_REBOUND = 721,
+	SI_UNLIMIT = 722,
+	SI_KINGS_GRACE = 723,
+	SI_ITEM_ATKMAX = 724,
+	SI_ITEM_ATKMIN = 725,
+	SI_ITEM_MATKMAX = 726,
+	SI_ITEM_MATKMIN = 727,
+	SI_SUPER_STAR = 728,
+	SI_HIGH_RANKER = 729,
+	SI_DARKCROW = 730,
+	SI_2013_VALENTINE1 = 731,
+	SI_2013_VALENTINE2 = 732,
+	SI_2013_VALENTINE3 = 733,
+//	SI_ = 734,
+//	SI_ = 735,
+	SI_CHILL = 736,
+	SI_BURNT = 737,
 	SI_MAX,
 };
 
@@ -1474,18 +1505,18 @@ enum {
 	OPTION_DRAGON4   = 0x02000000,
 	OPTION_DRAGON5   = 0x04000000,
 	OPTION_MOUNTING  = 0x08000000,
-	
+
 #ifndef NEW_CARTS
 	OPTION_CART1     = 0x00000008,
 	OPTION_CART2     = 0x00000080,
 	OPTION_CART3     = 0x00000100,
 	OPTION_CART4     = 0x00000200,
 	OPTION_CART5     = 0x00000400,
-	
+
 	/*  compound constant for older carts */
 	OPTION_CART      = OPTION_CART1|OPTION_CART2|OPTION_CART3|OPTION_CART4|OPTION_CART5,
 #endif
-	
+
 	// compound constants
 	OPTION_DRAGON    = OPTION_DRAGON1|OPTION_DRAGON2|OPTION_DRAGON3|OPTION_DRAGON4|OPTION_DRAGON5,
 	OPTION_MASK      = ~OPTION_INVISIBLE,
@@ -1509,7 +1540,7 @@ enum scs_flag {
 	SCS_NOPICKITEM      = 0x00000008, /* player unable to pick up items */
 	SCS_NODROPITEMCOND  = 0x00000010, /* cond flag for nodropitem */
 	SCS_NODROPITEM      = 0x00000020, /* player unable to drop items */
-	SCS_NOCASTCOND      = 0x00000040, /* cond flag for nocast */	
+	SCS_NOCASTCOND      = 0x00000040, /* cond flag for nocast */
 	SCS_NOCAST          = 0x00000080, /* unit unable to cast skills */
 };
 
@@ -1586,7 +1617,7 @@ struct status_data {
 		speed,
 		amotion, adelay, dmotion,
 		mode;
-	short 
+	short
 		hit, flee, cri, flee2,
 		def2, mdef2,
 #ifdef RENEWAL_ASPD
@@ -1614,7 +1645,7 @@ struct regen_data_sub {
 	struct {
 		unsigned int hp,sp;
 	} tick;
-	
+
 	//Regen rates (where every 1 means +100% regen)
 	struct {
 		unsigned char hp,sp;
@@ -1631,13 +1662,13 @@ struct regen_data {
 	struct {
 		unsigned int hp,sp,shp,ssp;
 	} tick;
-	
+
 	//Regen rates (where every 1 means +100% regen)
 	struct {
 		unsigned char
 		hp,sp,shp,ssp;
 	} rate;
-	
+
 	struct {
 		unsigned walk:1; //Can you regen even when walking?
 		unsigned gc:1;	//Tags when you should have double regen due to GVG castle
@@ -1764,13 +1795,13 @@ struct status_change *status_get_sc(struct block_list *bl);
 int status_isdead(struct block_list *bl);
 int status_isimmune(struct block_list *bl);
 
-int status_get_sc_def(struct block_list *bl, enum sc_type type, int rate, int tick, int flag);
+int status_get_sc_def(struct block_list *src,struct block_list *bl, enum sc_type type, int rate, int tick, int flag);
 //Short version, receives rate in 1->100 range, and does not uses a flag setting.
-#define sc_start(bl, type, rate, val1, tick) status_change_start(bl,type,100*(rate),val1,0,0,0,tick,0)
-#define sc_start2(bl, type, rate, val1, val2, tick) status_change_start(bl,type,100*(rate),val1,val2,0,0,tick,0)
-#define sc_start4(bl, type, rate, val1, val2, val3, val4, tick) status_change_start(bl,type,100*(rate),val1,val2,val3,val4,tick,0)
+#define sc_start(src, bl, type, rate, val1, tick) status_change_start(src,bl,type,100*(rate),val1,0,0,0,tick,0)
+#define sc_start2(src, bl, type, rate, val1, val2, tick) status_change_start(src,bl,type,100*(rate),val1,val2,0,0,tick,0)
+#define sc_start4(src, bl, type, rate, val1, val2, val3, val4, tick) status_change_start(src,bl,type,100*(rate),val1,val2,val3,val4,tick,0)
 
-int status_change_start(struct block_list* bl,enum sc_type type,int rate,int val1,int val2,int val3,int val4,int tick,int flag);
+int status_change_start(struct block_list* src, struct block_list* bl,enum sc_type type,int rate,int val1,int val2,int val3,int val4,int tick,int flag);
 int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const char* file, int line);
 #define status_change_end(bl,type,tid) status_change_end_(bl,type,tid,__FILE__,__LINE__)
 int kaahi_heal_timer(int tid, unsigned int tick, int id, intptr_t data);

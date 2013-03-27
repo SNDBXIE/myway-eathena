@@ -469,14 +469,19 @@ int itemdb_isrestricted(struct item* item, int gmlv, int gmlv2, int (*func)(stru
 int itemdb_isidentified(int nameid)
 {
 	int type=itemdb_type(nameid);
-	switch (type) {
-		case IT_WEAPON:
-		case IT_ARMOR:
-		case IT_PETARMOR:
-			return 0;
-		default:
-			return 1;
+	if(battle_config.identify_drop == 1){
+		return 1;
+	} else {
+		switch (type) {
+			case IT_WEAPON:
+			case IT_ARMOR:
+			case IT_PETARMOR:
+				return 0;
+			default:
+				return 1;
+		}
 	}
+
 }
 
 /*==========================================
@@ -1348,6 +1353,45 @@ static int itemdb_readbonus(void)
 	return 0;
 }
 
+/*==========================================
+ * sends to buf list of items that cannot be get from @item
+ *------------------------------------------*/
+static bool itemdb_read_block_atcmd(char* str[], int columns, int current) {
+	int nameid, min_level;
+	struct item_data *id;
+	
+	nameid = atoi(str[0]);
+	min_level = atoi(str[1]);
+
+	if( ( id = itemdb_exists(nameid) ) == NULL ) {
+		ShowWarning("itemdb_read_block_atcmd: Invalid item id %d.\n", nameid);
+		return false;
+	}
+	
+	id->atcmd_block = true;
+	id->atcmd_block_minlvl = min_level;
+
+	return true;
+}
+
+/*====================================
+* read item_announce.txt
+*------------------------------------*/
+static bool itemdb_read_announce(char* fields[], int columns, int current)
+{
+        unsigned short nameid;
+        struct item_data* id;
+        nameid = (unsigned short)strtoul(fields[0], NULL, 10);
+        if( ( id = itemdb_exists(nameid) ) == NULL )
+        {
+                ShowWarning("itemdb_read_announce: Unknow item id '%hu'.\n", nameid);
+                return false;
+        }
+
+        id->ann=1;
+        return true;
+}
+
 /*====================================
  * read all item-related databases
  *------------------------------------*/
@@ -1369,6 +1413,8 @@ static void itemdb_read(void) {
 	sv_readdb(db_path, "item_delay.txt",         ',', 2, 2, -1, &itemdb_read_itemdelay);
 	sv_readdb(db_path, "item_stack.txt",         ',', 3, 3, -1, &itemdb_read_stack);
 	sv_readdb(db_path, DBPATH"item_buyingstore.txt",   ',', 1, 1, -1, &itemdb_read_buyingstore);
+	sv_readdb(db_path, "item_block_atcmd.txt", ',', 2, 2, -1,         &itemdb_read_block_atcmd);
+	sv_readdb(db_path, "item_announce.txt", ',', 1, 1, -1,            &itemdb_read_announce);
 	
 	itemdb_uid_load();
 }

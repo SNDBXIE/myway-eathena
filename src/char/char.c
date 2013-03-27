@@ -126,10 +126,18 @@ struct char_session_data {
 	char email[40]; // e-mail (default: a@a.com) by [Yor]
 	time_t expiration_time; // # of seconds 1/1/1970 (timestamp): Validity limit of the account (0 = unlimited)
 	int group_id; // permission
+	uint8 char_slots;
 	uint32 version;
 	uint8 clienttype;
 	char new_name[NAME_LENGTH];
 	char birthdate[10+1];  // YYYY-MM-DD
+	// Pincode system
+	char pincode[4+1];
+	uint16 pincode_seed;
+	time_t pincode_change;
+	uint16 pincode_try;
+	// Addon system
+	unsigned int char_moves[MAX_CHARS]; // character moves left
 };
 
 int max_connect_user = -1;
@@ -139,6 +147,37 @@ int start_zeny = 0;
 int start_weapon = 1201;
 int start_armor = 2301;
 int guild_exp_rate = 100;
+
+// Pincode system
+#define PINCODE_OK 0
+#define PINCODE_ASK 1
+#define PINCODE_NOTSET 2
+#define PINCODE_EXPIRED 3
+#define PINCODE_NEW 4
+#define PINCODE_PASSED 7
+#define	PINCODE_WRONG 8
+
+bool pincode_enabled = true;
+int pincode_changetime = 0;
+int pincode_maxtry = 3;
+bool pincode_force = true;
+
+void pincode_check( int fd, struct char_session_data* sd );
+void pincode_change( int fd, struct char_session_data* sd );
+void pincode_setnew( int fd, struct char_session_data* sd );
+void pincode_sendstate( int fd, struct char_session_data* sd, uint16 state );
+void pincode_notifyLoginPinUpdate( int account_id, char* pin );
+void pincode_notifyLoginPinError( int account_id );
+void pincode_decrypt( unsigned long userSeed, char* pin );
+int pincode_compare( int fd, struct char_session_data* sd, char* pin );
+
+// Addon system
+bool char_move_enabled = true;
+bool char_movetoused = true;
+bool char_moves_unlimited = false;
+
+void moveCharSlot( int fd, struct char_session_data* sd, unsigned short from, unsigned short to );
+void moveCharSlotReply( int fd, struct char_session_data* sd, unsigned short index, short reason );
 
 //Custom limits for the fame lists. [Skotlex]
 int fame_list_size_chemist = MAX_FAME_LIST;
@@ -189,6 +228,7 @@ struct online_char_data {
 	int fd;
 	int waiting_disconnect;
 	short server; // -2: unknown server, -1: not connected, 0+: id of server
+	bool pincode_success;
 };
 
 static DBMap* online_char_db; // int account_id -> struct online_char_data*
@@ -318,6 +358,8 @@ void set_char_offline(int char_id, int account_id)
 		{
 			character->char_id = -1;
 			character->server = -1;
+			// needed if player disconnects completely since Skotlex did not want to free the session
+			character->pincode_success = false;
 		}
 
 		//FIXME? Why Kevin free'd the online information when the char was effectively in the map-server?
@@ -471,7 +513,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 		(p->pet_id != cp->pet_id) || (p->weapon != cp->weapon) || (p->hom_id != cp->hom_id) ||
 		(p->ele_id != cp->ele_id) || (p->shield != cp->shield) || (p->head_top != cp->head_top) ||
 		(p->head_mid != cp->head_mid) || (p->head_bottom != cp->head_bottom) || (p->delete_date != cp->delete_date) ||
-		(p->rename != cp->rename) || (p->robe != cp->robe)
+		(p->rename != cp->rename) || (p->robe != cp->robe) || (p->character_moves != cp->character_moves)
 	)
 	{	//Save status
 		if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `base_level`='%d', `job_level`='%d',"
@@ -481,7 +523,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 			"`option`='%d',`party_id`='%d',`guild_id`='%d',`pet_id`='%d',`homun_id`='%d',`elemental_id`='%d',"
 			"`weapon`='%d',`shield`='%d',`head_top`='%d',`head_mid`='%d',`head_bottom`='%d',"
 			"`last_map`='%s',`last_x`='%d',`last_y`='%d',`save_map`='%s',`save_x`='%d',`save_y`='%d', `rename`='%d',"
-			"`delete_date`='%lu',`robe`='%d'"
+			"`delete_date`='%lu',`robe`='%d',`moves`='%d'"
 			" WHERE  `account_id`='%d' AND `char_id` = '%d'",
 			char_db, p->base_level, p->job_level,
 			p->base_exp, p->job_exp, p->zeny,
@@ -492,7 +534,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 			mapindex_id2name(p->last_point.map), p->last_point.x, p->last_point.y,
 			mapindex_id2name(p->save_point.map), p->save_point.x, p->save_point.y, p->rename,
 			(unsigned long)p->delete_date,  // FIXME: platform-dependent size
-			p->robe,
+			p->robe,p->character_moves,
 			p->account_id, p->char_id) )
 		{
 			Sql_ShowDebug(sql_handle);
@@ -1015,7 +1057,7 @@ int mmo_chars_fromsql(struct char_session_data* sd, uint8* buf)
 		"`str`,`agi`,`vit`,`int`,`dex`,`luk`,`max_hp`,`hp`,`max_sp`,`sp`,"
 		"`status_point`,`skill_point`,`option`,`karma`,`manner`,`hair`,`hair_color`,"
 		"`clothes_color`,`weapon`,`shield`,`head_top`,`head_mid`,`head_bottom`,`last_map`,`rename`,`delete_date`,"
-		"`robe`"
+		"`robe`,`moves`"
 		" FROM `%s` WHERE `account_id`='%d' AND `char_num` < '%d'", char_db, sd->account_id, MAX_CHARS)
 	||	SQL_ERROR == SqlStmt_Execute(stmt)
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 0,  SQLDT_INT,    &p.char_id, 0, NULL, NULL)
@@ -1054,20 +1096,29 @@ int mmo_chars_fromsql(struct char_session_data* sd, uint8* buf)
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 33, SQLDT_SHORT,	&p.rename, 0, NULL, NULL)
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 34, SQLDT_UINT32, &p.delete_date, 0, NULL, NULL)
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 35, SQLDT_SHORT,  &p.robe, 0, NULL, NULL)
+	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 36, SQLDT_UINT,   &p.character_moves, 0, NULL, NULL)
 	)
 	{
 		SqlStmt_ShowDebug(stmt);
 		SqlStmt_Free(stmt);
 		return 0;
 	}
+
+	for( i = 0; i < MAX_CHARS; i++ ){
+		sd->found_char[i] = -1;
+		sd->char_moves[i] = 0;
+	}
+
 	for( i = 0; i < MAX_CHARS && SQL_SUCCESS == SqlStmt_NextRow(stmt); i++ )
 	{
 		p.last_point.map = mapindex_name2id(last_map);
-		sd->found_char[i] = p.char_id;
+		sd->found_char[p.slot] = p.char_id;
 		j += mmo_char_tobuf(WBUFP(buf, j), &p);
+
+		// Addon System
+		// store the required info into the session
+		sd->char_moves[p.slot] = p.character_moves;
 	}
-	for( ; i < MAX_CHARS; i++ )
-		sd->found_char[i] = -1;
 
 	memset(sd->new_name,0,sizeof(sd->new_name));
 
@@ -1112,7 +1163,7 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 		"`str`,`agi`,`vit`,`int`,`dex`,`luk`,`max_hp`,`hp`,`max_sp`,`sp`,"
 		"`status_point`,`skill_point`,`option`,`karma`,`manner`,`party_id`,`guild_id`,`pet_id`,`homun_id`,`elemental_id`,`hair`,"
 		"`hair_color`,`clothes_color`,`weapon`,`shield`,`head_top`,`head_mid`,`head_bottom`,`last_map`,`last_x`,`last_y`,"
-		"`save_map`,`save_x`,`save_y`,`partner_id`,`father`,`mother`,`child`,`fame`,`rename`,`delete_date`,`robe`"
+		"`save_map`,`save_x`,`save_y`,`partner_id`,`father`,`mother`,`child`,`fame`,`rename`,`delete_date`,`robe`, `moves`"
 		" FROM `%s` WHERE `char_id`=? LIMIT 1", char_db)
 	||	SQL_ERROR == SqlStmt_BindParam(stmt, 0, SQLDT_INT, &char_id, 0)
 	||	SQL_ERROR == SqlStmt_Execute(stmt)
@@ -1168,6 +1219,7 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 	||  SQL_ERROR == SqlStmt_BindColumn(stmt, 49, SQLDT_SHORT,	&p->rename, 0, NULL, NULL)
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 50, SQLDT_UINT32, &p->delete_date, 0, NULL, NULL)
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 51, SQLDT_SHORT,  &p->robe, 0, NULL, NULL)
+	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 52, SQLDT_UINT32, &p->character_moves, 0, NULL, NULL)
 	)
 	{
 		SqlStmt_ShowDebug(stmt);
@@ -1489,14 +1541,18 @@ int make_new_char_sql(struct char_session_data* sd, char* name_, int str, int ag
 
 	//check other inputs
 #if PACKETVER >= 20120307
-	if(slot >= MAX_CHARS)
+	if(slot >= sd->char_slots)
 #else
-	if((slot >= MAX_CHARS) // slots
+	if((slot >= sd->char_slots) // slots
 	|| (str + agi + vit + int_ + dex + luk != 6*5 ) // stats
 	|| (str < 1 || str > 9 || agi < 1 || agi > 9 || vit < 1 || vit > 9 || int_ < 1 || int_ > 9 || dex < 1 || dex > 9 || luk < 1 || luk > 9) // individual stat values
 	|| (str + int_ != 10 || agi + luk != 10 || vit + dex != 10) ) // pairs
 #endif
+#if PACKETVER >= 20100413
+		return -4; // invalid slot
+#else
 		return -2; // invalid input
+#endif
 
 
 	// check the number of already existing chars in this account
@@ -1831,7 +1887,13 @@ int mmo_char_tobuf(uint8* buffer, struct mmo_charstatus* p)
 #endif
 #if PACKETVER != 20111116 //2011-11-16 wants 136, ask gravity.
 	#if PACKETVER >= 20110928
-		WBUFL(buf,132) = 0;  // change slot feature (0 = disabled, otherwise enabled)
+		// change slot feature (0 = disabled, otherwise enabled)
+		if( !char_move_enabled )
+			WBUFL(buf,132) = 0;
+		else if( char_moves_unlimited )
+			WBUFL(buf,132) = 1;
+		else
+			WBUFL(buf,132) = max( 0, (int)p->character_moves );
 		offset += 4;
 	#endif
 	#if PACKETVER >= 20111025
@@ -1861,8 +1923,8 @@ int mmo_char_send006b(int fd, struct char_session_data* sd)
 	WFIFOW(fd,0) = 0x6b;
 #if PACKETVER >= 20100413
 	WFIFOB(fd,4) = MAX_CHARS; // Max slots.
-	WFIFOB(fd,5) = MAX_CHARS; // Available slots.
-	WFIFOB(fd,6) = MAX_CHARS; // Premium slots.
+	WFIFOB(fd,5) = sd->char_slots; // Available slots. (PremiumStartSlot)
+	WFIFOB(fd,6) = MAX_CHARS; // Premium slots. (Any existent chars past sd->char_slots but within MAX_CHARS will show a 'Premium Service' in red)
 #endif
 	memset(WFIFOP(fd,4 + offset), 0, 20); // unknown bytes
 	j+=mmo_chars_fromsql(sd, WFIFOP(fd,j));
@@ -2142,7 +2204,7 @@ int parse_fromlogin(int fd) {
 		break;
 
 		case 0x2717: // account data
-			if (RFIFOREST(fd) < 62)
+			if (RFIFOREST(fd) < 72)
 				return 0;
 
 			// find the authenticated session with this account id
@@ -2153,7 +2215,15 @@ int parse_fromlogin(int fd) {
 				memcpy(sd->email, RFIFOP(fd,6), 40);
 				sd->expiration_time = (time_t)RFIFOL(fd,46);
 				sd->group_id = RFIFOB(fd,50);
-				safestrncpy(sd->birthdate, (const char*)RFIFOP(fd,51), sizeof(sd->birthdate));
+				sd->char_slots = RFIFOB(fd,51);
+				if( sd->char_slots > MAX_CHARS ) {
+					ShowError("Account '%d' `character_slots` column is higher than supported MAX_CHARS (%d), update MAX_CHARS in mmo.h! capping to MAX_CHARS...\n",sd->account_id,sd->char_slots);
+					sd->char_slots = MAX_CHARS;/* cap to maximum */
+				} else if ( !sd->char_slots )/* no value aka 0 in sql */
+					sd->char_slots = MAX_CHARS;/* cap to maximum */
+				safestrncpy(sd->birthdate, (const char*)RFIFOP(fd,52), sizeof(sd->birthdate));
+				safestrncpy(sd->pincode, (const char*)RFIFOP(fd,63), sizeof(sd->pincode));
+				sd->pincode_change = (time_t)RFIFOL(fd,68);
 				ARR_FIND( 0, ARRAYLENGTH(server), server_id, server[server_id].fd > 0 && server[server_id].map[0] );
 				// continued from char_auth_ok...
 				if( server_id == ARRAYLENGTH(server) || //server not online, bugreport:2359
@@ -2168,18 +2238,39 @@ int parse_fromlogin(int fd) {
 					// send characters to player
 					mmo_char_send006b(i, sd);
 #if PACKETVER >=  20110309
-					// PIN code system, disabled
-					WFIFOHEAD(i, 12);
-					WFIFOW(i, 0) = 0x08B9;
-					WFIFOW(i, 2) = 0;
-					WFIFOW(i, 4) = 0;
-					WFIFOL(i, 6) = sd->account_id;
-					WFIFOW(i, 10) = 0;
-					WFIFOSET(i, 12);
+					if( pincode_enabled ){
+						// PIN code system enabled
+						if( strlen( sd->pincode ) <= 0 ){
+							// No PIN code has been set yet
+							if( pincode_force ){
+								pincode_sendstate( i, sd, PINCODE_NEW );
+							}else{
+								pincode_sendstate( i, sd, PINCODE_PASSED );
+							}
+						}else{
+							if( !pincode_changetime || ( sd->pincode_change + pincode_changetime ) > time(NULL) ){
+								struct online_char_data* node = (struct online_char_data*)idb_get( online_char_db, sd->account_id );
+
+								if( node != NULL && node->pincode_success ){
+									// User has already passed the check
+									pincode_sendstate( i, sd, PINCODE_PASSED );
+								}else{
+									// Ask user for his PIN code
+									pincode_sendstate( i, sd, PINCODE_ASK );
+								}
+							}else{
+								// User hasnt changed his PIN code too long
+								pincode_sendstate( i, sd, PINCODE_EXPIRED );
+							}
+						}
+					}else{
+						// PIN code system disabled
+						pincode_sendstate( i, sd, PINCODE_OK );
+					}
 #endif
 				}
 			}
-			RFIFOSKIP(fd,62);
+			RFIFOSKIP(fd,72);
 		break;
 
 		// login-server alive packet
@@ -2830,47 +2921,52 @@ int parse_frommap(int fd)
 		case 0x2b02: // req char selection
 			if( RFIFOREST(fd) < 18 )
 				return 0;
-		{
-			int account_id = RFIFOL(fd,2);
-			uint32 login_id1 = RFIFOL(fd,6);
-			uint32 login_id2 = RFIFOL(fd,10);
-			uint32 ip = RFIFOL(fd,14);
-			RFIFOSKIP(fd,18);
+			else{
+				int account_id = RFIFOL(fd,2);
+				uint32 login_id1 = RFIFOL(fd,6);
+				uint32 login_id2 = RFIFOL(fd,10);
+				uint32 ip = RFIFOL(fd,14);
+				RFIFOSKIP(fd,18);
 
-			if( runflag != CHARSERVER_ST_RUNNING )
-			{
-				WFIFOHEAD(fd,7);
-				WFIFOW(fd,0) = 0x2b03;
-				WFIFOL(fd,2) = account_id;
-				WFIFOB(fd,6) = 0;// not ok
-				WFIFOSET(fd,7);
+				if( runflag != CHARSERVER_ST_RUNNING ){
+					WFIFOHEAD(fd,7);
+					WFIFOW(fd,0) = 0x2b03;
+					WFIFOL(fd,2) = account_id;
+					WFIFOB(fd,6) = 0;// not ok
+					WFIFOSET(fd,7);
+				}else{
+					struct auth_node* node;
+
+					// create temporary auth entry
+					CREATE(node, struct auth_node, 1);
+					node->account_id = account_id;
+					node->char_id = 0;
+					node->login_id1 = login_id1;
+					node->login_id2 = login_id2;
+					//node->sex = 0;
+					node->ip = ntohl(ip);
+					//node->expiration_time = 0; // unlimited/unknown time by default (not display in map-server)
+					//node->gmlevel = 0;
+					idb_put(auth_db, account_id, node);
+
+					//Set char to "@ char select" in online db [Kevin]
+					set_char_charselect(account_id);
+
+					{
+						struct online_char_data* character = (struct online_char_data*)idb_get(online_char_db, account_id);
+						
+						if( character != NULL ){
+							character->pincode_success = true;
+						}
+					}
+
+					WFIFOHEAD(fd,7);
+					WFIFOW(fd,0) = 0x2b03;
+					WFIFOL(fd,2) = account_id;
+					WFIFOB(fd,6) = 1;// ok
+					WFIFOSET(fd,7);
+				}
 			}
-			else
-			{
-				struct auth_node* node;
-
-				// create temporary auth entry
-				CREATE(node, struct auth_node, 1);
-				node->account_id = account_id;
-				node->char_id = 0;
-				node->login_id1 = login_id1;
-				node->login_id2 = login_id2;
-				//node->sex = 0;
-				node->ip = ntohl(ip);
-				//node->expiration_time = 0; // unlimited/unknown time by default (not display in map-server)
-				//node->gmlevel = 0;
-				idb_put(auth_db, account_id, node);
-
-				//Set char to "@ char select" in online db [Kevin]
-				set_char_charselect(account_id);
-
-				WFIFOHEAD(fd,7);
-				WFIFOW(fd,0) = 0x2b03;
-				WFIFOL(fd,2) = account_id;
-				WFIFOB(fd,6) = 1;// ok
-				WFIFOSET(fd,7);
-			}
-		}
 		break;
 
 		case 0x2b05: // request "change map server"
@@ -3331,7 +3427,6 @@ int parse_frommap(int fd)
 				RFIFOSKIP(fd, RFIFOW(fd,2) );/* skip this packet */
 		}
 		break;
-
 
 		default:
 		{
@@ -3901,19 +3996,20 @@ int parse_char(int fd)
 #endif
 
 			//'Charname already exists' (-1), 'Char creation denied' (-2) and 'You are underaged' (-3)
-			if (i < 0)
-			{
+			if (i < 0) {
 				WFIFOHEAD(fd,3);
 				WFIFOW(fd,0) = 0x6e;
+				/* Others I found [Ind] */
+				/* 0x02 = Symbols in Character Names are forbidden */
+				/* 0x03 = You are not elegible to open the Character Slot. */
 				switch (i) {
-				case -1: WFIFOB(fd,2) = 0x00; break;
-				case -2: WFIFOB(fd,2) = 0xFF; break;
-				case -3: WFIFOB(fd,2) = 0x01; break;
+					case -1: WFIFOB(fd,2) = 0x00; break;
+					case -2: WFIFOB(fd,2) = 0xFF; break;
+					case -3: WFIFOB(fd,2) = 0x01; break;
+					case -4: WFIFOB(fd,2) = 0x03; break;
 				}
 				WFIFOSET(fd,3);
-			}
-			else
-			{
+			} else {
 				int len;
 				// retrieve data
 				struct mmo_charstatus char_dat;
@@ -4176,6 +4272,72 @@ int parse_char(int fd)
 		}
 		return 0; // avoid processing of followup packets here
 
+		// checks the entered pin
+		case 0x8b8:
+			if( RFIFOREST(fd) < 10 )
+				return 0;
+
+			if( RFIFOL(fd,2) != sd->account_id )
+				break;
+
+			pincode_check( fd, sd );
+
+			RFIFOSKIP(fd,10);
+		break;
+
+		// request for PIN window
+		case 0x8c5:
+			if( RFIFOREST(fd) < 6 )
+				return 0;
+
+			if( RFIFOL(fd,2) != sd->account_id )
+				break;
+
+			if( strlen( sd->pincode ) <= 0 ){
+				pincode_sendstate( fd, sd, PINCODE_NEW );
+			}else{
+				pincode_sendstate( fd, sd, PINCODE_ASK );
+			}
+
+			RFIFOSKIP(fd,6);
+		break;
+
+		// pincode change request
+		case 0x8be:
+			if( RFIFOREST(fd) < 14 )
+				return 0;
+
+			if( RFIFOL(fd,2) != sd->account_id )
+				break;
+
+			pincode_change( fd, sd );
+
+			RFIFOSKIP(fd,14);
+		break;
+
+		// activate PIN system and set first PIN
+		case 0x8ba:
+			if( RFIFOREST(fd) < 10 )
+				return 0;
+
+			if( RFIFOL(fd,2) != sd->account_id )
+				break;
+
+			pincode_setnew( fd, sd );
+
+			RFIFOSKIP(fd,10);
+		break;
+
+		// character movement request
+		case 0x8d4:
+			if( RFIFOREST(fd) < 8 )
+				return 0;
+
+			moveCharSlot( fd, sd, RFIFOW(fd, 2), RFIFOW(fd, 4) );
+
+			RFIFOSKIP(fd,8);
+		break;
+
 		// unknown packet received
 		default:
 			ShowError("parse_char: Received unknown packet "CL_WHITE"0x%x"CL_RESET" from ip '"CL_WHITE"%s"CL_RESET"'! Disconnecting!\n", RFIFOW(fd,0), ip2str(ipl, NULL));
@@ -4354,6 +4516,183 @@ int check_connect_login_server(int tid, unsigned int tick, int id, intptr_t data
 	WFIFOSET(login_fd,86);
 
 	return 1;
+}
+
+//------------------------------------------------
+//Pincode system
+//------------------------------------------------
+void pincode_check( int fd, struct char_session_data* sd ){
+	char pin[5] = "\0\0\0\0";
+	strncpy((char*)pin, (char*)RFIFOP(fd, 6), 4+1);
+
+	pincode_decrypt(sd->pincode_seed, pin );
+
+	if( pincode_compare( fd, sd, pin ) ){
+		pincode_sendstate( fd, sd, PINCODE_PASSED );
+	}
+}
+
+int pincode_compare( int fd, struct char_session_data* sd, char* pin ){
+	if( strcmp( sd->pincode, pin ) == 0 ){
+		sd->pincode_try = 0;
+		return 1;
+	}else{
+		pincode_sendstate( fd, sd, PINCODE_WRONG );
+
+		if( pincode_maxtry && ++sd->pincode_try >= pincode_maxtry ){
+			pincode_notifyLoginPinError( sd->account_id );
+		}
+
+		return 0;
+	}
+}
+
+void pincode_change( int fd, struct char_session_data* sd ){
+	char oldpin[5] = "\0\0\0\0";
+	char newpin[5] = "\0\0\0\0";
+
+	strncpy(oldpin, (char*)RFIFOP(fd,6), 4+1);
+	pincode_decrypt(sd->pincode_seed,oldpin);
+
+	if( !pincode_compare( fd, sd, oldpin ) )
+		return;
+
+	strncpy(newpin, (char*)RFIFOP(fd,10), 4+1);
+	pincode_decrypt(sd->pincode_seed,newpin);
+
+	pincode_notifyLoginPinUpdate( sd->account_id, newpin );
+
+	pincode_sendstate( fd, sd, PINCODE_PASSED );
+}
+
+void pincode_setnew( int fd, struct char_session_data* sd ){
+	char newpin[5] = "\0\0\0\0";
+
+	strncpy( newpin, (char*)RFIFOP(fd,6), 4+1 );
+	pincode_decrypt( sd->pincode_seed, newpin );
+
+	pincode_notifyLoginPinUpdate( sd->account_id, newpin );
+	strncpy( sd->pincode, newpin, strlen( newpin ) );
+
+	pincode_sendstate( fd, sd, PINCODE_PASSED );
+}
+
+// 0 = disabled / pin is correct
+// 1 = ask for pin - client sends 0x8b8
+// 2 = create new pin - client sends 0x8ba
+// 3 = pin must be changed - client 0x8be
+// 4 = create new pin - client sends 0x8ba
+// 5 = client shows msgstr(1896)
+// 6 = client shows msgstr(1897) Unable to use your KSSN number
+// 7 = char select window shows a button - client sends 0x8c5
+// 8 = pincode was incorrect
+void pincode_sendstate( int fd, struct char_session_data* sd, uint16 state ){
+	WFIFOHEAD(fd, 12);
+	WFIFOW(fd, 0) = 0x8b9;
+	WFIFOL(fd, 2) = sd->pincode_seed = rand() % 0xFFFF;
+	WFIFOL(fd, 6) = sd->account_id;
+	WFIFOW(fd,10) = state;
+	WFIFOSET(fd,12);
+}
+
+void pincode_notifyLoginPinUpdate( int account_id, char* pin ){
+	WFIFOHEAD(login_fd,11);
+	WFIFOW(login_fd,0) = 0x2738;
+	WFIFOL(login_fd,2) = account_id;
+	strncpy( (char*)WFIFOP(login_fd,6), pin, 5 );
+	WFIFOSET(login_fd,11);
+}
+
+void pincode_notifyLoginPinError( int account_id ){
+	WFIFOHEAD(login_fd,6);
+	WFIFOW(login_fd,0) = 0x2739;
+	WFIFOL(login_fd,2) = account_id;
+	WFIFOSET(login_fd,6);
+}
+
+void pincode_decrypt( unsigned long userSeed, char* pin ){
+	int i, pos;
+	char tab[10] = {0,1,2,3,4,5,6,7,8,9};
+	unsigned long multiplier = 0x3498, baseSeed = 0x881234;
+
+	for( i = 1; i < 10; i++ ){
+		userSeed = baseSeed + userSeed * multiplier;
+		pos = userSeed % (i + 1);
+		if( i != pos ){
+			tab[i] ^= tab[pos];
+			tab[pos] ^= tab[i];
+			tab[i] ^= tab[pos];
+		}
+	}
+	
+	for( i = 0; i < 4; i++ ){
+		pin[i] = tab[pin[i]- '0'];
+	}
+
+	sprintf(pin, "%d%d%d%d", pin[0], pin[1], pin[2], pin[3]);
+}
+
+//------------------------------------------------
+//Add On system
+//------------------------------------------------
+void moveCharSlot( int fd, struct char_session_data* sd, unsigned short from, unsigned short to ){
+	// Have we changed to often or is it disabled?
+	if( !char_move_enabled || ( !char_moves_unlimited && sd->char_moves[from] <= 0 ) ){
+		moveCharSlotReply( fd, sd, from, 1 );
+		return;
+	}
+
+	// We dont even have a character on the chosen slot?
+	if( sd->found_char[from] <= 0 ){
+		moveCharSlotReply( fd, sd, from, 1 );
+		return;
+	}
+
+	if( sd->found_char[to] > 0 ){
+		// We want to move to a used position
+		if( char_movetoused ){ // TODO: check if the target is in deletion process
+			// Admin is friendly and uses triangle exchange
+			if(	   SQL_ERROR == Sql_QueryStr(sql_handle, "START TRANSACTION")
+				|| SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `char_num`='%d' WHERE `char_id` = '%d'", char_db, to, sd->found_char[from] )
+				|| SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `char_num`='%d' WHERE `char_id` = '%d'", char_db, from, sd->found_char[to] )
+				|| SQL_ERROR == Sql_QueryStr(sql_handle, "COMMIT")
+				){
+				moveCharSlotReply( fd, sd, from, 1 );
+				Sql_ShowDebug(sql_handle);
+				Sql_QueryStr(sql_handle,"ROLLBACK");
+				return;
+			}
+		}else{
+			// Admin doesnt allow us to
+			moveCharSlotReply( fd, sd, from, 1 );
+			return;
+		}
+	}else if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `char_num`='%d' WHERE `char_id`='%d'", char_db, to, sd->found_char[from] ) ){
+		Sql_ShowDebug(sql_handle);
+		moveCharSlotReply( fd, sd, from, 1 );
+		return;
+	}
+
+	if( !char_moves_unlimited ){
+		sd->char_moves[from]--;
+		Sql_Query(sql_handle, "UPDATE `%s` SET `moves`='%d' WHERE `char_id`='%d'", char_db, sd->char_moves[from], sd->found_char[from] );
+	}
+
+	// We successfully moved the char - time to notify the client
+	moveCharSlotReply( fd, sd, from, 0 );
+	mmo_char_send006b( fd, sd );
+}
+
+// reason
+// 0: success
+// 1: failed
+void moveCharSlotReply( int fd, struct char_session_data* sd, unsigned short index, short reason ){
+	WFIFOHEAD(fd,8);
+	WFIFOW(fd,0) = 0x8d5;
+	WFIFOW(fd,2) = 8;
+	WFIFOW(fd,4) = reason;
+	WFIFOW(fd,6) = sd->char_moves[index];
+	WFIFOSET(fd,8);
 }
 
 //------------------------------------------------
@@ -4679,6 +5018,20 @@ int char_config_read(const char* cfgName)
 			}
 		} else if (strcmpi(w1, "guild_exp_rate") == 0) {
 			guild_exp_rate = atoi(w2);
+		} else if (strcmpi(w1, "pincode_enabled") == 0) {
+			pincode_enabled = config_switch(w2);
+		} else if (strcmpi(w1, "pincode_changetime") == 0) {
+			pincode_changetime = atoi(w2)*60*60*24;
+		} else if (strcmpi(w1, "pincode_maxtry") == 0) {
+			pincode_maxtry = atoi(w2);
+		} else if (strcmpi(w1, "pincode_force") == 0) {
+			pincode_force = config_switch(w2);
+		} else if (strcmpi(w1, "char_move_enabled") == 0) {
+			char_move_enabled = config_switch(w2);
+		} else if (strcmpi(w1, "char_movetoused") == 0) {
+			char_movetoused = config_switch(w2);
+		} else if (strcmpi(w1, "char_moves_unlimited") == 0) {
+			char_moves_unlimited = config_switch(w2);
 		} else if (strcmpi(w1, "import") == 0) {
 			char_config_read(w2);
 		}

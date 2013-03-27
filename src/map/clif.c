@@ -759,7 +759,10 @@ void clif_dropflooritem(struct flooritem_data* fitem)
 	WBUFW(buf, 0) = 0x9e;
 	WBUFL(buf, 2) = fitem->bl.id;
 	WBUFW(buf, 6) = ((view = itemdb_viewid(fitem->item_data.nameid)) > 0) ? view : fitem->item_data.nameid;
-	WBUFB(buf, 8) = fitem->item_data.identify;
+	if(battle_config.identify_drop == 1)
+		WBUFB(buf, 8) = 1;
+	else
+		WBUFB(buf, 8) = fitem->item_data.identify;
 	WBUFW(buf, 9) = fitem->bl.x;
 	WBUFW(buf,11) = fitem->bl.y;
 	WBUFB(buf,13) = fitem->subx;
@@ -3054,7 +3057,6 @@ void clif_changelook(struct block_list *bl,int type,int val)
 			//Shoes? No packet uses this....
 		break;
 		case LOOK_BODY:
-		case LOOK_FLOOR:
 			// unknown purpose
 		break;
 		case LOOK_ROBE:
@@ -4375,7 +4377,10 @@ void clif_getareachar_item(struct map_session_data* sd,struct flooritem_data* fi
 		WFIFOW(fd,6)=view;
 	else
 		WFIFOW(fd,6)=fitem->item_data.nameid;
-	WFIFOB(fd,8)=fitem->item_data.identify;
+	if(battle_config.identify_drop == 1)
+		WFIFOB(fd,8)=1;
+	else
+		WFIFOB(fd,8)=fitem->item_data.identify;
 	WFIFOW(fd,9)=fitem->bl.x;
 	WFIFOW(fd,11)=fitem->bl.y;
 	WFIFOW(fd,13)=fitem->item_data.amount;
@@ -9276,14 +9281,14 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 			clif_status_load(&sd->bl, SI_WUGRIDER, 1);
 
 		if(sd->status.manner < 0)
-			sc_start(&sd->bl,SC_NOCHAT,100,0,0);
+			sc_start(&sd->bl,&sd->bl,SC_NOCHAT,100,0,0);
 
 		//Auron reported that This skill only triggers when you logon on the map o.O [Skotlex]
 		if ((lv = pc_checkskill(sd,SG_KNOWLEDGE)) > 0) {
 			if(sd->bl.m == sd->feel_map[0].m
 				|| sd->bl.m == sd->feel_map[1].m
 				|| sd->bl.m == sd->feel_map[2].m)
-				sc_start(&sd->bl, SC_KNOWLEDGE, 100, lv, skill_get_time(SG_KNOWLEDGE, lv));
+				sc_start(&sd->bl,&sd->bl, SC_KNOWLEDGE, 100, lv, skill_get_time(SG_KNOWLEDGE, lv));
 		}
 
 		if(sd->pd && sd->pd->pet.intimate > 900)
@@ -10408,6 +10413,15 @@ void clif_parse_CreateChatRoom(int fd, struct map_session_data* sd)
 		return;
 	if(battle_config.basic_skill_check && pc_checkskill(sd,NV_BASIC) < 4) {
 		clif_skill_fail(sd,1,USESKILL_FAIL_LEVEL,3);
+		return;
+	}
+
+	if( npc_isnear(&sd->bl) ) {
+		// uncomment to send msg_txt.
+		//char output[150];
+		//sprintf(output, msg_txt(662), battle_config.min_npc_vendchat_distance);
+		//clif_displaymessage(sd->fd, output);
+		clif_skill_fail(sd,1,USESKILL_FAIL_THERE_ARE_NPC_AROUND,0);
 		return;
 	}
 
@@ -11910,6 +11924,9 @@ void clif_parse_OpenVending(int fd, struct map_session_data* sd)
 	bool flag = (bool)RFIFOB(fd,84);
 	const uint8* data = (uint8*)RFIFOP(fd,85);
 
+	if( !flag )
+		sd->state.prevend = 0;
+
 	if( sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOROOM )
 		return;
 	if( map[sd->bl.m].flag.novending ) {
@@ -11921,18 +11938,10 @@ void clif_parse_OpenVending(int fd, struct map_session_data* sd)
 		return;
 	}
 
-	if( vending_checknearnpc(&sd->bl) ) {
-		char output[150];
-		sprintf(output, msg_txt(662), battle_config.min_npc_vending_distance);
-		clif_displaymessage(sd->fd, output);
-		clif_skill_fail(sd, MC_VENDING, USESKILL_FAIL_LEVEL, 0);
-		return;
-	}
-
 	if( message[0] == '\0' ) // invalid input
 		return;
 
-	vending_openvending(sd, message, flag, data, len/8);
+	vending_openvending(sd, message, data, len/8);
 }
 
 
@@ -12829,7 +12838,7 @@ void clif_parse_NoviceExplosionSpirits(int fd, struct map_session_data *sd)
 
 			if( percent && ( percent%100 ) == 0 )
 			{// 10.0%, 20.0%, ..., 90.0%
-				sc_start(&sd->bl, status_skill2sc(MO_EXPLOSIONSPIRITS), 100, 17, skill_get_time(MO_EXPLOSIONSPIRITS, 5)); //Lv17-> +50 critical (noted by Poki) [Skotlex]
+				sc_start(&sd->bl,&sd->bl, status_skill2sc(MO_EXPLOSIONSPIRITS), 100, 17, skill_get_time(MO_EXPLOSIONSPIRITS, 5)); //Lv17-> +50 critical (noted by Poki) [Skotlex]
 				clif_skill_nodamage(&sd->bl, &sd->bl, MO_EXPLOSIONSPIRITS, 5, 1);  // prayer always shows successful Lv5 cast and disregards noskill restrictions
 			}
 		}

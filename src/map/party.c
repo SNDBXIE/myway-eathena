@@ -832,7 +832,7 @@ int party_skill_check(struct map_session_data *sd, int party_id, uint16 skill_id
 			case TK_COUNTER: //Increase Triple Attack rate of Monks.
 				if((p_sd->class_&MAPID_UPPERMASK) == MAPID_MONK
 					&& pc_checkskill(p_sd,MO_TRIPLEATTACK)) {
-					sc_start4(&p_sd->bl,SC_SKILLRATE_UP,100,MO_TRIPLEATTACK,
+					sc_start4(&p_sd->bl,&p_sd->bl,SC_SKILLRATE_UP,100,MO_TRIPLEATTACK,
 						50+50*skill_lv, //+100/150/200% rate
 						0,0,skill_get_time(SG_FRIEND, 1));
 				}
@@ -841,7 +841,7 @@ int party_skill_check(struct map_session_data *sd, int party_id, uint16 skill_id
 				if((p_sd->class_&MAPID_UPPERMASK) == MAPID_STAR_GLADIATOR
 					&& sd->sc.data[SC_READYCOUNTER]
 					&& pc_checkskill(p_sd,SG_FRIEND)) {
-					sc_start4(&p_sd->bl,SC_SKILLRATE_UP,100,TK_COUNTER,
+					sc_start4(&p_sd->bl,&p_sd->bl,SC_SKILLRATE_UP,100,TK_COUNTER,
 						50+50*pc_checkskill(p_sd,SG_FRIEND), //+100/150/200% rate
 						0,0,skill_get_time(SG_FRIEND, 1));
 				}
@@ -972,7 +972,13 @@ int party_exp_share(struct party_data* p, struct block_list* src, unsigned int b
 	for (i = 0; i < c; i++) {
 #ifdef RENEWAL_EXP
 		if( !(src && src->type == BL_MOB && ((TBL_MOB*)src)->db->mexp) ){
-			int rate = pc_level_penalty_mod(sd[i], (TBL_MOB*)src, 1);
+			TBL_MOB *md = BL_CAST(BL_MOB, src);
+			int rate = 0;
+
+			if (!md)
+				return 0;
+
+			rate = pc_level_penalty_mod(sd[i], md->db->lv, md->db->status.race, md->db->status.mode, 1);
 			base_exp = (unsigned int)cap_value(base_exp_bonus * rate / 100, 1, UINT_MAX);
 			job_exp = (unsigned int)cap_value(job_exp_bonus * rate / 100, 1, UINT_MAX);
 		}
