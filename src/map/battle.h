@@ -498,9 +498,10 @@ extern struct Battle_Config
 	// Party Increased Drop Rate [WiseWarrior]
     int party_drop_bonus;
 	
-	//[Cydh] Zeny rate
+	//[Cydh]
 	int zeny_from_mobs_rate;	// Add zeny drop rate from monsters, rate for normal monsters [Cydh]
 	int zeny_from_boss_rate;	// Add zeny drop rate from monsters, rate for boss monsters [Cydh]	
+	int noequip_belowgrouplv;	// mf_noequip
 } battle_config;
 
 void do_init_battle(void);

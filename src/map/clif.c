@@ -4030,8 +4030,10 @@ void clif_storageclose(struct map_session_data* sd)
 static void clif_getareachar_pc(struct map_session_data* sd,struct map_session_data* dstsd)
 {
 	struct block_list *d_bl;
-	int i;
-
+	//@seehp
+	int i = 0, c = 0;
+	struct guild* g = guild_search(sd->status.guild_id);
+	
 	if( dstsd->chatID ) {
 		struct chat_data *cd = NULL;
 		if( (cd = (struct chat_data*)map_id2bl(dstsd->chatID)) && cd->usersd[0]==dstsd)
@@ -4040,6 +4042,19 @@ static void clif_getareachar_pc(struct map_session_data* sd,struct map_session_d
 		clif_showvendingboard(&dstsd->bl,dstsd->message,sd->fd);
 	else if( dstsd->state.buyingstore )
 		clif_buyingstore_entry_single(sd, dstsd);
+		
+	//@seehp
+	if( dstsd->status.guild_id && sd->status.guild_id ) {
+		for( i = c = 0; i < MAX_GUILDALLIANCE; i++ ) {
+			struct guild_alliance *a=&g->alliance[i];
+			if( a->guild_id ) {
+				if( a->guild_id == dstsd->status.guild_id) {
+					c++;
+				}
+			}
+			i++;
+		}
+	}
 
 	if(dstsd->spiritball > 0)
 		clif_spiritball_single(sd->fd, dstsd);
@@ -4057,6 +4072,7 @@ static void clif_getareachar_pc(struct map_session_data* sd,struct map_session_d
 #endif
 	if( (sd->status.party_id && dstsd->status.party_id == sd->status.party_id) || //Party-mate, or hpdisp setting.
 		(sd->bg_id && sd->bg_id == dstsd->bg_id) || //BattleGround
+		(sd->state.seeghp && ((dstsd->status.guild_id == sd->status.guild_id) || (c)) && sd->status.guild_id) || //guildmaster with @seeghp
 		pc_has_permission(sd, PC_PERM_VIEW_HPMETER)
 	)
 		clif_hpmeter_single(sd->fd, dstsd->bl.id, dstsd->battle_status.hp, dstsd->battle_status.max_hp);

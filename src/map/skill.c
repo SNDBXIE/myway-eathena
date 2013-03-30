@@ -954,9 +954,9 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, uint
 
 	case SM_BASH:
 		if( sd && skill_lv > 5 && pc_checkskill(sd,SM_FATALBLOW)>0 ){
-			//TODO: How much % per base level it actually is?
-			sc_start(src,bl,SC_STUN,(5*(skill_lv-5)+(int)sd->status.base_level/10),
-				skill_lv,skill_get_time2(SM_FATALBLOW,skill_lv));
+			//BaseChance gets multiplied with BaseLevel/50.0; 500/50 simplifies to 10 [Playtester]
+			status_change_start(src,bl,SC_STUN,(skill_lv-5)*sd->status.base_level*10,
+				skill_lv,0,0,0,skill_get_time2(SM_FATALBLOW,skill_lv),0);
 		}
 		break;
 
@@ -5547,7 +5547,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 	case NJ_NEN:
 	case NPC_DEFENDER:
 	case NPC_MAGICMIRROR:
-	case ST_PRESERVE:
+	//case ST_PRESERVE:
 	case NPC_INVINCIBLE:
 	case NPC_INVINCIBLEOFF:
 	case RK_DEATHBOUND:
@@ -5999,6 +5999,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 	case CR_SHRINK:
 	case SG_FUSION:
 	case GS_GATLINGFEVER:
+	case ST_PRESERVE:
 		if( tsce )
 		{
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,status_change_end(bl, type, INVALID_TIMER));
@@ -12469,6 +12470,7 @@ static int skill_unit_effect (struct block_list* bl, va_list ap)
 	unsigned int flag = va_arg(ap,unsigned int);
 	uint16 skill_id;
 	bool dissonance;
+	bool isTarget = false;
 
 	if( (!unit->alive && !(flag&4)) || bl->prev == NULL )
 		return 0;
@@ -12480,10 +12482,8 @@ static int skill_unit_effect (struct block_list* bl, va_list ap)
 	//Necessary in case the group is deleted after calling on_place/on_out [Skotlex]
 	skill_id = group->skill_id;
 	//Target-type check.
-	if( !(group->bl_flag&bl->type && battle_check_target(&unit->bl,bl,group->target_flag)>0) && (flag&4) ) {
-		if( group->state.song_dance&0x1 || (group->src_id == bl->id && group->state.song_dance&0x2) )
-			skill_unit_onleft(skill_id, bl, tick);//Ensemble check to terminate it.
-	} else {
+	isTarget = group->bl_flag & bl->type && battle_check_target( &unit->bl, bl, group->target_flag ) > 0;
+	if( isTarget ){
 		if( flag&1 )
 			skill_unit_onplace(unit,bl,tick);
 		else
@@ -12491,9 +12491,12 @@ static int skill_unit_effect (struct block_list* bl, va_list ap)
 
 		if( flag&4 )
 	  		skill_unit_onleft(skill_id, bl, tick);
+	}else if( !isTarget && flag&4 && ( group->state.song_dance&0x1 || ( group->src_id == bl->id && group->state.song_dance&0x2 ) ) ){
+		skill_unit_onleft(skill_id, bl, tick);//Ensemble check to terminate it.
 	}
 
-	if( dissonance ) skill_dance_switch(unit, 1);
+	if( dissonance )
+		skill_dance_switch(unit, 1);
 
 	return 0;
 }
@@ -12806,6 +12809,7 @@ int skill_check_condition_castbegin(struct map_session_data* sd, uint16 skill_id
 		case ML_AUTOGUARD:		case CR_DEFENDER:	case ML_DEFENDER:		case ST_CHASEWALK:		case PA_GOSPEL:
 		case CR_SHRINK:			case TK_RUN:		case GS_GATLINGFEVER:	case TK_READYCOUNTER:	case TK_READYDOWN:
 		case TK_READYSTORM:		case TK_READYTURN:	case SG_FUSION:			case RA_WUGDASH:		case KO_YAMIKUMO:
+		case ST_PRESERVE:
 			if( sc && sc->data[status_skill2sc(skill_id)] )
 				return 1;
 	}

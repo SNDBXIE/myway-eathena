@@ -3424,6 +3424,8 @@ static const char* npc_parse_mapflag(char* w1, char* w2, char* w3, char* w4, con
 		map[m].flag.guildlock=state;
 	else if (!strcmpi(w3,"reset"))
 		map[m].flag.reset=state;
+	else if (!strcmpi(w3,"noequip"))	//mf_noequip
+		map[m].flag.noequip=state;
 	else
 	// mobitemadder (Zephyr)
 	if( !strcmpi( w3, "mobitemadder" ) ) {
