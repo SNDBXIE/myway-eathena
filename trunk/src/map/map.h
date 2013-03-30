@@ -577,6 +577,7 @@ struct map_data {
 		unsigned reset :1; // [Daegaladh]
 		unsigned mobcantattackplayer : 1; // [Goddameit]
 		unsigned mobitemadder :1; // mobitemadder (Zephyr)
+		unsigned noequip : 1;	//mf_noequip
 	} flag;
 	struct point save;
 	struct npc_data *npc[MAX_NPC_PER_MAP];

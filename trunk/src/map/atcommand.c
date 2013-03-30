@@ -8872,6 +8872,261 @@ ACMD_FUNC(pkmode) {
 	return 0;
 }
 
+/* ===========================================================
+ * Command: @seeghp
+ * Description: Display HP of players of clan and alliances.
+ * Created by: Rad
+ * Updated by: Cainho
+ * -----------------------------------------------------------*/
+ACMD_FUNC(seeghp) {
+
+	nullpo_retr(-1,sd);
+
+	if( !sd->status.guild_id ) {
+		clif_displaymessage(sd->fd, "You need to be in a clan to use this command.");
+		return -1;
+	}
+
+	if( !sd->state.seeghp ) {
+		sd->state.seeghp++;
+		clif_displaymessage(sd->fd, "Now you can view the HP of players in your clan.");
+	} else {
+		sd->state.seeghp--;
+		clif_displaymessage(sd->fd, "The display HP has been disabled.");
+	}
+	return 0;
+}
+
+/*==========================================
+ * @leaveguild <message> by [LordJhedzkie]
+ *------------------------------------------*/
+ACMD_FUNC(leaveguild)
+{
+	struct guild *g;
+	nullpo_retr(-1, sd);
+	
+	g = guild_search(sd->status.guild_id);
+	
+	if (sd->status.guild_id == 0)
+	{
+		clif_displaymessage(fd, msg_txt(800)); // You need to be a member of a guild to use this command.
+		return -1;
+	}
+	
+	if (!strcmp(g->master, sd->status.name))
+	{
+		clif_displaymessage(fd, msg_txt(802)); // Guild masters can't directly leave the guild. Use [@breakguild] instead.
+		return -1;
+	}
+	
+	if (message[0])
+		guild_leave(sd, sd->status.guild_id, sd->status.account_id, sd->status.char_id, (char *)message);
+	else
+		guild_leave(sd, sd->status.guild_id, sd->status.account_id, sd->status.char_id, msg_txt(801));
+	
+	return 0;
+}
+
+ACMD_FUNC(guildinvite)
+{
+	int i;
+	struct guild *g;
+	struct map_session_data *target_sd;
+	nullpo_retr(-1, sd);
+
+	g = guild_search(sd->status.guild_id);
+
+	if(sd->status.guild_id == 0)
+	{
+		clif_displaymessage(fd, msg_txt(800)); // You need to be a member of a guild to use this command.
+		return -1;
+	}
+
+	if((i=guild_getposition(g,sd))<0 || !(g->position[i].mode&0x0001) )
+	{
+		clif_displaymessage(fd, msg_txt(807)); // You do not have enough authority to invite players to the guild.
+		return 0; //Invite permission.
+	}
+
+	if(message[0])
+	{
+		target_sd = map_nick2sd((char *)message);
+		if(target_sd != NULL)
+		{
+			if(target_sd->status.guild_id!=0)
+				clif_displaymessage(fd, msg_txt(805)); // Target player already have a guild.
+			else
+				guild_invite(sd, target_sd);
+		}
+		else
+		{
+			clif_displaymessage(fd, msg_txt(804));
+			return -1;
+		}
+	}
+	else
+	{
+		// Please enter the name of the player you wish to invite. Usage: [@guildinvite <player name>]
+		clif_displaymessage(fd, msg_txt(806)); 
+		return -1;
+	}
+	
+	return 0;
+}
+
+/*==========================================
+* @zenymap <mapname> <amount> (By TheLordofdirTB)
+*------------------------------------------*/
+ACMD_FUNC(zenymap)
+{
+	struct map_session_data *pl_sd = NULL;
+	struct s_mapiterator* iter;
+	char map_name[MAP_NAME_LENGTH_EXT];
+	int zeny = 0, new_zeny, map_id;
+	nullpo_retr(-1, sd);
+
+	if (!message || !*message || (sscanf(message, "%99s %d", map_name, &zeny) < 1)) {
+		clif_displaymessage(fd, "Please, enter an amount (usage: @zenymap <mapname> <amount>).");
+		return -1;
+	}
+	if ((map_id = map_mapname2mapid(map_name)) < 0) {
+		clif_displaymessage(fd, msg_txt(1)); // Map not found.
+		return -1;
+	}
+	if (zeny == 0) {
+		clif_displaymessage(fd, "Empty Zeny");
+		return -1;
+	}
+	iter = mapit_getallusers();
+	for( pl_sd = (TBL_PC*)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC*)mapit_next(iter) )
+	{
+		if( pl_sd->bl.m != map_id )
+			continue;
+		new_zeny = pl_sd->status.zeny + zeny;
+		if (zeny > 0 && (zeny > MAX_ZENY || new_zeny > MAX_ZENY)) // fix positiv overflow
+			new_zeny = MAX_ZENY;
+		else if (zeny < 0 && (zeny < -MAX_ZENY || new_zeny < 0)) // fix negativ overflow
+			new_zeny = 0;
+		if (new_zeny != pl_sd->status.zeny) {
+			pl_sd->status.zeny = new_zeny;
+			clif_updatestatus(pl_sd, SP_ZENY);
+		}
+	}
+	sprintf(atcmd_output, "Add Zeny User All Map : %s, Zeny : %d", map_name, zeny); // %s recalled!
+	clif_displaymessage(fd, atcmd_output);
+	return 0;
+}
+
+/*==========================================
+- *
+ * 0 = @itemmap <item id/name> {<amount>}
+ * 1 = @itemmap1 <item id/name> <amount>, <party name>
+ * 2 = @itemmap2 <item id/name> <amount>, <guild name>
+ * [Xantara]
+ *------------------------------------------*/
+ACMD_FUNC(itemmap)
+{
+	char item_name[100], party_name[NAME_LENGTH], guild_name[NAME_LENGTH];
+	int amount, get_type = 0, flag = 0, get_count, i, map;
+	struct item it;
+	struct item_data *item_data;
+	struct party_data *p;
+	struct guild *g;
+	struct s_mapiterator *iter = NULL;
+	struct map_session_data *pl_sd = NULL;
+
+	nullpo_retr(-1, sd);
+	
+	memset(item_name, '\0', sizeof(item_name));
+	memset(party_name, '\0', sizeof(party_name));
+	memset(guild_name, '\0', sizeof(guild_name));
+
+	if (strstr(command, "1") != NULL)
+		get_type = 1;
+	else if (strstr(command, "2") != NULL)
+		get_type = 2;
+
+	if (!message || !*message || 
+		get_type == 0 && sscanf(message, "\"%99[^\"]\" %d", item_name, &amount) < 1 
+					  && sscanf(message, "%99s %d", item_name, &amount) < 1 )
+	{
+		clif_displaymessage(fd, "Please, enter an item name/id (usage: @itemmap <item name or ID> {amount}).");
+		return -1;
+	}
+	if ( get_type == 1 && sscanf(message, "\"%99[^\"]\" %d, %23[^\n]", item_name, &amount, party_name) < 2 
+					   && sscanf(message, "%99s %d, %23[^\n]", item_name, &amount, party_name) < 2 )
+	{
+		clif_displaymessage(fd, "Please, enter an item name/id (usage: @itemmap1 <item id/name> <amount>, <party name>).");
+		return -1;
+	}
+	if ( get_type == 2 && sscanf(message, "\"%99[^\"]\" %d, %23[^\n]", item_name, &amount, guild_name) < 2 
+					   && sscanf(message, "%99s %d, %23[^\n]", item_name, &amount, guild_name) < 2 )
+	{
+		clif_displaymessage(fd, "Please, enter an item name/id (usage: @itemmap2 <item id/name> <amount>, <guild name>).");
+		return -1;
+	}
+
+	if ((item_data = itemdb_searchname(item_name)) == NULL &&
+	    (item_data = itemdb_exists(atoi(item_name))) == NULL)
+	{
+		clif_displaymessage(fd, msg_txt(19)); // Invalid item ID or name.
+		return -1;
+	}
+
+	if (amount <= 0)
+		amount = 1;	
+
+	map = sd->bl.m;
+	
+	memset(&it,0,sizeof(it));
+	it.nameid = item_data->nameid;
+	if(!flag)
+		it.identify = 1;
+	else
+		it.identify = itemdb_isidentified(item_data->nameid);
+
+	if (!itemdb_isstackable(item_data->nameid))
+		get_count = 1;
+	else
+		get_count = amount;
+
+	switch(get_type)
+	{
+		case 1:
+			if( (p = party_searchname(party_name)) == NULL )
+			{
+				clif_displaymessage(fd, msg_txt(96)); // Incorrect name or ID, or no one from the party is online.
+				return -1;
+			}
+			for( i=0; i < MAX_PARTY; i++ )
+				if( p->data[i].sd && map == p->data[i].sd->bl.m )
+					pc_getitem_map(p->data[i].sd,it,amount,get_count,LOG_TYPE_COMMAND);
+			break;
+		case 2:
+			if( (g = guild_searchname(guild_name)) == NULL )
+			{
+				clif_displaymessage(fd, msg_txt(94)); // Incorrect name/ID, or no one from the guild is online.
+				return -1;
+			}
+			for( i=0; i < g->max_member; i++ )
+				if( g->member[i].sd && map == g->member[i].sd->bl.m )
+					pc_getitem_map(g->member[i].sd,it,amount,get_count,LOG_TYPE_COMMAND);
+			break;
+		default:
+			iter = mapit_getallusers();
+			for (pl_sd = (TBL_PC*)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC*)mapit_next(iter)) {
+				if( map != pl_sd->bl.m )
+					continue;
+				pc_getitem_map(pl_sd,it,amount,get_count,LOG_TYPE_COMMAND);
+			}
+			mapit_free(iter);
+			break;
+	}
+
+	clif_displaymessage(fd, msg_txt(18)); // Item created.
+	return 0;
+}
+
 /**
  * Fills the reference of available commands in atcommand DBMap
  **/
@@ -9135,6 +9390,15 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(mount2),
 		ACMD_DEF2("ignorebattle", ignorebattle),	// [Goddameit]
 		ACMD_DEF2("pk",pkmode),
+		ACMD_DEF(seeghp),
+		ACMD_DEF(leaveguild),
+		ACMD_DEF(breakguild),
+		ACMD_DEF(guildinvite),
+		ACMD_DEF(zenymap),
+		ACMD_DEF(itemmap),
+		ACMD_DEF2("itemmap1", itemmap),
+		ACMD_DEF2("itemmap2", itemmap),
+		ACMD_DEF2("itemmap3", itemmap),
 	};
 	AtCommandInfo* atcommand;
 	int i;

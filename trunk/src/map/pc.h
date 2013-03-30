@@ -146,6 +146,7 @@ struct map_session_data {
 		unsigned int prevend : 1;//used to flag wheather you've spent 40sp to open the vending or not.
 		unsigned int warping : 1;//states whether you're in the middle of a warp processing
 		unsigned int pk_mode : 1; //@pkmode by malufett
+		unsigned int seeghp :1; // Display the HP of players of clan and alliances. [Created by Rad & Updated by Cainho]
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;
@@ -169,7 +170,7 @@ struct map_session_data {
 	struct registry save_reg;
 
 	struct item_data* inventory_data[MAX_INVENTORY]; // direct pointers to itemdb entries (faster than doing item_id lookups)
-	short equip_index[14];
+	short equip_index[15];
 	unsigned int weight,max_weight;
 	int cart_weight,cart_num,cart_weight_max;
 	int fd;
@@ -937,6 +938,8 @@ int pc_add_talisman(struct map_session_data *sd,int interval,int max,int type);
 int pc_del_talisman(struct map_session_data *sd,int count,int type);
 
 void pc_baselevelchanged(struct map_session_data *sd);
+
+int pc_getitem_map(struct map_session_data *sd,struct item it,int amt,int count,e_log_pick_type log_type); // [Xantara]
 
 #if defined(RENEWAL_DROP) || defined(RENEWAL_EXP)
 int pc_level_penalty_mod(struct map_session_data *sd, int mob_level, uint32 mob_race, uint32 mob_mode, int type);

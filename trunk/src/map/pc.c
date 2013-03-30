@@ -8463,6 +8463,13 @@ int pc_equipitem(struct map_session_data *sd,int n,int req_pos)
 		clif_equipitemack(sd,n,0,0);	// fail
 		return 0;
 	}
+	
+	//mf_noequip
+	if( map[sd->bl.m].flag.noequip && pc_get_group_level(sd) < battle_config.noequip_belowgrouplv)	
+	{
+		clif_displaymessage (sd->fd, "You can't wear any equipments in this map.");
+		return 0;
+	}
 
 	if(pos == EQP_ACC) { //Accesories should only go in one of the two,
 		pos = req_pos&EQP_ACC;
@@ -9850,6 +9857,33 @@ void pc_itemcd_do(struct map_session_data *sd, bool load) {
 	}
 	return;
 }
+
+/*------------------------------------------
+ * pc_getitem_map [Xantara]
+ *------------------------------------------*/
+int pc_getitem_map(struct map_session_data *sd,struct item it,int amt,int count,e_log_pick_type log_type)
+{
+	int i, flag;
+
+	nullpo_ret(sd);
+
+	for ( i = 0; i < amt; i += count )
+	{
+		if ( !pet_create_egg(sd,it.nameid) )
+		{ // if not pet egg
+			if ( flag = pc_additem(sd,&it,count,log_type) )
+			{
+				clif_additem(sd, 0, 0, flag);
+				if( pc_candrop(sd,&it) )
+					map_addflooritem(&it,count,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0);
+			}
+		}
+	}
+
+	log_pick_pc(sd, log_type, -amt, &sd->status.inventory[i]);
+	return 1;
+}
+
 /*==========================================
  * pc Init/Terminate
  *------------------------------------------*/

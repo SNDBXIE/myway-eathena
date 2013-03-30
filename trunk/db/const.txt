@@ -367,7 +367,8 @@ mf_monster_noteleport	49
 mf_pvp_nocalcrank	50
 mf_battleground	51
 mf_reset	52
-mf_mobcantattackplayer	53
+mf_noequip	98
+mf_mobcantattackplayer	99
 
 cell_walkable	0
 cell_shootable	1
@@ -606,6 +607,10 @@ EQI_ACC_L	7
 EQI_ACC_R	8
 EQI_HEAD_MID	9
 EQI_HEAD_LOW	10
+EQI_COSTUME_HEAD_LOW	11
+EQI_COSTUME_HEAD_MID	12
+EQI_COSTUME_HEAD_TOP	13
+EQI_COSTUME_GARMENT	14
 
 LOOK_BASE	0
 LOOK_HAIR	1

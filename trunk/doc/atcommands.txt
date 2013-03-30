@@ -1430,3 +1430,10 @@ Sets the hunger level of your homunculus, with 100 being "Stuffed".
 
 ---------------------------------------
 @ignorebattle
+@pk
+@leaveguild | @breakguild | @guildinvite
+@zenymap
+@itemmap <item id/name> {<amount>}
+@itemmap1 <item id/name> <amount>, <party name>
+@itemmap2 <item id/name> <amount>, <guild name>
+

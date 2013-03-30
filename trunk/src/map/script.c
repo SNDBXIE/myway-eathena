@@ -402,6 +402,7 @@ enum {
 	MF_PVP_NOCALCRANK,	//50
 	MF_BATTLEGROUND,
 	MF_RESET,
+	MF_NOEQUIP = 98,	//mf_noequip
 	MF_MOBCANTATTACKPLAYER
 };
 
@@ -7528,7 +7529,7 @@ BUILDIN_FUNC(strnpcinfo)
 static unsigned int equip[] = {EQP_HEAD_TOP,EQP_ARMOR,EQP_HAND_L,EQP_HAND_R,EQP_GARMENT,EQP_SHOES,EQP_ACC_L,EQP_ACC_R,EQP_HEAD_MID,EQP_HEAD_LOW,EQP_COSTUME_HEAD_LOW,EQP_COSTUME_HEAD_MID,EQP_COSTUME_HEAD_TOP,EQP_COSTUME_GARMENT};
 
 /*==========================================
- * GetEquipID(Pos);     Pos: 1-13
+ * GetEquipID(Pos);     Pos: 1-14
  *------------------------------------------*/
 BUILDIN_FUNC(getequipid)
 {
@@ -10362,7 +10363,7 @@ BUILDIN_FUNC(homunculus_mutate)
 BUILDIN_FUNC(morphembryo)
 {
 	struct item item_tmp;
-	int m_class, i;
+	int m_class, i=0;
 	TBL_PC *sd;
 	
 	sd = script_rid2sd(st);
@@ -10413,9 +10414,9 @@ BUILDIN_FUNC(homunculus_shuffle)
 /*==========================================
  * Check for homunculus state.
  * Return: -1 = No homunculus
- *          0 = Homunculus is vaporized (rest)
- *          1 = Homunculus is in morph state
- *          2 = Homunculus is active
+ *          0 = Homunculus is active
+ *          1 = Homunculus is vaporized (rest)
+ *          2 = Homunculus is in morph state
  *------------------------------------------*/
 BUILDIN_FUNC(checkhomcall)
 {
@@ -10982,6 +10983,7 @@ BUILDIN_FUNC(getmapflag)
 			case MF_PVP_NOCALCRANK:		script_pushint(st,map[m].flag.pvp_nocalcrank); break;
 			case MF_BATTLEGROUND:		script_pushint(st,map[m].flag.battleground); break;
 			case MF_RESET:				script_pushint(st,map[m].flag.reset); break;
+			case MF_NOEQUIP:			script_pushint(st,map[m].flag.noequip); break;	//mf_noequip
 			case MF_MOBCANTATTACKPLAYER:	script_pushint(st,map[m].flag.mobcantattackplayer); break;
 		}
 	}
@@ -11082,6 +11084,7 @@ BUILDIN_FUNC(setmapflag)
 			case MF_PVP_NOCALCRANK:		map[m].flag.pvp_nocalcrank = 1; break;
 			case MF_BATTLEGROUND:		map[m].flag.battleground = (val <= 0 || val > 2) ? 1 : val; break;
 			case MF_RESET:				map[m].flag.reset = 1; break;
+			case MF_NOEQUIP:			map[m].flag.noequip = 1; break;	//mf_noequip
 			case MF_MOBCANTATTACKPLAYER:	map[m].flag.mobcantattackplayer = 1; break;
 		}
 	}
@@ -11169,6 +11172,7 @@ BUILDIN_FUNC(removemapflag)
 			case MF_PVP_NOCALCRANK:		map[m].flag.pvp_nocalcrank = 0; break;
 			case MF_BATTLEGROUND:		map[m].flag.battleground = 0; break;
 			case MF_RESET:				map[m].flag.reset = 0; break;
+			case MF_NOEQUIP:			map[m].flag.noequip=0; break;	//mf_noequip
 			case MF_MOBCANTATTACKPLAYER:	map[m].flag.mobcantattackplayer = 0; break;
 		}
 	}
@@ -17900,6 +17904,122 @@ BUILDIN_FUNC(sendmail) {
 	return 0;
 }
 
+/*====================================================================
+  [Xantara]
+     *getitem_map <item id>,<amount>,"<mapname>"{,<type>,<ID for Type>};
+       type: 0=everyone, 1=party, 2=guild, 3=bg
+ =====================================================================*/
+static int buildin_getitem_map_sub(struct block_list *bl,va_list ap)
+{
+	struct item it;
+	struct guild *g = NULL;
+	struct party_data *p = NULL;
+
+	int amt,count;
+	TBL_PC *sd = (TBL_PC *)bl;
+
+	it    = va_arg(ap,struct item);
+	amt   = va_arg(ap,int);
+	count = va_arg(ap,int);
+
+	pc_getitem_map(sd,it,amt,count,LOG_TYPE_SCRIPT);
+
+	return 0;
+}
+
+BUILDIN_FUNC(getitem_map)
+{
+	struct item it;
+	struct guild *g = NULL;
+	struct party_data *p = NULL;
+	struct battleground_data *bg = NULL;
+	struct script_data *data;
+
+	int m,i,get_count,nameid,amount,flag=0,type=0,type_id=0;
+	const char *mapname;
+
+	data = script_getdata(st,2);
+	get_val(st,data);
+	if( data_isstring(data) )
+	{
+		const char *name = conv_str(st,data);
+		struct item_data *item_data = itemdb_searchname(name);
+		if( item_data )
+			nameid = item_data->nameid;
+		else
+			nameid = UNKNOWN_ITEM_ID;
+	}
+	else
+		nameid = conv_num(st,data);
+
+	if( (amount = script_getnum(st,3)) <= 0 )
+		return 0;
+
+	mapname = script_getstr(st,4);
+	if( (m = map_mapname2mapid(mapname)) < 0 )
+		return 0;
+
+	if( script_hasdata(st,5) ){
+		type    = script_getnum(st,5);
+		type_id = script_getnum(st,6);
+	}
+
+	if(nameid < 0) {
+		nameid = itemdb_searchrandomid(-nameid);
+		flag = 1;
+	}
+	
+	if( nameid <= 0 || !itemdb_exists(nameid) ){
+		ShowError("buildin_getitem_map: Nonexistant item %d requested.\n", nameid);
+		return 1; //No item created.
+	}
+
+	memset(&it,0,sizeof(it));
+	it.nameid = nameid;
+	if(!flag)
+		it.identify = 1;
+	else
+		it.identify = itemdb_isidentified(nameid);
+
+	if (!itemdb_isstackable(nameid))
+		get_count = 1;
+	else
+		get_count = amount;
+
+	switch(type)
+	{
+		case 1:
+			if( (p = party_search(type_id)) != NULL )
+			{
+				for( i=0; i < MAX_PARTY; i++ )
+					if( p->data[i].sd && m == p->data[i].sd->bl.m )
+						pc_getitem_map(p->data[i].sd,it,amount,get_count,LOG_TYPE_SCRIPT);
+			}
+			break;
+		case 2:
+			if( (g = guild_search(type_id)) != NULL )
+			{
+				for( i=0; i < g->max_member; i++ )
+					if( g->member[i].sd && m == g->member[i].sd->bl.m )
+						pc_getitem_map(g->member[i].sd,it,amount,get_count,LOG_TYPE_SCRIPT);
+			}
+			break;
+		case 3:
+			if( (bg = bg_team_search(type_id)) != NULL )
+			{
+				for( i=0; i < MAX_BG_MEMBERS; i++ )
+					if( bg->members[i].sd && m == bg->members[i].sd->bl.m )
+						pc_getitem_map(bg->members[i].sd,it,amount,get_count,LOG_TYPE_SCRIPT);
+			}
+			break;
+		default:
+			map_foreachinmap(buildin_getitem_map_sub,m,BL_PC,it,amount,get_count);
+			break;
+	}
+
+	return 0;
+}
+
 // declarations that were supposed to be exported from npc_chat.c
 #ifdef PCRE_SUPPORT
 BUILDIN_FUNC(defpattern);
@@ -18371,5 +18491,7 @@ struct script_function buildin_func[] = {
 
 	BUILDIN_DEF(getequippedon,""),
 	BUILDIN_DEF(sendmail,"isssivi??????"), // [clydelion]
+	
+	BUILDIN_DEF(getitem_map,"iis??"),
 	{NULL,NULL,NULL},
 };
