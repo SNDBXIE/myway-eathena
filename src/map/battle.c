@@ -2142,7 +2142,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src,struct blo
 
 					ATK_ADDRATE(50*skill_lv); //Skill modifier applies to weight only.
 				} else {
-					wd.damage = battle_calc_base_damage(sstatus, &sstatus->rhw, sc, tstatus->size, sd, i); //Monsters have no weight and use ATK instead
+					wd.damage = battle_calc_base_damage(sstatus, &sstatus->rhw, sc, tstatus->size, sd, 0); //Monsters have no weight and use ATK instead
 				}
 
 				i = sstatus->str/10;
@@ -4268,6 +4268,9 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 	if (flag.infdef && ad.damage)
 		ad.damage = ad.damage>0?1:-1;
 
+	if( sc && skill_id == WL_COMET && map_getcell(target->m, target->x, target->y, CELL_CHKLANDPROTECTOR) )
+		ad.damage = 0; // Comet damage should be 0 on Land Protector
+
 	ad.damage=battle_calc_damage(src,target,&ad,ad.damage,skill_id,skill_lv);
 	if( map_flag_gvg2(target->m) )
 		ad.damage=battle_calc_gvg_damage(src,target,ad.damage,ad.div_,skill_id,skill_lv,ad.flag);
@@ -4283,7 +4286,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 		}
 		//case HM_ERASER_CUTTER:
 	}
-
+	
 	return ad;
 }
 

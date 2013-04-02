@@ -2274,7 +2274,8 @@ int skill_mcri_kill_delay(int tid, unsigned int tick, int id, intptr_t data)
 	struct mob_data *md = BL_CAST(BL_MOB, bl);
 	if(bl!=NULL)
 	{
-		mob_dead(md,src,0);
+		if(md != NULL)
+			mob_dead(md,src,0);
 		status_kill(bl);
 	}
 	return 0;
@@ -2629,84 +2630,47 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 		//m_cri
 		if (( src->type == BL_PC || battle_get_master(src)->type == BL_PC ) && skill_get_type(skill_id) == BF_MAGIC && battle_config.magic_critical == 1)
 		{
-			//char m_cri = 0;
-			//if(sd==NULL)
-			//	m_cri = cap_value(map_id2sd(battle_get_master(src)->id)->battle_status.cri/10,1,100);
-			//else
-			//	m_cri = cap_value(sd->battle_status.cri/10,1,100);
-			//if( rnd()%100 < m_cri )
-			//{
-			//	struct mob_data *md=NULL;
-			//	struct tmp_data *tmpd=NULL;
-			//	int d_ = 200;
-			//	unsigned int u_ = 0;
-			//	int i=0, num=abs(skill_get_num(skill_id,skill_lv)), _damage=0;
-			//	damage *= 2;	
-			//	md = mob_once_spawn_sub(src, src->m, src->x, src->y, "--en--",1083,"", SZ_SMALL, AI_NONE);
-			//	md->deletetimer=add_timer(tick+d_*num+1,mob_timer_delete,md->bl.id,0);
-			//	status_set_viewdata(&md->bl, INVISIBLE_CLASS);
-			//	tmpd = &md->tmpd;				
-			//	if(skill_get_splash(skill_id,skill_lv)>1&&num>1)
-			//		num = 1;
-			//	_damage = damage/num;
-			//	tmpd->src = src;
-			//	tmpd->bl = bl;
-			//	if(bl->type != BL_PC){
-			//		tmpd->num[0]=skill_id;
-			//		tmpd->num[1]=skill_lv;
-			//		u_ = tick+d_*num+1;
-			//		if( tstatus->hp <= damage )//delay to kill it
-			//		{
-			//			damage = 1;
-			//			status_change_start(src, bl, SC_BLADESTOP_WAIT, 10000, 1, 0, 0, 0, u_, 2);
-			//			status_change_start(src, bl, SC_INVINCIBLE, 10000, 1, 0, 0, 0, u_, 2);
-			//			add_timer(u_,skill_mcri_kill_delay,bl->id,(intptr_t)src);
-			//		}
-			//	}
-			//	clif_skill_nodamage(src,src,skill_id,skill_lv,1);
-			//	for(i=0;i<num;i++)
-			//		if(md!=NULL)
-			//			add_timer(tick+d_*i +1,skill_mcri_hit,_damage,(intptr_t)md);
-			//		else
-			//			add_timer(tick+200*i,skill_mcri_hit,_damage,(intptr_t)sd);
-			//	u_ = d_ = _damage = 0;
-			//	break;
-			struct mob_data *md=NULL;
 			char m_cri = 0;
 			if(sd==NULL)
-			{
-				md = BL_CAST(BL_MOB, src);
 				m_cri = cap_value(map_id2sd(battle_get_master(src)->id)->battle_status.cri/10,1,100);
-			}else
+			else
 				m_cri = cap_value(sd->battle_status.cri/10,1,100);
-			if( rand()%100 < m_cri )
+			if( rnd()%100 < m_cri )
 			{
-				struct tmp_data *tmpd;
-				int mi = 0;
+				struct mob_data *md=NULL;
+				struct tmp_data *tmpd=NULL;
+				int d_ = 200;
+				unsigned int u_ = 0;
 				int i=0, num=abs(skill_get_num(skill_id,skill_lv)), _damage=0;
-				damage *= 2;
-				if(sd==NULL)
-					tmpd = &md->tmpd;
-				else{
-					md = mob_once_spawn_sub(src, src->m, src->x, src->y, "--en--",1083,"", SZ_SMALL, AI_NONE);
-					md->deletetimer=add_timer(tick+200*num,mob_timer_delete,md->bl.id,0);
-					status_set_viewdata(&md->bl, INVISIBLE_CLASS);
-					if(md)
-						tmpd = &md->tmpd;
-					else
-						tmpd = &sd->tmpd;
-				}
+				damage *= 2;	
+				md = mob_once_spawn_sub(src, src->m, src->x, src->y, "--en--",1083,"", SZ_SMALL, AI_NONE);
+				md->deletetimer=add_timer(tick+d_*num+1,mob_timer_delete,md->bl.id,0);
+				status_set_viewdata(&md->bl, INVISIBLE_CLASS);
+				tmpd = &md->tmpd;				
 				if(skill_get_splash(skill_id,skill_lv)>1&&num>1)
 					num = 1;
 				_damage = damage/num;
 				tmpd->src = src;
 				tmpd->bl = bl;
+				if(bl->type != BL_PC){
+					tmpd->num[0]=skill_id;
+					tmpd->num[1]=skill_lv;
+					u_ = tick+d_*num+1;
+					if( tstatus->hp <= damage )//delay to kill it
+					{
+						damage = 1;
+						status_change_start(src, bl, SC_BLADESTOP_WAIT, 10000, 1, 0, 0, 0, u_, 2);
+						status_change_start(src, bl, SC_INVINCIBLE, 10000, 1, 0, 0, 0, u_, 2);
+						add_timer(u_,skill_mcri_kill_delay,bl->id,(intptr_t)src);
+					}
+				}
 				clif_skill_nodamage(src,src,skill_id,skill_lv,1);
 				for(i=0;i<num;i++)
 					if(md!=NULL)
-						add_timer(tick+200*i,skill_mcri_hit,_damage,(intptr_t)md);
+						add_timer(tick+d_*i +1,skill_mcri_hit,_damage,(intptr_t)md);
 					else
 						add_timer(tick+200*i,skill_mcri_hit,_damage,(intptr_t)sd);
+				u_ = d_ = _damage = 0;
 				break;
 			}
 		}
