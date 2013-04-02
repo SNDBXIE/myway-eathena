@@ -1,0 +1,8 @@
+//===== unOfficial Script =======================================
+//= Map flags that disable players to use any equipments any usable item
+//===== By: ==================================================
+//= Cydh
+//= [mapname]	mapflag	noequip
+//============================================================
+
+//guild_vs5	mapflag	noequip
