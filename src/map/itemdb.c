@@ -481,7 +481,6 @@ int itemdb_isidentified(int nameid)
 				return 1;
 		}
 	}
-
 }
 
 /*==========================================

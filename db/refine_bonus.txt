@@ -1,0 +1,27 @@
+// =============================================
+// [Cydh]
+// house.bad@gmail.com
+// =============================================
+// Structure:
+// 		Type,RefineNumber,{ Script }
+// ---------------------------------------------
+// Type:
+//	- 0 : Armor
+//	- 1 : Weapon Level 1
+//	- 2 : Weapon Level 2
+//	- 3 : Weapon Level 3
+//	- 4 : Weapon Level 4
+// ---------------------------------------------
+// RefineNumber:
+// 	- 1,2,3,...,20
+// ---------------------------------------------
+// { Script }
+// 	- Works like { Script } on item_db.txt Look at doc/item_bonus.txt
+// =============================================
+// NOTES:
+//	- Every line must be written completely!
+// =============================================
+// Examples:
+//	0,1,{ bonus bVit,5; }		- Add 5 Vit for +0 Armors
+//	4,10,{ bonus bStr,5; }		- Add 10 Str for +10 Level 4 Weapons
+// ---------------------------------------------

@@ -2156,10 +2156,10 @@ static void add_buildin_func(void)
 			str_data[n].val = i;
 			str_data[n].func = buildin_func[i].func;
 
-            if (!strcmp(buildin_func[i].name, "set")) buildin_set_ref = n;
-            else if (!strcmp(buildin_func[i].name, "callsub")) buildin_callsub_ref = n;
-            else if (!strcmp(buildin_func[i].name, "callfunc")) buildin_callfunc_ref = n;
-            else if( !strcmp(buildin_func[i].name, "getelementofarray") ) buildin_getelementofarray_ref = n;
+		if (!strcmp(buildin_func[i].name, "set")) buildin_set_ref = n;
+		else if (!strcmp(buildin_func[i].name, "callsub")) buildin_callsub_ref = n;
+		else if (!strcmp(buildin_func[i].name, "callfunc")) buildin_callfunc_ref = n;
+		else if( !strcmp(buildin_func[i].name, "getelementofarray") ) buildin_getelementofarray_ref = n;
 		}
 	}
 }
@@ -4794,8 +4794,10 @@ BUILDIN_FUNC(callfunc)
 		{
 			const char* name = reference_getname(data);
 			if( name[0] == '.' ) {
-				ref = (struct DBMap**)aCalloc(sizeof(struct DBMap*), 1);
-				ref[0] = (name[1] == '@' ? st->stack->var_function : st->script->script_vars);
+				if(!ref){
+					ref = (struct DBMap**)aCalloc(sizeof(struct DBMap*), 1);
+					ref[0] = (name[1] == '@' ? st->stack->var_function : st->script->script_vars);
+				}
 				data->ref = ref;
 			}
 		}
@@ -7439,22 +7441,16 @@ BUILDIN_FUNC(strcharinfo)
 			script_pushstrcopy(st,sd->status.name);
 			break;
 		case 1:
-			if( ( p = party_search(sd->status.party_id) ) != NULL )
-			{
+			if( ( p = party_search(sd->status.party_id) ) != NULL ) {
 				script_pushstrcopy(st,p->party.name);
-			}
-			else
-			{
+			} else {
 				script_pushconststr(st,"");
 			}
 			break;
 		case 2:
-			if( ( g = guild_search(sd->status.guild_id) ) != NULL )
-			{
+			if( ( g = sd->guild ) != NULL ) {
 				script_pushstrcopy(st,g->name);
-			}
-			else
-			{
+			} else {
 				script_pushconststr(st,"");
 			}
 			break;
@@ -10325,7 +10321,7 @@ BUILDIN_FUNC(homunculus_mutate)
 	TBL_PC *sd;
 
 	sd = script_rid2sd(st);
-	if( sd == NULL )
+	if( sd == NULL || sd->hd == NULL )
 		return 0;
 
 	if(script_hasdata(st,2))
@@ -10365,9 +10361,9 @@ BUILDIN_FUNC(morphembryo)
 	struct item item_tmp;
 	int m_class, i=0;
 	TBL_PC *sd;
-	
+
 	sd = script_rid2sd(st);
-	if( sd == NULL )
+	if( sd == NULL || sd->hd == NULL )
 		return 0;
 
 	if( merc_is_hom_active(sd->hd) ) {
@@ -10378,7 +10374,7 @@ BUILDIN_FUNC(morphembryo)
 			item_tmp.nameid = ITEMID_STRANGE_EMBRYO;
 			item_tmp.identify = 1;
 
-			if( item_tmp.nameid==0 || (i = pc_additem(sd, &item_tmp, 1, LOG_TYPE_SCRIPT)) ) {
+			if( item_tmp.nameid == 0 || (i = pc_additem(sd, &item_tmp, 1, LOG_TYPE_SCRIPT)) ) {
 				clif_additem(sd, 0, 0, i);
 				clif_emotion(&sd->bl, E_SWT); // Fail to avoid item drop exploit.
 			} else {
@@ -10425,7 +10421,7 @@ BUILDIN_FUNC(checkhomcall)
 
 	if( sd == NULL )
 		return 0;
-	
+
 	hd = sd->hd;
 
 	if( !hd )
@@ -10948,10 +10944,6 @@ BUILDIN_FUNC(getmapflag)
 			case MF_FOG:				script_pushint(st,map[m].flag.fog); break;
 			case MF_SAKURA:				script_pushint(st,map[m].flag.sakura); break;
 			case MF_LEAVES:				script_pushint(st,map[m].flag.leaves); break;
-			/**
-			 * No longer available, keeping here just in case it's back someday. [Ind]
-			 **/
-			//case MF_RAIN:				script_pushint(st,map[m].flag.rain); break;
 			case MF_NOGO:				script_pushint(st,map[m].flag.nogo); break;
 			case MF_CLOUDS:				script_pushint(st,map[m].flag.clouds); break;
 			case MF_CLOUDS2:			script_pushint(st,map[m].flag.clouds2); break;
@@ -11046,10 +11038,6 @@ BUILDIN_FUNC(setmapflag)
 			case MF_FOG:				map[m].flag.fog = 1; break;
 			case MF_SAKURA:				map[m].flag.sakura = 1; break;
 			case MF_LEAVES:				map[m].flag.leaves = 1; break;
-			/**
-			 * No longer available, keeping here just in case it's back someday. [Ind]
-			 **/
-			//case MF_RAIN:				map[m].flag.rain = 1; break;
 			case MF_NOGO:				map[m].flag.nogo = 1; break;
 			case MF_CLOUDS:				map[m].flag.clouds = 1; break;
 			case MF_CLOUDS2:			map[m].flag.clouds2 = 1; break;
@@ -11132,10 +11120,6 @@ BUILDIN_FUNC(removemapflag)
 			case MF_FOG:				map[m].flag.fog = 0; break;
 			case MF_SAKURA:				map[m].flag.sakura = 0; break;
 			case MF_LEAVES:				map[m].flag.leaves = 0; break;
-			/**
-			 * No longer available, keeping here just in case it's back someday. [Ind]
-			 **/
-			//case MF_RAIN:				map[m].flag.rain = 0; break;
 			case MF_NOGO:				map[m].flag.nogo = 0; break;
 			case MF_CLOUDS:				map[m].flag.clouds = 0; break;
 			case MF_CLOUDS2:			map[m].flag.clouds2 = 0; break;
@@ -13161,7 +13145,7 @@ BUILDIN_FUNC(npctalk)
 		safestrncpy(name, nd->name, sizeof(name));
 		strtok(name, "#"); // discard extra name identifier if present
 		safesnprintf(message, sizeof(message), "%s : %s", name, str);
-		clif_message(&nd->bl, message);
+		clif_disp_overhead(&nd->bl, message);
 	}
 
 	return 0;
@@ -15655,7 +15639,7 @@ BUILDIN_FUNC(unittalk)
 		struct StringBuf sbuf;
 		StringBuf_Init(&sbuf);
 		StringBuf_Printf(&sbuf, "%s : %s", status_get_name(bl), message);
-		clif_message(bl, StringBuf_Value(&sbuf));
+		clif_disp_overhead(bl, StringBuf_Value(&sbuf));
 		if( bl->type == BL_PC )
 			clif_displaymessage(((TBL_PC*)bl)->fd, StringBuf_Value(&sbuf));
 		StringBuf_Destroy(&sbuf);
@@ -17526,8 +17510,10 @@ BUILDIN_FUNC(getrandgroupitem) {
 		ShowError("getrandgroupitem: qty is <= 0!\n");
 		return 1;
 	}
+	if( (nameid = itemdb_searchrandomid(group)) == UNKNOWN_ITEM_ID ) {
+		return 1; //ensure valid itemid
+	}
 
-	nameid = itemdb_searchrandomid(group);
 	memset(&item_tmp,0,sizeof(item_tmp));
 	item_tmp.nameid   = nameid;
 	item_tmp.identify = itemdb_isidentified(nameid);
@@ -18021,6 +18007,30 @@ BUILDIN_FUNC(getitem_map)
 	return 0;
 }
 
+/*==========================================
+ * Item Security System
+ *------------------------------------------*/
+BUILDIN_FUNC(setsecurity)
+{
+	struct map_session_data *sd = script_rid2sd(st);
+	int value = script_getnum(st,2);
+	if( sd == NULL )
+		return 0;
+
+	sd->state.secure_items = (value)?1:0;
+	return 0;
+}
+
+BUILDIN_FUNC(getsecurity)
+{
+	struct map_session_data *sd = script_rid2sd(st);
+	if( sd == NULL )
+		return 0;
+
+	script_pushint(st,sd->state.secure_items);
+	return 0;
+}
+
 // declarations that were supposed to be exported from npc_chat.c
 #ifdef PCRE_SUPPORT
 BUILDIN_FUNC(defpattern);
@@ -18494,5 +18504,9 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(sendmail,"isssivi??????"), // [clydelion]
 	
 	BUILDIN_DEF(getitem_map,"iis??"),
+	
+	// Item Security [Zephyrus]
+	BUILDIN_DEF(setsecurity,"i"),
+	BUILDIN_DEF(getsecurity,""),
 	{NULL,NULL,NULL},
 };

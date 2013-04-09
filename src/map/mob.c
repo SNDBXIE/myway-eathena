@@ -2714,8 +2714,13 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 		mvptomb_create(md, mvp_sd ? mvp_sd->status.name : NULL, time(NULL));
 
 	// Remove all status changes before creating a respawn
-	if( sc )
+	if( sc ){
+		for(i=0; i<SC_MAX; i++){
+			if(sc->data[i] && (sc->data[i]->timer != INVALID_TIMER))
+				delete_timer(sc->data[i]->timer, status_change_timer);
+		}
 		memset( sc, 0, sizeof( struct status_change ) );
+	}
 
 	if( !rebirth )
 		mob_setdelayspawn(md); //Set respawning.
@@ -3009,7 +3014,7 @@ int mob_summonslave(struct mob_data *md2,int *value,int amount,uint16 skill_id)
 
 		//Inherit the aggressive mode of the master.
 		if (battle_config.slaves_inherit_mode && md->master_id)
-	  	{
+		{
 			switch (battle_config.slaves_inherit_mode) {
 			case 1: //Always aggressive
 				if (!(md->status.mode&MD_AGGRESSIVE))

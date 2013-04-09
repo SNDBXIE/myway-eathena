@@ -36,6 +36,12 @@ void trade_traderequest(struct map_session_data *sd, struct map_session_data *ta
 		return; //Can't trade in notrade mapflag maps.
 	}
 
+	// Item Security [Zephyrus]
+	if( sd->state.secure_items ) {
+ 		clif_displaymessage(sd->fd, "You can't trade. Blocked with @security");
+		return;
+	}
+
 	if (target_sd == NULL || sd == target_sd) {
 		clif_tradestart(sd, 1); // character does not exist
 		return;

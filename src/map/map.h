@@ -11,18 +11,15 @@
 #include "../common/db.h"
 #include "../common/msg_conf.h"
 
-/**
- * [rAthena.org]
- **/
 #include "../config/core.h"
 
 #include <stdarg.h>
 
 struct npc_data;
 struct item_data;
+struct raChSysCh;
 
-enum E_MAPSERVER_ST
-{
+enum E_MAPSERVER_ST {
 	MAPSERVER_ST_RUNNING = CORE_ST_LAST,
 	MAPSERVER_ST_SHUTDOWN,
 	MAPSERVER_ST_LAST
@@ -556,10 +553,6 @@ struct map_data {
 		unsigned fireworks : 1;
 		unsigned sakura : 1; // [Valaris]
 		unsigned leaves : 1; // [Valaris]
-		/**
-		 * No longer available, keeping here just in case it's back someday. [Ind]
-		 **/
-		//unsigned rain : 1; // [Valaris]
 		unsigned nogo : 1; // [Valaris]
 		unsigned nobaseexp	: 1; // [Lorky] added by Lupus
 		unsigned nojobexp	: 1; // [Lorky]
@@ -575,6 +568,8 @@ struct map_data {
 		unsigned guildlock :1;
 		unsigned src4instance : 1; // To flag this map when it's used as a src map for instances
 		unsigned reset :1; // [Daegaladh]
+		unsigned chsysnolocalaj : 1;
+
 		unsigned mobcantattackplayer : 1; // [Goddameit]
 		unsigned mobitemadder :1; // mobitemadder (Zephyr)
 		unsigned noequip : 1;	//mf_noequip
@@ -609,6 +604,9 @@ struct map_data {
 	// Instance Variables
 	int instance_id;
 	int instance_src_map;
+
+	/* rAthena Local Chat */
+	struct raChSysCh *channel;
 };
 
 /// Stores information about a remote map (for multi-mapserver setups).
@@ -785,8 +783,6 @@ typedef struct elemental_data	TBL_ELEM;
 #define BL_CAST(type_, bl) \
 	( ((bl) == (struct block_list*)NULL || (bl)->type != (type_)) ? (T ## type_ *)NULL : (T ## type_ *)(bl) )
 
-
-extern char main_chat_nick[16];
 
 #ifdef BETA_THREAD_TEST
 

@@ -597,7 +597,7 @@ ACMD_FUNC(who)
 				}
 				default: {
 					struct party_data *p = party_search(pl_sd->status.party_id);
-					struct guild *g = guild_search(pl_sd->status.guild_id);
+					struct guild *g = pl_sd->guild;
 
 					StringBuf_Printf(&buf, msg_txt(343), pl_sd->status.name); // "Name: %s "
 					if (pc_get_group_id(pl_sd) > 0) // Player title, if exists
@@ -700,7 +700,7 @@ ACMD_FUNC(whogm)
 		clif_displaymessage(fd, atcmd_output);
 
 		p = party_search(pl_sd->status.party_id);
-		g = guild_search(pl_sd->status.guild_id);
+		g = pl_sd->guild;
 
 		sprintf(atcmd_output,msg_txt(916),	// Party: '%s' | Guild: '%s'
 			p?p->party.name:msg_txt(917), g?g->name:msg_txt(917));	// None.
@@ -782,7 +782,13 @@ ACMD_FUNC(speed)
 		return -1;
 	}
 
-	sd->base_status.speed = cap_value(speed, MIN_WALK_SPEED, MAX_WALK_SPEED);
+	if (speed < 0) {
+		sd->base_status.speed = DEFAULT_WALK_SPEED;
+		sd->state.permanent_speed = 0; // Remove lock when set back to default speed.
+	} else {
+		sd->base_status.speed = cap_value(speed, MIN_WALK_SPEED, MAX_WALK_SPEED);
+		sd->state.permanent_speed = 1; // Set lock when set to non-default speed.
+	}
 	status_calc_bl(&sd->bl, SCB_SPEED);
 	clif_displaymessage(fd, msg_txt(8)); // Speed changed.
 	return 0;
@@ -927,14 +933,24 @@ ACMD_FUNC(jobchange)
 	nullpo_retr(-1, sd);
 
     if (!message || !*message || sscanf(message, "%d %d", &job, &upper) < 1) {
-		int i, found = 0;
+		int i;
+		bool found = false;
 
-        for (i = JOB_NOVICE; i < JOB_MAX; ++i) {
-            if (strncmpi(message, job_name(i), 16) == 0) {
-                job = i;
-				upper = 0;
-				found = 1;
-				break;
+		upper = 0;
+ 
+		// Normal Jobs
+		for( i = JOB_NOVICE; i < JOB_MAX_BASIC && !found; i++ ){
+			if (strncmpi(message, job_name(i), 16) == 0) {
+				job = i;
+				found = true;
+			}
+		}
+ 
+		// High Jobs, Babys and Third
+		for( i = JOB_NOVICE_HIGH; i < JOB_MAX && !found; i++ ){
+			if (strncmpi(message, job_name(i), 16) == 0) {
+				job = i;
+				found = true;
 			}
 		}
 
@@ -949,9 +965,10 @@ ACMD_FUNC(jobchange)
     if (job == JOB_KNIGHT2 || job == JOB_CRUSADER2 || job == JOB_WEDDING || job == JOB_XMAS || job == JOB_SUMMER || job == JOB_HANBOK
         || job == JOB_LORD_KNIGHT2 || job == JOB_PALADIN2 || job == JOB_BABY_KNIGHT2 || job == JOB_BABY_CRUSADER2 || job == JOB_STAR_GLADIATOR2
 		 || (job >= JOB_RUNE_KNIGHT2 && job <= JOB_MECHANIC_T2) || (job >= JOB_BABY_RUNE2 && job <= JOB_BABY_MECHANIC2)
-	) // Deny direct transformation into dummy jobs
-		{clif_displaymessage(fd, msg_txt(923)); //"You can not change to this job by command."
-		return 0;}
+	){ // Deny direct transformation into dummy jobs
+		clif_displaymessage(fd, msg_txt(923)); //"You can not change to this job by command."
+		return 0;
+	}
 
 	if (pcdb_checkid(job))
 	{
@@ -2506,7 +2523,7 @@ ACMD_FUNC(guildlevelup)
 		return -1;
 	}
 
-	if (sd->status.guild_id <= 0 || (guild_info = guild_search(sd->status.guild_id)) == NULL) {
+	if (sd->status.guild_id <= 0 || (guild_info = sd->guild) == NULL) {
 		clif_displaymessage(fd, msg_txt(43)); // You're not in a guild.
 		return -1;
 	}
@@ -3182,7 +3199,7 @@ ACMD_FUNC(lostskill)
 	}
 
 	sd->status.skill[skill_id].lv = 0;
-	sd->status.skill[skill_id].flag = 0;
+	sd->status.skill[skill_id].flag = SKILL_FLAG_PERMANENT;
 	clif_deleteskill(sd,skill_id);
 	clif_displaymessage(fd, msg_txt(71)); // You have forgotten the skill.
 
@@ -3267,7 +3284,7 @@ ACMD_FUNC(breakguild)
 
 	if (sd->status.guild_id) { // Check if the player has a guild
 		struct guild *g;
-		g = guild_search(sd->status.guild_id); // Search the guild
+		g = sd->guild; // Search the guild
 		if (g) { // Check if guild was found
 			if (sd->state.gmaster_flag) { // Check if player is guild master
 				int ret = 0;
@@ -3748,16 +3765,15 @@ ACMD_FUNC(reloadscript)
  * 0 = no additional information
  * 1 = Show users in that map and their location
  * 2 = Shows NPCs in that map
- * 3 = Shows the shops/chats in that map (not implemented)
+ * 3 = Shows the chats in that map
  *------------------------------------------*/
-ACMD_FUNC(mapinfo)
-{
+ACMD_FUNC(mapinfo) {
 	struct map_session_data* pl_sd;
 	struct s_mapiterator* iter;
 	struct npc_data *nd = NULL;
 	struct chat_data *cd = NULL;
 	char direction[12];
-	int i, m_id, chat_num, list = 0;
+	int i, m_id, chat_num = 0, list = 0, vend_num = 0;
 	unsigned short m_index;
 	char mapname[24];
 
@@ -3792,12 +3808,17 @@ ACMD_FUNC(mapinfo)
 	// count chats (for initial message)
 	chat_num = 0;
 	iter = mapit_getallusers();
-	for( pl_sd = (TBL_PC*)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC*)mapit_next(iter) )
-		if( (cd = (struct chat_data*)map_id2bl(pl_sd->chatID)) != NULL && pl_sd->mapindex == m_index && cd->usersd[0] == pl_sd )
-			chat_num++;
+	for( pl_sd = (TBL_PC*)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC*)mapit_next(iter) ) {
+		if( pl_sd->mapindex == m_index ) {
+			if( pl_sd->state.vending )
+				vend_num++;
+			else if( (cd = (struct chat_data*)map_id2bl(pl_sd->chatID)) != NULL && cd->usersd[0] == pl_sd )
+				chat_num++;
+		}
+	}
 	mapit_free(iter);
 
-	sprintf(atcmd_output, msg_txt(1040), mapname, map[m_id].users, map[m_id].npc_num, chat_num); // Map Name: %s | Players In Map: %d | NPCs In Map: %d | Chats In Map: %d
+	sprintf(atcmd_output, msg_txt(1040), mapname, map[m_id].users, map[m_id].npc_num, chat_num, vend_num); // Map: %s | Players: %d | NPCs: %d | Chats: %d | Vendings: %d
 	clif_displaymessage(fd, atcmd_output);
 	clif_displaymessage(fd, msg_txt(1041)); // ------ Map Flags ------
 	if (map[m_id].flag.town)
@@ -3885,11 +3906,6 @@ ACMD_FUNC(mapinfo)
 		strcat(atcmd_output, msg_txt(1077)); // Fireworks |
 	if (map[m_id].flag.leaves)
 		strcat(atcmd_output, msg_txt(1078)); // Leaves |
-	/**
-	 * No longer available, keeping here just in case it's back someday. [Ind]
-	 **/
-	//if (map[m_id].flag.rain)
-	//	strcat(atcmd_output, msg_txt(1079)); // Rain |
 	if (map[m_id].flag.nightenabled)
 		strcat(atcmd_output, msg_txt(1080)); // Displays Night |
 	clif_displaymessage(fd, atcmd_output);
@@ -5269,7 +5285,7 @@ ACMD_FUNC(cleargstorage)
 	struct guild_storage *gstorage;
 	nullpo_retr(-1, sd);
 
-	g = guild_search(sd->status.guild_id);
+	g = sd->guild;
 
 	if (g == NULL) {
 		clif_displaymessage(fd, msg_txt(43));
@@ -5334,8 +5350,7 @@ ACMD_FUNC(clearcart)
  *------------------------------------------*/
 #define MAX_SKILLID_PARTIAL_RESULTS 5
 #define MAX_SKILLID_PARTIAL_RESULTS_LEN 74 // "skill " (6) + "%d:" (up to 5) + "%s" (up to 30) + " (%s)" (up to 33)
-ACMD_FUNC(skillid)
-{
+ACMD_FUNC(skillid) {
 	int skillen, idx, i, found = 0;
 	DBIterator* iter;
 	DBKey key;
@@ -5605,8 +5620,8 @@ ACMD_FUNC(changelook)
  * @autotrade by durf [Lupus] [Paradox924X]
  * Turns on/off Autotrade for a specific player
  *------------------------------------------*/
-ACMD_FUNC(autotrade)
-{
+ACMD_FUNC(autotrade) {
+	int i;
 	nullpo_retr(-1, sd);
 
 	if( map[sd->bl.m].flag.autotrade != battle_config.autotrade_mapflag ) {
@@ -5629,6 +5644,29 @@ ACMD_FUNC(autotrade)
 		int timeout = atoi(message);
 		status_change_start(NULL,&sd->bl, SC_AUTOTRADE, 10000, 0, 0, 0, 0, ((timeout > 0) ? min(timeout,battle_config.at_timeout) : battle_config.at_timeout) * 60000, 0);
 	}
+
+	// Leave all chat channels.
+	if( raChSys.ally && sd->status.guild_id ) {
+		struct guild *g = sd->guild, *sg;
+		if( g ) {
+			if( idb_exists(((struct raChSysCh *)g->channel)->users, sd->status.char_id) )
+				clif_chsys_left((struct raChSysCh *)g->channel,sd);
+			for (i = 0; i < MAX_GUILDALLIANCE; i++) {
+				if( g->alliance[i].guild_id && (sg = guild_search(g->alliance[i].guild_id) ) ) {
+					if( idb_exists(((struct raChSysCh *)sg->channel)->users, sd->status.char_id) )
+						clif_chsys_left((struct raChSysCh *)sg->channel,sd);
+					break;
+				}
+			}
+		}
+	}
+	if( sd->channel_count ) { //quit all chan
+		uint8 count = sd->channel_count;
+		for( i = 0; i < count; i++ ) {
+			if( sd->channels[i] != NULL )
+				clif_chsys_left(sd->channels[i],sd);
+		}
+	}
 	clif_authfail_fd(sd->fd, 15);
 
 	return 0;
@@ -5644,7 +5682,7 @@ ACMD_FUNC(changegm)
 	struct map_session_data *pl_sd;
 	nullpo_retr(-1, sd);
 
-	if (sd->status.guild_id == 0 || (g = guild_search(sd->status.guild_id)) == NULL || strcmp(g->master,sd->status.name)) {
+	if (sd->status.guild_id == 0 || (g = sd->guild) == NULL || strcmp(g->master,sd->status.name)) {
 		clif_displaymessage(fd, msg_txt(1181)); // You need to be a Guild Master to use this command.
 		return -1;
 	}
@@ -6186,7 +6224,7 @@ ACMD_FUNC(npctalk)
 	snprintf(temp, sizeof(temp), "%s : %s", name, mes);
 
 	if(ifcolor) clif_messagecolor(&nd->bl,color,temp);
-	else clif_message(&nd->bl, temp);
+	else clif_disp_overhead(&nd->bl, temp);
 
 	return 0;
 }
@@ -6250,7 +6288,7 @@ ACMD_FUNC(pettalk)
 	}
 
 	snprintf(temp, sizeof temp ,"%s : %s", pd->pet.name, mes);
-	clif_message(&pd->bl, temp);
+	clif_disp_overhead(&pd->bl, temp);
 
 	return 0;
 }
@@ -7040,7 +7078,7 @@ ACMD_FUNC(homtalk)
 	}
 
 	snprintf(temp, sizeof temp ,"%s : %s", sd->hd->homunculus.name, mes);
-	clif_message(&sd->hd->bl, temp);
+	clif_disp_overhead(&sd->hd->bl, temp);
 
 	return 0;
 }
@@ -7399,7 +7437,7 @@ ACMD_FUNC(rates)
 	//[Cydh] Zeny rate
 	if(battle_config.zeny_from_mobs)
 	{
-		snprintf(buf, CHAT_SIZE_MAX, msg_txt(1414), // Drop Zeny Rates: Normal %.2fx / Boss %.2fx
+		snprintf(buf, CHAT_SIZE_MAX, msg_txt(8888), // Drop Zeny Rates: Normal %.2fx / Boss %.2fx
 			battle_config.zeny_from_mobs_rate/100., battle_config.zeny_from_boss_rate/100.);
 		clif_displaymessage(fd, buf);
 	}
@@ -7430,7 +7468,7 @@ ACMD_FUNC(me)
 	}
 
 	sprintf(atcmd_output, msg_txt(270), sd->status.name, tempmes);	// *%s %s*
-	clif_disp_overhead(sd, atcmd_output);
+	clif_disp_overhead(&sd->bl, atcmd_output);
 
 	return 0;
 
@@ -7598,7 +7636,7 @@ ACMD_FUNC(mapflag) {
 		clif_displaymessage(sd->fd,atcmd_output);\
 		return 0;\
 	}
-        char flag_name[100];
+	char flag_name[100];
 	short flag=0,i;
 	nullpo_retr(-1, sd);
 	memset(flag_name, '\0', sizeof(flag_name));
@@ -7972,58 +8010,6 @@ ACMD_FUNC(clone)
 		return 0;
 	}
 	clif_displaymessage(fd, msg_txt(129+flag*2));	// Unable to spawn evil clone. Unable to spawn clone. Unable to spawn slave clone.
-	return 0;
-}
-
-/*===================================
- * Main chat [LuzZza]
- * Usage: @main <on|off|message>
- *-----------------------------------*/
-ACMD_FUNC(main)
-{
-	if( message[0] ) {
-
-		if(strcmpi(message, "on") == 0) {
-			if(!sd->state.mainchat) {
-				sd->state.mainchat = 1;
-				clif_displaymessage(fd, msg_txt(380)); // Main chat has been activated.
-			} else {
-				clif_displaymessage(fd, msg_txt(381)); // Main chat already activated.
-			}
-		} else if(strcmpi(message, "off") == 0) {
-			if(sd->state.mainchat) {
-				sd->state.mainchat = 0;
-				clif_displaymessage(fd, msg_txt(382)); // Main chat has been disabled.
-			} else {
-				clif_displaymessage(fd, msg_txt(383)); // Main chat already disabled.
-			}
-		} else {
-			if(!sd->state.mainchat) {
-				sd->state.mainchat = 1;
-				clif_displaymessage(fd, msg_txt(380)); // Main chat has been activated.
-			}
-			if (sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOCHAT) {
-				clif_displaymessage(fd, msg_txt(387));
-				return -1;
-			}
-
-			if ( battle_config.min_chat_delay ) {
-				if( DIFF_TICK(sd->cantalk_tick, gettick()) > 0 )
-					return 0;
-				sd->cantalk_tick = gettick() + battle_config.min_chat_delay;
-			}
-
-			// send the message using inter-server system
-			intif_main_message( sd, message );
-		}
-
-	} else {
-
-		if(sd->state.mainchat)
-			clif_displaymessage(fd, msg_txt(384)); // Main chat currently enabled. Usage: @main <on|off>, @main <message>.
-		else
-			clif_displaymessage(fd, msg_txt(385)); // Main chat currently disabled. Usage: @main <on|off>, @main <message>.
-	}
 	return 0;
 }
 
@@ -8805,7 +8791,7 @@ ACMD_FUNC(cart) {
 #define MC_CART_MDFY(x) \
 	sd->status.skill[MC_PUSHCART].id = x?MC_PUSHCART:0; \
 	sd->status.skill[MC_PUSHCART].lv = x?1:0; \
-	sd->status.skill[MC_PUSHCART].flag = x?1:0;
+	sd->status.skill[MC_PUSHCART].flag = x?SKILL_FLAG_TEMPORARY:SKILL_FLAG_PERMANENT;
 
 	int val = atoi(message);
 	bool need_skill = pc_checkskill(sd, MC_PUSHCART) ? false : true;
@@ -8840,6 +8826,294 @@ ACMD_FUNC(cart) {
 
 	return 0;
 	#undef MC_CART_MDFY
+}
+
+/* Channel System [Ind] */
+ACMD_FUNC(join) {
+	struct raChSysCh *channel;
+	char name[RACHSYS_NAME_LENGTH], pass[RACHSYS_NAME_LENGTH];
+	DBMap* channel_db = clif_get_channel_db();
+
+	if( !message || !*message || sscanf(message, "%s %s", name, pass) < 1 ) {
+		sprintf(atcmd_output, msg_txt(1399),command); // Unknown Channel (usage: %s <#channel_name>)
+		clif_displaymessage(fd, atcmd_output);
+		return -1;
+	}
+	if( raChSys.local && strcmpi(name + 1, raChSys.local_name) == 0 ) {
+		if( !map[sd->bl.m].channel ) {
+			clif_chsys_mjoin(sd);
+			return 0;
+		} else
+			channel = map[sd->bl.m].channel;
+	} else if( raChSys.ally && sd->status.guild_id && strcmpi(name + 1, raChSys.ally_name) == 0 ) {
+		struct guild *g = sd->guild;
+		if( !g ) return -1;/* unlikely, but we wont let it crash anyway. */
+		channel = (struct raChSysCh *)g->channel;
+	} else if( !( channel = strdb_get(channel_db, name + 1) ) ) {
+		sprintf(atcmd_output, msg_txt(1400),name,command); // Unknown Channel '%s' (usage: %s <#channel_name>)
+		clif_displaymessage(fd, atcmd_output);
+		return -1;
+	}
+
+	if( idb_exists(channel->users, sd->status.char_id) ) {
+		sprintf(atcmd_output, msg_txt(1434),name); // You're already in the '%s' channel.
+		clif_displaymessage(fd, atcmd_output);
+		return -1;
+	}
+	if( channel->pass[0] != '\0'  && strcmp(channel->pass,pass) != 0 ) {
+		if( pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN) ) {
+			sd->stealth = true;
+		} else {
+			sprintf(atcmd_output, msg_txt(1401),name,command); // '%s' Channel is password protected (usage: %s <#channel_name> <password>)
+			clif_displaymessage(fd, atcmd_output);
+			return -1;
+		}
+	}
+
+	if( !( channel->opt & raChSys_OPT_ANNOUNCE_JOIN ) ) {
+		sprintf(atcmd_output, msg_txt(1403),name); // You're now in the '%s' channel.
+		clif_displaymessage(fd, atcmd_output);
+	}
+
+	clif_chsys_join(channel,sd);
+
+	return 0;
+}
+
+static inline void atcmd_channel_help(int fd, const char *command, bool can_create) {
+	sprintf(atcmd_output, msg_txt(1404),command); // %s failed.
+	clif_displaymessage(fd, atcmd_output);
+	clif_displaymessage(fd, msg_txt(1414));// ---- Available options:
+	if( can_create ) {
+		sprintf(atcmd_output, msg_txt(1415),command);// * %s create <#channel_name> <channel_password>
+		clif_displaymessage(fd, atcmd_output);
+		clif_displaymessage(fd, msg_txt(1416));// -- Creates a new channel.
+	}
+	sprintf(atcmd_output, msg_txt(1417),command);// * %s list
+	clif_displaymessage(fd, atcmd_output);
+	clif_displaymessage(fd, msg_txt(1418));// -- Lists all public channels.
+	if( can_create ) {
+		sprintf(atcmd_output, msg_txt(1419),command);// * %s list colors
+		clif_displaymessage(fd, atcmd_output);
+		clif_displaymessage(fd, msg_txt(1420));// -- Lists all available colors for custom channels.
+		sprintf(atcmd_output, msg_txt(1421),command);// * %s setcolor <#channel_name> <color_name>
+		clif_displaymessage(fd, atcmd_output);
+		clif_displaymessage(fd, msg_txt(1422));// -- Changes channel text to the specified color (channel owners only).
+	}
+	sprintf(atcmd_output, msg_txt(1423),command);// * %s leave <#channel_name>
+	clif_displaymessage(fd, atcmd_output);
+	clif_displaymessage(fd, msg_txt(1424));// -- Leaves the specified channel.
+	sprintf(atcmd_output, msg_txt(1427),command);// * %s bindto <#channel_name>
+	clif_displaymessage(fd, atcmd_output);
+	clif_displaymessage(fd, msg_txt(1428));// -- Binds your global chat to the specified channel, sending all global messages to that channel.
+	sprintf(atcmd_output, msg_txt(1429),command);// * %s unbind
+	clif_displaymessage(fd, atcmd_output);
+	clif_displaymessage(fd, msg_txt(1430));// -- Unbinds your global chat from the attached channel, if any.
+}
+
+ACMD_FUNC(channel) {
+	struct raChSysCh *channel;
+	char key[RACHSYS_NAME_LENGTH], sub1[RACHSYS_NAME_LENGTH], sub2[RACHSYS_NAME_LENGTH], sub3[RACHSYS_NAME_LENGTH];
+	unsigned char k = 0;
+	DBMap* channel_db = clif_get_channel_db();
+	sub1[0] = sub2[0] = sub3[0] = '\0';
+
+	if( !message || !*message || sscanf(message, "%s %s %s %s", key, sub1, sub2, sub3) < 1 ) {
+		atcmd_channel_help(fd,command,( raChSys.allow_user_channel_creation || pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN) ));
+		return 0;
+	}
+
+	if( strcmpi(key,"create") == 0 && ( raChSys.allow_user_channel_creation || pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN) ) ) {
+		if( sub1[0] != '#' ) {
+			clif_displaymessage(fd, msg_txt(1405));// Channel name must start with '#'.
+			return -1;
+		} else if ( strlen(sub1) < 3 || strlen(sub1) > RACHSYS_NAME_LENGTH ) {
+			sprintf(atcmd_output, msg_txt(1406), RACHSYS_NAME_LENGTH);// Channel length must be between 3 and %d.
+			clif_displaymessage(fd, atcmd_output);
+			return -1;
+		} else if ( sub3[0] != '\0' ) {
+			clif_displaymessage(fd, msg_txt(1408)); // Channel password may not contain spaces.
+			return -1;
+		}
+		if( strcmpi(sub1 + 1,raChSys.local_name) == 0 || strcmpi(sub1 + 1,raChSys.ally_name) == 0 || strdb_exists(channel_db, sub1 + 1) ) {
+			sprintf(atcmd_output, msg_txt(1407), sub1);// Channel '%s' is not available.
+			clif_displaymessage(fd, atcmd_output);
+			return -1;
+		}
+
+		CREATE( channel, struct raChSysCh, 1 );
+
+		clif_chsys_create(channel,sub1 + 1,sub2,0);
+
+		channel->owner = sd->status.char_id;
+		channel->type = raChSys_PRIVATE;
+
+		if( !( channel->opt & raChSys_OPT_ANNOUNCE_JOIN ) ) {
+			sprintf(atcmd_output, msg_txt(1403),sub1); // You're now in the '%s' channel.
+			clif_displaymessage(fd, atcmd_output);
+		}
+
+		clif_chsys_join(channel,sd);
+
+	} else if ( strcmpi(key,"list") == 0 ) {
+		if( sub1[0] != '\0' && strcmpi(sub1,"colors") == 0 ) {
+			char mout[40];
+			for( k = 0; k < raChSys.colors_count; k++ ) {
+				unsigned short msg_len = 1;
+				msg_len += sprintf(mout, "[ %s list colors ] : %s",command,raChSys.colors_name[k]);
+
+				WFIFOHEAD(fd,msg_len + 12);
+				WFIFOW(fd,0) = 0x2C1;
+				WFIFOW(fd,2) = msg_len + 12;
+				WFIFOL(fd,4) = 0;
+				WFIFOL(fd,8) = raChSys.colors[k];
+				safestrncpy((char*)WFIFOP(fd,12), mout, msg_len);
+				WFIFOSET(fd, msg_len + 12);
+			}
+		} else {
+			DBIterator *iter = db_iterator(channel_db);
+			bool show_all = pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN) ? true : false;
+			clif_displaymessage(fd, msg_txt(1410)); // ---- Public Channels ----
+			if( raChSys.local ) {
+				sprintf(atcmd_output, msg_txt(1409), raChSys.local_name, map[sd->bl.m].channel ? db_size(map[sd->bl.m].channel->users) : 0);// - #%s ( %d users )
+				clif_displaymessage(fd, atcmd_output);
+			}
+			if( raChSys.ally && sd->status.guild_id ) {
+				struct guild *g = sd->guild;
+				if( !g ) return -1;
+				sprintf(atcmd_output, msg_txt(1409), raChSys.ally_name, db_size(((struct raChSysCh *)g->channel)->users));// - #%s ( %d users )
+				clif_displaymessage(fd, atcmd_output);
+			}
+			for(channel = dbi_first(iter); dbi_exists(iter); channel = dbi_next(iter)) {
+				if( show_all || channel->type == raChSys_PUBLIC ) {
+					sprintf(atcmd_output, msg_txt(1409), channel->name, db_size(channel->users));// - #%s (%d users)
+					clif_displaymessage(fd, atcmd_output);
+				}
+			}
+			dbi_destroy(iter);
+		}
+	} else if ( strcmpi(key,"setcolor") == 0 ) {
+
+		if( sub1[0] != '#' ) {
+			clif_displaymessage(fd, msg_txt(1405));// Channel name must start with '#'.
+			return -1;
+		}
+
+		if( !(channel = strdb_get(channel_db, sub1 + 1)) ) {
+			sprintf(atcmd_output, msg_txt(1407), sub1);// Channel '%s' is not available.
+			clif_displaymessage(fd, atcmd_output);
+			return -1;
+		}
+
+		if( channel->owner != sd->status.char_id && !pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN) ) {
+			sprintf(atcmd_output, msg_txt(1412), sub1);// You're not the owner of channel '%s'.
+			clif_displaymessage(fd, atcmd_output);
+			return -1;
+		}
+
+		for( k = 0; k < raChSys.colors_count; k++ ) {
+			if( strcmpi(sub2,raChSys.colors_name[k]) == 0 )
+				break;
+		}
+		if( k == raChSys.colors_count ) {
+			sprintf(atcmd_output, msg_txt(1411), sub2);// Unknown color '%s'.
+			clif_displaymessage(fd, atcmd_output);
+			return -1;
+		}
+		channel->color = k;
+		sprintf(atcmd_output, msg_txt(1413),sub1,raChSys.colors_name[k]);// '%s' channel color updated to '%s'.
+		clif_displaymessage(fd, atcmd_output);
+	} else if ( strcmpi(key,"leave") == 0 ) {
+
+		if( sub1[0] != '#' ) {
+			clif_displaymessage(fd, msg_txt(1405));// Channel name must start with '#'.
+			return -1;
+		}
+
+		ARR_FIND(0, sd->channel_count, k, strcmpi(sub1+1,sd->channels[k]->name) == 0);
+		if( k == sd->channel_count ) {
+			sprintf(atcmd_output, msg_txt(1425),sub1);// You're not part of the '%s' channel.
+			clif_displaymessage(fd, atcmd_output);
+			return -1;
+		}
+		clif_chsys_left(sd->channels[k],sd);
+		sprintf(atcmd_output, msg_txt(1426),sub1); // You've left the '%s' channel.
+		clif_displaymessage(fd, atcmd_output);
+	} else if ( strcmpi(key,"bindto") == 0 ) {
+
+		if( sub1[0] != '#' ) {
+			clif_displaymessage(fd, msg_txt(1405));// Channel name must start with '#'.
+			return -1;
+		}
+
+		ARR_FIND(0, sd->channel_count, k, strcmpi(sub1+1,sd->channels[k]->name) == 0);
+		if( k == sd->channel_count ) {
+			sprintf(atcmd_output, msg_txt(1425),sub1);// You're not part of the '%s' channel.
+			clif_displaymessage(fd, atcmd_output);
+			return -1;
+		}
+
+		sd->gcbind = sd->channels[k];
+		sprintf(atcmd_output, msg_txt(1431),sub1); // Your global chat is now binded to the '%s' channel.
+		clif_displaymessage(fd, atcmd_output);
+	} else if ( strcmpi(key,"unbind") == 0 ) {
+
+		if( sd->gcbind == NULL ) {
+			clif_displaymessage(fd, msg_txt(1432));// Your global chat is not binded to any channel.
+			return -1;
+		}
+
+		sprintf(atcmd_output, msg_txt(1433),sd->gcbind->name); // Your global chat is now unbinded from the '#%s' channel.
+		clif_displaymessage(fd, atcmd_output);
+
+		sd->gcbind = NULL;
+	} else {
+		atcmd_channel_help(fd,command,( raChSys.allow_user_channel_creation || pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN) ));
+	}
+
+	return 0;
+}
+
+ACMD_FUNC(fontcolor) {
+	unsigned char k;
+
+	if( !message || !*message ) {
+		char mout[40];
+		for( k = 0; k < raChSys.colors_count; k++ ) {
+			unsigned short msg_len = 1;
+			msg_len += sprintf(mout, "[ %s ] : %s",command,raChSys.colors_name[k]);
+
+			WFIFOHEAD(fd,msg_len + 12);
+			WFIFOW(fd,0) = 0x2C1;
+			WFIFOW(fd,2) = msg_len + 12;
+			WFIFOL(fd,4) = 0;
+			WFIFOL(fd,8) = raChSys.colors[k];
+			safestrncpy((char*)WFIFOP(fd,12), mout, msg_len);
+			WFIFOSET(fd, msg_len + 12);
+		}
+		return -1;
+	}
+
+	if( message[0] == '0' ) {
+		sd->fontcolor = 0;
+		pc_disguise(sd,0);
+		return 0;
+	}
+
+	for( k = 0; k < raChSys.colors_count; k++ ) {
+		if( strcmpi(message,raChSys.colors_name[k]) == 0 )
+			break;
+	}
+	if( k == raChSys.colors_count ) {
+		sprintf(atcmd_output, msg_txt(1411), message);// Unknown color '%s'.
+		clif_displaymessage(fd, atcmd_output);
+		return -1;
+	}
+
+	sd->fontcolor = k + 1;
+	pc_disguise(sd,sd->status.class_);
+
+	return 0;
 }
 
 //@ignorebattle [Goddameit]
@@ -9127,6 +9401,19 @@ ACMD_FUNC(itemmap)
 	return 0;
 }
 
+/*=========================================
+ * Item Security System
+ *-----------------------------------------*/
+ACMD_FUNC(security)
+{
+	nullpo_retr(-1,sd);
+	if( sd->npc_id || sd->vender_id || sd->buyer_id || sd->state.trading || sd->state.storage_flag )
+		return -1;
+
+	npc_event(sd,"SecuritySystem::OnSettings",0);
+ 	return 0;
+ }
+
 /**
  * Fills the reference of available commands in atcommand DBMap
  **/
@@ -9339,7 +9626,6 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(leave),
 		ACMD_DEF(accept),
 		ACMD_DEF(reject),
-		ACMD_DEF(main),
 		ACMD_DEF(clone),
 		ACMD_DEF2("slaveclone", clone),
 		ACMD_DEF2("evilclone", clone),
@@ -9388,6 +9674,10 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(unloadnpcfile),
 		ACMD_DEF(cart),
 		ACMD_DEF(mount2),
+		ACMD_DEF(join),
+		ACMD_DEF(channel),
+		ACMD_DEF(fontcolor),
+		
 		ACMD_DEF2("ignorebattle", ignorebattle),	// [Goddameit]
 		ACMD_DEF2("pk",pkmode),
 		ACMD_DEF(seeghp),
@@ -9399,6 +9689,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF2("itemmap1", itemmap),
 		ACMD_DEF2("itemmap2", itemmap),
 		ACMD_DEF2("itemmap3", itemmap),
+		ACMD_DEF(security)	// Item Security [Zephyrus]
 	};
 	AtCommandInfo* atcommand;
 	int i;

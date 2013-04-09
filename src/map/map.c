@@ -13,6 +13,7 @@
 #include "../common/strlib.h"
 #include "../common/utils.h"
 #include "../common/cli.h"
+#include "../common/ers.h"
 
 #include "map.h"
 #include "path.h"
@@ -80,10 +81,6 @@ char log_db_id[32] = "ragnarok";
 char log_db_pw[32] = "ragnarok";
 char log_db_db[32] = "log";
 Sql* logmysql_handle;
-
-// This param using for sending mainchat
-// messages like whispers to this nick. [LuzZza]
-char main_chat_nick[16] = "Main";
 
 // DBMap declaartion
 static DBMap* id_db=NULL; // int id -> struct block_list*
@@ -383,6 +380,8 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 		skill_unit_move(bl,tick,2);
 		status_change_end(bl, SC_CLOSECONFINE, INVALID_TIMER);
 		status_change_end(bl, SC_CLOSECONFINE2, INVALID_TIMER);
+		status_change_end(bl, SC_TINDER_BREAKER, INVALID_TIMER);
+		status_change_end(bl, SC_TINDER_BREAKER2, INVALID_TIMER);
 //		status_change_end(bl, SC_BLADESTOP, INVALID_TIMER); //Won't stop when you are knocked away, go figure...
 		status_change_end(bl, SC_TATAMIGAESHI, INVALID_TIMER);
 		status_change_end(bl, SC_MAGICROD, INVALID_TIMER);
@@ -1487,8 +1486,7 @@ void map_addnickdb(int charid, const char* nick)
 	p = idb_ensure(nick_db, charid, create_charid2nick);
 	safestrncpy(p->nick, nick, sizeof(p->nick));
 
-	while( p->requests )
-	{
+	while( p->requests ) {
 		req = p->requests;
 		p->requests = req->next;
 		sd = map_charid2sd(req->charid);
@@ -1510,8 +1508,7 @@ void map_delnickdb(int charid, const char* name)
 	if (!nick_db->remove(nick_db, db_i2key(charid), &data) || (p = db_data2ptr(&data)) == NULL)
 		return;
 
-	while( p->requests )
-	{
+	while( p->requests ) {
 		req = p->requests;
 		p->requests = req->next;
 		sd = map_charid2sd(req->charid);
@@ -1654,7 +1651,7 @@ int map_quit(struct map_session_data *sd) {
 			status_change_end(&sd->bl, SC_ENDURE, INVALID_TIMER); //No need to save infinite endure.
 		status_change_end(&sd->bl, SC_WEIGHT50, INVALID_TIMER);
 		status_change_end(&sd->bl, SC_WEIGHT90, INVALID_TIMER);
-        status_change_end(&sd->bl, SC_SATURDAYNIGHTFEVER, INVALID_TIMER);
+		status_change_end(&sd->bl, SC_SATURDAYNIGHTFEVER, INVALID_TIMER);
 		status_change_end(&sd->bl, SC_KYOUGAKU, INVALID_TIMER);
 		if (battle_config.debuff_on_logout&1) {
 			status_change_end(&sd->bl, SC_ORCISH, INVALID_TIMER);
@@ -1693,15 +1690,41 @@ int map_quit(struct map_session_data *sd) {
 
 	if( sd->state.storage_flag == 1 ) sd->state.storage_flag = 0; // No need to Double Save Storage on Quit.
 
+	if (sd->state.permanent_speed == 1) sd->state.permanent_speed = 0; // Remove lock so speed is set back to normal at login.
+
 	if( sd->ed ) {
 		elemental_clean_effect(sd->ed);
 		unit_remove_map(&sd->ed->bl,CLR_TELEPORT);
 	}
 
+	if( raChSys.ally && sd->status.guild_id ) {
+		struct guild *g = sd->guild, *sg;
+		if( g ) {
+			if( idb_exists(((struct raChSysCh *)g->channel)->users, sd->status.char_id) )
+				clif_chsys_left((struct raChSysCh *)g->channel,sd);
+			for (i = 0; i < MAX_GUILDALLIANCE; i++) {
+				if( g->alliance[i].guild_id && (sg = guild_search(g->alliance[i].guild_id) ) ) {
+					if( idb_exists(((struct raChSysCh *)sg->channel)->users, sd->status.char_id) )
+						clif_chsys_left((struct raChSysCh *)sg->channel,sd);
+					break;
+				}
+			}
+		}
+	}
+
+	if( sd->channel_count ) {
+		uint8 ch_count = sd->channel_count;
+		for( i = 0; i < ch_count; i++ ) {
+			if( sd->channels[i] != NULL )
+				clif_chsys_left(sd->channels[i],sd);
+		}
+		if( raChSys.closing )
+			aFree(sd->channels);
+	}
+
 	unit_remove_map_pc(sd,CLR_TELEPORT);
 
-	if( map[sd->bl.m].instance_id )
-	{ // Avoid map conflicts and warnings on next login
+	if( map[sd->bl.m].instance_id ) { // Avoid map conflicts and warnings on next login
 		int16 m;
 		struct point *pt;
 		if( map[sd->bl.m].save.map )
@@ -2639,8 +2662,7 @@ bool map_iwall_set(int16 m, int16 x, int16 y, int size, int8 dir, bool shootable
 	return true;
 }
 
-void map_iwall_get(struct map_session_data *sd)
-{
+void map_iwall_get(struct map_session_data *sd) {
 	struct iwall_data *iwall;
 	DBIterator* iter;
 	int16 x1, y1;
@@ -2650,13 +2672,11 @@ void map_iwall_get(struct map_session_data *sd)
 		return;
 
 	iter = db_iterator(iwall_db);
-	for( iwall = dbi_first(iter); dbi_exists(iter); iwall = dbi_next(iter) )
-	{
+	for( iwall = dbi_first(iter); dbi_exists(iter); iwall = dbi_next(iter) ) {
 		if( iwall->m != sd->bl.m )
 			continue;
 
-		for( i = 0; i < iwall->size; i++ )
-		{
+		for( i = 0; i < iwall->size; i++ ) {
 			map_iwall_nextxy(iwall->x, iwall->y, iwall->dir, i, &x1, &y1);
 			clif_changemapcell(sd->fd, iwall->m, x1, y1, map_getcell(iwall->m, x1, y1, CELL_GETTYPE), SELF);
 		}
@@ -2672,8 +2692,7 @@ void map_iwall_remove(const char *wall_name)
 	if( (iwall = (struct iwall_data *)strdb_get(iwall_db, wall_name)) == NULL )
 		return; // Nothing to do
 
-	for( i = 0; i < iwall->size; i++ )
-	{
+	for( i = 0; i < iwall->size; i++ ) {
 		map_iwall_nextxy(iwall->x, iwall->y, iwall->dir, i, &x1, &y1);
 
 		map_setcell(iwall->m, x1, y1, CELL_SHOOTABLE, true);
@@ -3165,6 +3184,9 @@ int parse_console(const char* buf)
 			runflag = 0;
 		}
 	}
+	else if( strcmpi("ers_report", type) == 0 ){
+		ers_report();
+	}
 	else if( strcmpi("help", type) == 0 )
 	{
 		ShowInfo("To use GM commands:\n");
@@ -3356,9 +3378,6 @@ int inter_config_read(char *cfgName)
 		if( sscanf(line,"%[^:]: %[^\r\n]",w1,w2) < 2 )
 			continue;
 
-		if(strcmpi(w1, "main_chat_nick")==0)
-			safestrncpy(main_chat_nick, w2, sizeof(main_chat_nick));
-		else
 		if(strcmpi(w1,"item_db_db")==0)
 			strcpy(item_db_db,w2);
 		else
@@ -3555,6 +3574,7 @@ void do_final(void)
 	struct s_mapiterator* iter;
 
 	ShowStatus("Terminating...\n");
+	raChSys.closing = true;
 
 	//Ladies and babies first.
 	iter = mapit_getallusers();
@@ -3732,7 +3752,6 @@ int do_init(int argc, char *argv[])
 
 	rnd_init();
 	map_config_read(MAP_CONF_NAME);
-	/* only temporary until sirius's datapack patch is complete  */
 
 	// loads npcs
 	map_reloadnpc(false);
