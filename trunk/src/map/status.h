@@ -634,8 +634,8 @@ typedef enum sc_type {
 
 	//homon S
 	SC_STYLE_CHANGE,
-	SC_TINDER_BREAKER, //@TODO rewritte me plz
-	SC_TINDER_BREAKER2, //for rewritte and other icone
+	SC_TINDER_BREAKER,
+	SC_TINDER_BREAKER2,
 	SC_CBC,
 	SC_EQC,
 	SC_GOLDENE_FERSE,
@@ -1684,6 +1684,13 @@ struct status_change_entry {
 	int timer;
 	int val1,val2,val3,val4;
 };
+
+// Refine bonus [Cydh]
+static struct {
+	struct {
+		struct script_code *script;
+	} refine[MAX_REFINE+1];	// +1 is Icabit correction
+} refine_bonus[REFINE_TYPE_MAX+1];	// +1 is Icabit correction
 
 struct status_change {
 	unsigned int option;// effect state (bitfield)

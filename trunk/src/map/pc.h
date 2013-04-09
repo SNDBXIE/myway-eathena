@@ -137,7 +137,6 @@ struct map_session_data {
 		unsigned int showdelay :1;
 		unsigned int showexp :1;
 		unsigned int showzeny :1;
-		unsigned int mainchat :1; //[LuzZza]
 		unsigned int noask :1; // [LuzZza]
 		unsigned int trading :1; //[Skotlex] is 1 only after a trade has started.
 		unsigned int deal_locked :2; //1: Clicked on OK. 2: Clicked on TRADE
@@ -166,8 +165,10 @@ struct map_session_data {
 		struct guild *gmaster_flag;
 		unsigned int prevend : 1;//used to flag wheather you've spent 40sp to open the vending or not.
 		unsigned int warping : 1;//states whether you're in the middle of a warp processing
+		unsigned int permanent_speed : 1; // When 1, speed cannot be changed through status_calc_pc().
 		unsigned int pk_mode : 1; //@pkmode by malufett
 		unsigned int seeghp :1; // Display the HP of players of clan and alliances. [Created by Rad & Updated by Cainho]
+		unsigned int secure_items : 1; // Item Security [Zephyrus]
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;
@@ -389,6 +390,7 @@ struct map_session_data {
 	int party_invite, party_invite_account; // for handling party invitation (holds party id and account id)
 	int adopt_invite; // Adoption
 
+	struct guild *guild; // [Ind] speed everything up
 	int guild_invite,guild_invite_account;
 	int guild_emblem_id,guild_alliance,guild_alliance_account;
 	short guild_x,guild_y; // For guildmate position display. [Skotlex] should be short [zzo]
@@ -498,6 +500,13 @@ struct map_session_data {
 	int friend_req;
 
 	int shadowform_id;
+
+	/* Channel System [Ind] */
+	struct raChSysCh **channels;
+	unsigned char channel_count;
+	struct raChSysCh *gcbind;
+	bool stealth;
+	unsigned char fontcolor; /* debug-only */
 
 	// temporary debugging of bug #3504
 	const char* delunit_prevfile;

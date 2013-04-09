@@ -442,9 +442,16 @@ int guild_storage_additem(struct map_session_data* sd, struct guild_storage* sto
 		return 1;
 	}
 
+	// Item Security [Zephyrus]
 	if( !itemdb_canguildstore(item_data, pc_get_group_level(sd)) || item_data->expire_time )
 	{	//Check if item is storable. [Skotlex]
 		clif_displaymessage (sd->fd, msg_txt(264));
+		return 1;
+	}
+	
+	if( sd->state.secure_items )
+	{
+		clif_displaymessage(sd->fd, "You can't store items on Guild Storage. Blocked with @security");
 		return 1;
 	}
 

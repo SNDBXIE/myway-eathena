@@ -62,6 +62,12 @@ bool buyingstore_setup(struct map_session_data* sd, unsigned char slots)
 		return false;
 	}
 
+	if( sd->state.secure_items )
+	{
+		clif_displaymessage(sd->fd, "You can't open Buying. Blocked with @security");
+		return false;
+	}
+
 	if( map_getcell(sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKNOVENDING) )
 	{// custom: no vending cells
 		clif_displaymessage(sd->fd, msg_txt(204)); // "You can't open a shop on this cell."

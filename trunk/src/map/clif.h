@@ -5,6 +5,7 @@
 #define _CLIF_H_
 
 #include "../common/cbasetypes.h"
+#include "../common/db.h" //dbmap
 //#include "../common/mmo.h"
 struct item;
 struct storage_data;
@@ -32,7 +33,7 @@ struct party_booking_ad_info;
 enum
 {// packet DB
 	MAX_PACKET_DB  = 0xf00,
-	MAX_PACKET_VER = 32,
+	MAX_PACKET_VER = 34,
 	MAX_PACKET_POS = 20,
 };
 
@@ -73,8 +74,8 @@ typedef enum send_target {
 	GUILD_NOBG,
 	DUEL,
 	DUEL_WOS,
-	CHAT_MAINCHAT,		// everyone on main chat
 	SELF,
+
 	BG,					// BattleGround System
 	BG_WOS,
 	BG_SAMEMAP,
@@ -83,8 +84,7 @@ typedef enum send_target {
 	BG_AREA_WOS,
 } send_target;
 
-typedef enum emotion_type
-{
+typedef enum emotion_type {
 	E_GASP = 0,     // /!
 	E_WHAT,         // /?
 	E_HO,
@@ -314,6 +314,13 @@ enum useskill_fail_cause
 	USESKILL_FAIL_THERE_ARE_NPC_AROUND = 83,
 };
 
+enum clif_messages {
+	MERC_MSG_BASE = 1266, //0x4f2
+	SKILL_CANT_USE_AREA = 0x536,
+	VIEW_EQUIP_FAIL = 0x54d,
+	USAGE_FAIL = 0x783,
+};
+
 int clif_setip(const char* ip);
 void clif_setbindip(const char* ip);
 void clif_setport(uint16 port);
@@ -425,7 +432,7 @@ void clif_class_change(struct block_list *bl,int class_,int type);
 #define clif_mob_class_change(md, class_) clif_class_change(&md->bl, class_, 1)
 
 void clif_skillinfoblock(struct map_session_data *sd);
-void clif_skillup(struct map_session_data *sd,uint16 skill_id);
+void clif_skillup(struct map_session_data *sd, uint16 skill_id, int lv, int range, int upgradable);
 void clif_skillinfo(struct map_session_data *sd,int skill, int inf);
 void clif_addskill(struct map_session_data *sd, int id);
 void clif_deleteskill(struct map_session_data *sd, int id);
@@ -540,7 +547,6 @@ void clif_guild_emblem(struct map_session_data *sd,struct guild *g);
 void clif_guild_emblem_area(struct block_list* bl);
 void clif_guild_notice(struct map_session_data* sd, struct guild* g);
 void clif_guild_message(struct guild *g,int account_id,const char *mes,int len);
-int clif_guild_skillup(struct map_session_data *sd,uint16 skill_id,int lv);
 void clif_guild_reqalliance(struct map_session_data *sd,int account_id,const char *name);
 void clif_guild_allianceack(struct map_session_data *sd,int flag);
 void clif_guild_delalliance(struct map_session_data *sd,int guild_id,int flag);
@@ -573,7 +579,6 @@ void clif_displaymessage(const int fd, const char* mes);
 void clif_disp_onlyself(struct map_session_data *sd, const char *mes, int len);
 void clif_disp_message(struct block_list* src, const char* mes, int len, enum send_target target);
 void clif_broadcast(struct block_list* bl, const char* mes, int len, int type, enum send_target target);
-void clif_MainChatMessage(const char* message);
 void clif_broadcast2(struct block_list* bl, const char* mes, int len, unsigned long fontColor, short fontType, short fontSize, short fontAlign, short fontY, enum send_target target);
 void clif_heal(int fd,int type,int val);
 void clif_resurrection(struct block_list *bl,int type);
@@ -604,7 +609,6 @@ void clif_weather(int16 m); // [Valaris]
 void clif_specialeffect(struct block_list* bl, int type, enum send_target target); // special effects [Valaris]
 void clif_specialeffect_single(struct block_list* bl, int type, int fd);
 void clif_messagecolor(struct block_list* bl, unsigned long color, const char* msg); // Mob/Npc color talk [SnakeDrak]
-void clif_message(struct block_list* bl, const char* msg);
 void clif_specialeffect_value(struct block_list* bl, int effect_id, int num, send_target target);
 
 void clif_GM_kickack(struct map_session_data *sd, int id);
@@ -612,7 +616,7 @@ void clif_GM_kick(struct map_session_data *sd,struct map_session_data *tsd);
 void clif_manner_message(struct map_session_data* sd, uint32 type);
 void clif_GM_silence(struct map_session_data* sd, struct map_session_data* tsd, uint8 type);
 
-void clif_disp_overhead(struct map_session_data *sd, const char* mes);
+void clif_disp_overhead(struct block_list *bl, const char* mes);
 
 void clif_get_weapon_view(struct map_session_data* sd, unsigned short *rhand, unsigned short *lhand);
 
@@ -634,7 +638,6 @@ void clif_send_homdata(struct map_session_data *sd, int state, int param);	//[or
 
 void clif_equiptickack(struct map_session_data* sd, int flag);
 void clif_viewequip_ack(struct map_session_data* sd, struct map_session_data* tsd);
-void clif_viewequip_fail(struct map_session_data* sd);
 void clif_equipcheckbox(struct map_session_data* sd);
 
 void clif_msg(struct map_session_data* sd, unsigned short id);
@@ -766,6 +769,56 @@ enum clif_colors {
 };
 unsigned long color_table[COLOR_MAX];
 int clif_colormes(struct map_session_data * sd, enum clif_colors color, const char* msg);
+
+/**
+ * Channel System
+ **/
+#define RACHSYS_NAME_LENGTH 20
+
+enum raChSysChOpt {
+	raChSys_OPT_BASE				= 0,
+	raChSys_OPT_ANNOUNCE_JOIN	= 1,
+};
+
+enum raChSysChType {
+	raChSys_PUBLIC	= 0,
+	raChSys_PRIVATE	= 1,
+	raChSys_MAP		= 2,
+	raChSys_ALLY		= 3,
+};
+
+struct {
+	unsigned long *colors;
+	char **colors_name;
+	unsigned char colors_count;
+	bool local, ally;
+	bool local_autojoin, ally_autojoin;
+	char local_name[RACHSYS_NAME_LENGTH], ally_name[RACHSYS_NAME_LENGTH];
+	unsigned char local_color, ally_color;
+	bool closing;
+	bool allow_user_channel_creation;
+} raChSys;
+
+struct raChSysCh {
+	char name[RACHSYS_NAME_LENGTH];
+	char pass[RACHSYS_NAME_LENGTH];
+	unsigned char color;
+	DBMap *users;
+	unsigned int opt;
+	unsigned int owner;
+	enum raChSysChType type;
+	uint16 m;
+};
+
+struct DBMap* clif_get_channel_db(void);
+void clif_chsys_create(struct raChSysCh *channel, char *name, char *pass, unsigned char color);
+void clif_chsys_msg(struct raChSysCh *channel, struct map_session_data *sd, char *msg);
+void clif_chsys_send(struct raChSysCh *channel, struct map_session_data *sd, char *msg);
+void clif_chsys_join(struct raChSysCh *channel, struct map_session_data *sd);
+void clif_chsys_left(struct raChSysCh *channel, struct map_session_data *sd);
+void clif_chsys_delete(struct raChSysCh *channel);
+void clif_chsys_mjoin(struct map_session_data *sd);
+void clif_read_channels_config(void);
 
 #define clif_menuskill_clear(sd) (sd)->menuskill_id = (sd)->menuskill_val = (sd)->menuskill_val2 = 0;
 
