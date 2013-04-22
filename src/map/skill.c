@@ -252,7 +252,7 @@ static int skill_cell_overlap(struct block_list *bl, va_list ap);
 static int skill_trap_splash(struct block_list *bl, va_list ap);
 struct skill_unit_group_tickset *skill_unitgrouptickset_search(struct block_list *bl,struct skill_unit_group *sg,int tick);
 static int skill_unit_onplace(struct skill_unit *src,struct block_list *bl,unsigned int tick);
-static int skill_unit_onleft(uint16 skill_id, struct block_list *bl,unsigned int tick);
+int skill_unit_onleft(uint16 skill_id, struct block_list *bl,unsigned int tick);
 static int skill_unit_effect(struct block_list *bl,va_list ap);
 
 int enchant_eff[5] = { 10, 14, 17, 19, 20 };
@@ -570,15 +570,13 @@ int skillnotok (uint16 skill_id, struct map_session_data *sd)
 			break;
 		case MC_VENDING:
 		case ALL_BUYING_STORE:
-
-			// Item Security [Zephyrus]
-			if( sd->state.secure_items )
-			{
-				clif_displaymessage(sd->fd, "You can't open shop. Blocked with @security");
-				return 1;
-			}
-
 			if( npc_isnear(&sd->bl) ) {
+				// Item Security [Zephyrus]
+				if( sd->state.secure_items )
+				{
+					clif_displaymessage(sd->fd, "You can't open shop. Blocked with @security");
+					return 1;
+				}
 				// uncomment to send msg_txt.
 				//char output[150];
 				//sprintf(output, msg_txt(662), battle_config.min_npc_vendchat_distance);
@@ -1051,9 +1049,9 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, uint
 	case DC_UGLYDANCE:
 		rate = 5+5*skill_lv;
 		if(sd && (skill=pc_checkskill(sd,DC_DANCINGLESSON)))
-		    rate += 5+skill;
+			rate += 5+skill;
 		status_zap(bl, 0, rate);
-  		break;
+		break;
 	case SL_STUN:
 		if (tstatus->size==SZ_MEDIUM) //Only stuns mid-sized mobs.
 			sc_start(src,bl,SC_STUN,(30+10*skill_lv),skill_lv,skill_get_time(skill_id,skill_lv));
@@ -1110,7 +1108,8 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, uint
 
 	case LK_SPIRALPIERCE:
 	case ML_SPIRALPIERCE:
-		sc_start(src,bl,SC_STOP,(15+skill_lv*5),0,skill_get_time2(skill_id,skill_lv));
+		if( dstsd || ( dstmd && !is_boss(bl) ) ) //Does not work on bosses
+			sc_start(src,bl,SC_STOP,100,0,skill_get_time2(skill_id,skill_lv));
 		break;
 
 	case ST_REJECTSWORD:
@@ -2201,12 +2200,11 @@ void skill_combo_toogle_inf(struct block_list* bl, uint16 skill_id, int inf){
 	case MH_MIDNIGHT_FRENZY:
 	case MH_EQC:{
 		int skill_id2 = ((skill_id==MH_EQC)?MH_TINDER_BREAKER:MH_SONIC_CRAW);
-		int idx = skill_get_index(skill_id2);
+		int idx = skill_id2 - HM_SKILLBASE;
 		int flag = (inf?SKILL_FLAG_TMP_COMBO:SKILL_FLAG_PERMANENT);
 		TBL_HOM *hd = BL_CAST(BL_HOM, bl);
 		sd = hd->master;
-//		if (sd) clif_skillinfo(sd,skill_id2, inf);
-		hd->homunculus.hskill[idx].flag= SKILL_FLAG_TMP_COMBO;
+		hd->homunculus.hskill[idx].flag= flag;
 		if(sd) clif_homskillinfoblock(sd); //refresh info //@FIXME we only want to refresh one skill
 	}
 	break;
@@ -2502,8 +2500,8 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 		if(rnd()%100 > (1 + skill_lv) ) dmg.blewcount = 0;
 		break;
 	default:
-		if(damage < dmg.div_ && skill_lv != CH_PALMSTRIKE)
-			dmg.blewcount = 0; //only pushback when it hit
+		if(damage < dmg.div_ && skill_id != CH_PALMSTRIKE)
+			dmg.blewcount = 0; //only pushback when it hit for other
 		break;
 	}
 	switch(skill_id){
@@ -3937,7 +3935,6 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, uint
 	case AB_JUDEX:
 	case WL_SOULEXPANSION:
 	case WL_CRIMSONROCK:
-	case WL_COMET:
 	case WL_JACKFROST:
 	case RA_ARROWSTORM:
 	case RA_WUGDASH:
@@ -4011,6 +4008,11 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, uint
 			// recursive invocation of skill_castend_damage_id() with flag|1
 			map_foreachinrange(skill_area_sub, bl, skill_get_splash(skill_id, skill_lv), ( skill_id == WM_REVERBERATION_MELEE || skill_id == WM_REVERBERATION_MAGIC )?BL_CHAR:splash_target(src), src, skill_id, skill_lv, tick, flag|BCT_ENEMY|SD_SPLASH|1, skill_castend_damage_id);
 		}
+		break;
+
+	case WL_COMET:
+		if(!map_getcell(bl->m, bl->x, bl->y, CELL_CHKLANDPROTECTOR)) // Nothing should happen if the target is on Land Protector
+			skill_attack(skill_get_type(skill_id), src, src, bl, skill_id, skill_lv, tick, flag);
 		break;
 
 	case KN_BRANDISHSPEAR:
@@ -4794,14 +4796,6 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, uint
 		break;
 	}
 	case MH_TINDER_BREAKER:
-		if (unit_movepos(src, bl->x, bl->y, 1, 1)) {
-#if PACKETVER >= 20111005
-			clif_snap(src, bl->x, bl->y);
-#else
-			clif_skill_poseffect(src,skill_id,skill_lv,bl->x,bl->y,tick);
-#endif
-
-		}
 	case MH_CBC:
 	case MH_EQC: {
 		int duration=0;
@@ -4811,6 +4805,14 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, uint
 		skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag);
 		clif_skill_nodamage(src,bl,skill_id,skill_lv,
 			sc_start4(src,bl,status_skill2sc(skill_id),100,skill_lv,src->id,0,0,duration));
+		if (skill_id==MH_TINDER_BREAKER && unit_movepos(src, bl->x, bl->y, 1, 1)) {
+#if PACKETVER >= 20111005
+			clif_snap(src, bl->x, bl->y);
+#else
+			clif_skill_poseffect(src,skill_id,skill_lv,bl->x,bl->y,tick);
+#endif
+
+		}
 		break;
 	}
 
@@ -5348,7 +5350,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 			if (sd)
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
 			if (skill_break_equip(src,bl, EQP_WEAPON, 10000, BCT_PARTY) && sd && sd != dstsd)
-				clif_displaymessage(sd->fd, msg_txt(669));
+				clif_displaymessage(sd->fd, msg_txt(sd,669));
 		}
 		break;
 
@@ -6252,7 +6254,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 				break;
 			}
 			if(!battle_config.duel_allow_teleport && sd->duel_group && skill_lv <= 2) { // duel restriction [LuzZza]
-				char output[128]; sprintf(output, msg_txt(365), skill_get_name(AL_TELEPORT));
+				char output[128]; sprintf(output, msg_txt(sd,365), skill_get_name(AL_TELEPORT));
 				clif_displaymessage(sd->fd, output); //"Duel: Can't use %s in duel."
 				break;
 			}
@@ -7957,6 +7959,10 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 	case AB_CLEARANCE:
 		if( flag&1 || (i = skill_get_splash(skill_id, skill_lv)) < 1 )
 		{ //As of the behavior in official server Clearance is just a super version of Dispell skill. [Jobbie]
+
+			if( bl->type != BL_MOB && battle_check_target(src,bl,BCT_PARTY) <= 0 ) // Only affect mob or party.
+				break;
+
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 
 			if((dstsd && (dstsd->class_&MAPID_UPPERMASK) == MAPID_SOUL_LINKER) || rnd()%100 >= 60 + 8 * skill_lv) {
@@ -10727,6 +10733,9 @@ int skill_dance_overlap(struct skill_unit* unit, int flag)
 /*==========================================
  * Converts this group information so that it is handled as a Dissonance or Ugly Dance cell.
  * Flag: 0 - Convert, 1 - Revert.
+ * TODO: This should be completely removed later and rewritten
+ * 	 The entire execution of the overlapping songs instances is dirty and hacked together
+ *	 Overlapping cells should be checked on unit entry, not infinitely loop checked causing 1000's of executions a song/dance
  *------------------------------------------*/
 static bool skill_dance_switch(struct skill_unit* unit, int flag)
 {
@@ -10946,10 +10955,6 @@ struct skill_unit_group* skill_unitsetting (struct block_list *src, uint16 skill
 		break;
 	}
 
-	case BA_DISSONANCE:
-	case DC_UGLYDANCE:
-		val1 = 10;	//FIXME: This value is not used anywhere, what is it for? [Skotlex]
-		break;
 	case BA_WHISTLE:
 		val1 = skill_lv +status->agi/10; // Flee increase
 		val2 = ((skill_lv+1)/2)+status->luk/10; // Perfect dodge increase
@@ -10997,9 +11002,9 @@ struct skill_unit_group* skill_unitsetting (struct block_list *src, uint16 skill
 		}
 		break;
 	case BA_ASSASSINCROSS:
-		val1 = 100+(10*skill_lv)+(status->agi/10); // ASPD increase
+		val1 = 100+(10*skill_lv)+status->agi; // ASPD increase
 		if(sd)
-			val1 += 5*pc_checkskill(sd,BA_MUSICALLESSON);
+			val1 += 10*((pc_checkskill(sd,BA_MUSICALLESSON)+1)/2); //aspd +1% per 2lvl
 		break;
 	case DC_FORTUNEKISS:
 		val1 = 10+skill_lv+(status->luk/10); // Critical increase
@@ -12267,6 +12272,19 @@ int skill_unit_onout (struct skill_unit *src, struct block_list *bl, unsigned in
 			}
 			break;
 		}
+	case UNT_DISSONANCE:
+	case UNT_UGLYDANCE: //Used for updating timers in song overlap instances
+		{
+			short i;
+			for(i = BA_WHISTLE; i <= DC_SERVICEFORYOU; i++){
+				if(skill_get_inf2(i)&(INF2_SONG_DANCE)){
+					type = status_skill2sc(i);
+					sce = (sc && type != -1)?sc->data[type]:NULL;
+					if(sce)
+						return i;
+				}
+			}
+		}
 	}
 	return sg->skill_id;
 }
@@ -12274,7 +12292,7 @@ int skill_unit_onout (struct skill_unit *src, struct block_list *bl, unsigned in
 /*==========================================
  * Triggered when a char steps out of a skill group (entirely) [Skotlex]
  *------------------------------------------*/
-static int skill_unit_onleft (uint16 skill_id, struct block_list *bl, unsigned int tick)
+int skill_unit_onleft (uint16 skill_id, struct block_list *bl, unsigned int tick)
 {
 	struct status_change *sc;
 	struct status_change_entry *sce;
@@ -12339,7 +12357,23 @@ static int skill_unit_onleft (uint16 skill_id, struct block_list *bl, unsigned i
 				status_set_sp(bl, 0, 0); //set sp to 0 when quitting zone
 			}
 			break;
-
+		case BA_DISSONANCE:
+		case DC_UGLYDANCE: //Used for updating song timers in overlap instances
+			{
+				short i;
+				for(i = BA_WHISTLE; i <= DC_SERVICEFORYOU; i++){
+					if(skill_get_inf2(i)&(INF2_SONG_DANCE)){
+						type = status_skill2sc(i);
+						sce = (sc && type != -1)?sc->data[type]:NULL;
+						if(sce && !sce->val4){ //We don't want dissonance updating this anymore
+							delete_timer(sce->timer, status_change_timer);
+							sce->val4 = 1; //Store the fact that this is a "reduced" duration effect.
+							sce->timer = add_timer(tick+skill_get_time2(i,1), status_change_timer, bl->id, type);
+						}
+					}
+				}
+			}
+			break;
 		case BA_POEMBRAGI:
 		case BA_WHISTLE:
 		case BA_ASSASSINCROSS:
@@ -12389,6 +12423,7 @@ static int skill_unit_onleft (uint16 skill_id, struct block_list *bl, unsigned i
  * flag values:
  * flag&1: Invoke onplace function (otherwise invoke onout)
  * flag&4: Invoke a onleft call (the unit might be scheduled for deletion)
+ * flag&8: Recursive
  *------------------------------------------*/
 static int skill_unit_effect (struct block_list* bl, va_list ap)
 {
@@ -12397,7 +12432,7 @@ static int skill_unit_effect (struct block_list* bl, va_list ap)
 	unsigned int tick = va_arg(ap,unsigned int);
 	unsigned int flag = va_arg(ap,unsigned int);
 	uint16 skill_id;
-	bool dissonance;
+	bool dissonance = false;
 	bool isTarget = false;
 
 	if( (!unit->alive && !(flag&4)) || bl->prev == NULL )
@@ -12405,12 +12440,14 @@ static int skill_unit_effect (struct block_list* bl, va_list ap)
 
 	nullpo_ret(group);
 
-	dissonance = skill_dance_switch(unit, 0);
+	if( !(flag&8) ) {
+		dissonance = skill_dance_switch(unit, 0);
+		//Target-type check.
+		isTarget = group->bl_flag & bl->type && battle_check_target( &unit->bl, bl, group->target_flag ) > 0;
+	}
 
 	//Necessary in case the group is deleted after calling on_place/on_out [Skotlex]
 	skill_id = group->skill_id;
-	//Target-type check.
-	isTarget = group->bl_flag & bl->type && battle_check_target( &unit->bl, bl, group->target_flag ) > 0;
 	if( isTarget ){
 		if( flag&1 )
 			skill_unit_onplace(unit,bl,tick);
@@ -12418,13 +12455,16 @@ static int skill_unit_effect (struct block_list* bl, va_list ap)
 			skill_unit_onout(unit,bl,tick);
 
 		if( flag&4 )
-	  		skill_unit_onleft(skill_id, bl, tick);
+			skill_unit_onleft(skill_id, bl, tick);
 	}else if( !isTarget && flag&4 && ( group->state.song_dance&0x1 || ( group->src_id == bl->id && group->state.song_dance&0x2 ) ) ){
 		skill_unit_onleft(skill_id, bl, tick);//Ensemble check to terminate it.
 	}
 
-	if( dissonance )
+	if( dissonance ) {
 		skill_dance_switch(unit, 1);
+		//we placed a dissonance, let's update
+		map_foreachincell(skill_unit_effect,unit->bl.m,unit->bl.x,unit->bl.y,group->bl_flag,&unit->bl,gettick(),4|8);
+	}
 
 	return 0;
 }
@@ -12810,7 +12850,7 @@ int skill_check_condition_castbegin(struct map_session_data* sd, uint16 skill_id
 			break;
 		case AL_WARP:
 			if(!battle_config.duel_allow_teleport && sd->duel_group) { // duel restriction [LuzZza]
-				char output[128]; sprintf(output, msg_txt(365), skill_get_name(AL_WARP));
+				char output[128]; sprintf(output, msg_txt(sd,365), skill_get_name(AL_WARP));
 				clif_displaymessage(sd->fd, output); //"Duel: Can't use %s in duel."
 				return 0;
 			}
@@ -14077,9 +14117,10 @@ int skill_vfcastfix (struct block_list *bl, double time, uint16 skill_id, uint16
 	if( time < 0 )
 		return 0;
 
-	if(bl->type == BL_MOB)
-	    fixed = 0; //mob as no fixed time
-	else if( fixed == 0 ){
+	if( bl->type == BL_MOB )
+		return (int)time;
+
+	if( fixed == 0 ){
 		fixed = (int)time * 20 / 100; // fixed time
 		time = time * 80 / 100; // variable time
 	}else if( fixed < 0 ) // no fixed cast time
@@ -14104,8 +14145,7 @@ int skill_vfcastfix (struct block_list *bl, double time, uint16 skill_id, uint16
 			}
 		for( i = 0; i < ARRAYLENGTH(sd->skillcast) && sd->skillcast[i].id; i++ )
 			if( sd->skillcast[i].id == skill_id ){ // bonus2 bVariableCastrate
-				if( (i=sd->skillcast[i].val) < 0)
-					VARCAST_REDUCTION(i);
+				VARCAST_REDUCTION(sd->skillcast[i].val);
 				break;
 			}
 		for( i = 0; i < ARRAYLENGTH(sd->skillfixcastrate) && sd->skillfixcastrate[i].id; i++ )
@@ -14533,9 +14573,11 @@ void skill_weaponrefine (struct map_session_data *sd, int idx)
 				clif_skill_fail(sd,sd->menuskill_id,USESKILL_FAIL_LEVEL,0);
 				return;
 			}
-
 			per = status_get_refine_chance(ditem->wlv, (int)item->refine);
-			per += (((signed int)sd->status.job_level)-50)/2; //Updated per the new kro descriptions. [Skotlex]
+			if( sd->class_&JOBL_THIRD )
+				per += 10;
+			else
+				per += (((signed int)sd->status.job_level)-50)/2; //Updated per the new kro descriptions. [Skotlex]
 
 			pc_delitem(sd, i, 1, 0, 0, LOG_TYPE_OTHER);
 			if (per > rnd() % 100) {
@@ -15755,7 +15797,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 			{
 				struct map_session_data *sd = NULL;
 				if(group->val1) {
-		  			sd = map_charid2sd(group->val1);
+					sd = map_charid2sd(group->val1);
 					group->val1 = 0;
 					if (sd && !map[sd->bl.m].flag.nowarp)
 						pc_setpos(sd,map_id2index(unit->bl.m),unit->bl.x,unit->bl.y,CLR_TELEPORT);
@@ -15930,7 +15972,10 @@ int skill_unit_move_sub (struct block_list* bl, va_list ap) {
 
 	if( unit->group->interval != -1 && !(skill_get_unit_flag(skill_id)&UF_DUALMODE) && skill_id != BD_LULLABY ) //Lullaby is the exception, bugreport:411
 	{	//Non-dualmode unit skills with a timer don't trigger when walking, so just return
-		if( dissonance ) skill_dance_switch(unit, 1);
+		if( dissonance ) {
+			skill_dance_switch(unit, 1);
+			skill_unit_onleft(skill_unit_onout(unit,target,tick),target,tick); //we placed a dissonance, let's update
+		}
 		return 0;
 	}
 
@@ -16024,7 +16069,7 @@ int skill_unit_move (struct block_list *bl, unsigned int tick, int flag) {
 		for( i = 0; i < ARRAYLENGTH(skill_unit_temp); i++ )
 			if( skill_unit_temp[i] )
 				skill_unit_onleft(skill_unit_temp[i], bl, tick);
-	}
+			}
 
 	return 0;
 }
@@ -16147,7 +16192,7 @@ int skill_can_produce_mix (struct map_session_data *sd, int nameid, int trigger,
 	if( i >= MAX_SKILL_PRODUCE_DB )
 		return 0;
 
-	if( pc_checkadditem(sd, nameid, qty) == ADDITEM_OVERAMOUNT )
+	if( pc_checkadditem(sd, nameid, qty) == CHKADDITEM_OVERAMOUNT )
 	{// cannot carry the produced stuff
 		return 0;
 	}
@@ -16523,7 +16568,7 @@ int skill_produce_mix (struct map_session_data *sd, uint16 skill_id, int nameid,
 				break;
 		}
 	} else { // Weapon Forging - skill bonuses are straight from kRO website, other things from a jRO calculator [DracoRPG]
-		make_per = 5000 + sd->status.job_level*20 + status->dex*10 + status->luk*10; // Base
+		make_per = 5000 + ((sd->class_&JOBL_THIRD)?1400:sd->status.job_level*20) + status->dex*10 + status->luk*10; // Base
 		make_per += pc_checkskill(sd,skill_id)*500; // Smithing skills bonus: +5/+10/+15
 		make_per += pc_checkskill(sd,BS_WEAPONRESEARCH)*100 +((wlv >= 3)? pc_checkskill(sd,BS_ORIDEOCON)*100:0); // Weaponry Research bonus: +1/+2/+3/+4/+5/+6/+7/+8/+9/+10, Oridecon Research bonus (custom): +1/+2/+3/+4/+5
 		make_per -= (ele?2000:0) + sc*1500 + (wlv>1?wlv*1000:0); // Element Stone: -20%, Star Crumb: -15% each, Weapon level malus: -0/-20/-30
@@ -16857,7 +16902,7 @@ static void skill_toggle_magicpower(struct block_list *bl, uint16 skill_id)
 #ifndef RENEWAL
 			if(bl->type == BL_PC){// update current display.
 				clif_updatestatus(((TBL_PC *)bl),SP_MATK1);
-			    clif_updatestatus(((TBL_PC *)bl),SP_MATK2);
+				clif_updatestatus(((TBL_PC *)bl),SP_MATK2);
 			}
 #endif
 		}

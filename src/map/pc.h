@@ -187,6 +187,7 @@ struct map_session_data {
 	int group_id, group_pos, group_level;
 	unsigned int permissions;/* group permissions */
 
+	int langtype;
 	int packet_ver;  // 5: old, 6: 7july04, 7: 13july04, 8: 26july04, 9: 9aug04/16aug04/17aug04, 10: 6sept04, 11: 21sept04, 12: 18oct04, 13: 25oct04 ... 18
 	struct mmo_charstatus status;
 	struct registry save_reg;
@@ -240,7 +241,7 @@ struct map_session_data {
 	unsigned int canskill_tick; // used to prevent abuse from no-delay ACT files
 	unsigned int cansendmail_tick; // [Mail System Flood Protection]
 	unsigned int ks_floodprotect_tick; // [Kill Steal Protection]
-    unsigned int bloodylust_tick; // bloodylust player timer [out/in re full-heal protection]
+	 unsigned int bloodylust_tick; // bloodylust player timer [out/in re full-heal protection]
 
 	struct {
 		short nameid;
@@ -744,8 +745,8 @@ int pc_getzeny(struct map_session_data*,int, enum e_log_pick_type, struct map_se
 int pc_delitem(struct map_session_data*,int,int,int,short,e_log_pick_type);
 
 // Special Shop System
-int pc_paycash(struct map_session_data *sd, int price, int points);
-int pc_getcash(struct map_session_data *sd, int cash, int points);
+int pc_paycash( struct map_session_data *sd, int price, int points, e_log_pick_type type );
+int pc_getcash( struct map_session_data *sd, int cash, int points, e_log_pick_type type );
 
 int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amount,e_log_pick_type log_type);
 int pc_cart_delitem(struct map_session_data *sd,int n,int amount,int type,e_log_pick_type log_type);
@@ -918,7 +919,15 @@ int pc_readdb(void);
 int do_init_pc(void);
 void do_final_pc(void);
 
-enum {ADDITEM_EXIST,ADDITEM_NEW,ADDITEM_OVERAMOUNT};
+enum {CHKADDITEM_EXIST,CHKADDITEM_NEW,CHKADDITEM_OVERAMOUNT};
+enum {
+    ADDITEM_SUCCESS,
+    ADDITEM_INVALID,
+    ADDITEM_OVERWEIGHT,
+    ADDITEM_OVERITEM=4,
+    ADDITEM_OVERAMOUNT,
+    ADDITEM_STACKLIMIT=7
+};
 
 // timer for night.day
 extern int day_timer_tid;

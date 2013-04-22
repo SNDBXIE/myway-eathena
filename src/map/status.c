@@ -1893,14 +1893,22 @@ static unsigned short status_base_atk(const struct block_list *bl, const struct 
 	//Normally only players have base-atk, but homunc have a different batk
 	// equation, hinting that perhaps non-players should use this for batk.
 	// [Skotlex]
+#ifdef RENEWAL
+	if (bl->type == BL_HOM) {
+		//str = ((rstr + dex + status->luk) / 3) + (((TBL_HOM*)bl)->homunculus.level / 10);
+		str = (((rstr + dex + status->luk) / 3) + (((TBL_HOM*)bl)->homunculus.level / 10))*2; //Because Renewal ATK isn't implemented we adjust the actual ATK until it is
+		return cap_value(str, 0, USHRT_MAX);
+	}
+#endif
 	dstr = str/10;
 	str += dstr*dstr;
-	if (bl->type == BL_PC)
+	if (bl->type == BL_PC) {
 #ifdef RENEWAL
 		str = (rstr*10 + dex*10/5 + status->luk*10/3 + ((TBL_PC*)bl)->status.base_level*10/4)/10;
 #else
 		str+= dex/5 + status->luk/5;
 #endif
+	}
 	return cap_value(str, 0, USHRT_MAX);
 }
 
@@ -1922,14 +1930,22 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 		status->cri = status->flee2 = 0;
 
 #ifdef RENEWAL // renewal formulas
-    status->matk_min = status->matk_max = status_base_matk(status, level);
-    status->hit += level + status->dex + status->luk/3 + 175; //base level + ( every 1 dex = +1 hit ) + (every 3 luk = +1 hit) + 175
-    status->flee += level + status->agi + status->luk/5 + 100; //base level + ( every 1 agi = +1 flee ) + (every 5 luk = +1 flee) + 100
-    status->def2 += (int)(((float)level + status->vit)/2 + ((float)status->agi/5)); //base level + (every 2 vit = +1 def) + (every 5 agi = +1 def)
-    status->mdef2 += (int)(status->int_ + ((float)level/4) + ((float)status->dex/5) + ((float)status->vit/5)); //(every 4 base level = +1 mdef) + (every 1 int = +1 mdef) + (every 5 dex = +1 mdef) + (every 5 vit = +1 mdef)
+	if (bl->type == BL_MOB) {
+		status->hit += level + status->dex + 175;
+		status->flee += level + status->agi + 100;
+	} else if (bl->type == BL_HOM) {
+		status->hit = level + status->dex + 150; //base level + dex + 150
+		status->flee = level + status->agi + level/10; //base level + agi + base level/10
+	} else {
+		status->hit += level + status->dex + status->luk/3 + 175; //base level + ( every 1 dex = +1 hit ) + (every 3 luk = +1 hit) + 175
+		status->flee += level + status->agi + status->luk/5 + 100; //base level + ( every 1 agi = +1 flee ) + (every 5 luk = +1 flee) + 100
+	}
+	status->matk_min = status->matk_max = status_base_matk(status, level);
+	status->def2 += (int)(((float)level + status->vit)/2 + ((float)status->agi/5)); //base level + (every 2 vit = +1 def) + (every 5 agi = +1 def)
+	status->mdef2 += (int)(status->int_ + ((float)level/4) + ((float)status->dex/5) + ((float)status->vit/5)); //(every 4 base level = +1 mdef) + (every 1 int = +1 mdef) + (every 5 dex = +1 mdef) + (every 5 vit = +1 mdef)
 #else
-    status->matk_min = status_base_matk_min(status);
-    status->matk_max = status_base_matk_max(status);
+	status->matk_min = status_base_matk_min(status);
+	status->matk_max = status_base_matk_max(status);
 	status->hit += level + status->dex;
 	status->flee += level + status->agi;
 	status->def2 += status->vit;
@@ -2726,7 +2742,7 @@ int status_calc_pc_(struct map_session_data* sd, bool first)
 	}
 
 	// If a Super Novice has never died and is at least joblv 70, he gets all stats +10
-	if((sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && sd->die_counter == 0 && sd->status.job_level >= 70){
+	if(((sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && (sd->status.job_level >= 70  || sd->class_&JOBL_THIRD)) && sd->die_counter == 0){
 		status->str += 10;
 		status->agi += 10;
 		status->vit += 10;
@@ -3210,11 +3226,26 @@ int status_calc_homunculus_(struct homun_data *hd, bool first)
 		status->hp = 1;
 		status->sp = 1;
 	}
+
+	status->aspd_rate = 1000;
+
+#ifdef RENEWAL
+	status->def = (status->vit + (hom->level / 10)) + ((status->agi + (hom->level / 10)) / 2);
+	status->mdef = status->int_ + ((status->int_ + status->dex + status->luk) / 3) + (hom->level / 10) * 2;
+
+	amotion = (1000 -2*status->agi -status->dex) * hd->homunculusDB->baseASPD/1000;
+#else
 	skill = hom->level/10 + status->vit/5;
 	status->def = cap_value(skill, 0, 99);
 
 	skill = hom->level/10 + status->int_/5;
 	status->mdef = cap_value(skill, 0, 99);
+
+	amotion = (1000 -4*status->agi -status->dex) * hd->homunculusDB->baseASPD/1000;
+#endif
+
+	status->amotion = cap_value(amotion,battle_config.max_aspd,2000);
+	status->adelay = status->amotion; //It seems adelay = amotion for Homunculus.
 
 	status->max_hp = hom->max_hp ;
 	status->max_sp = hom->max_sp ;
@@ -3243,14 +3274,10 @@ int status_calc_homunculus_(struct homun_data *hd, bool first)
 			sc_start(&hd->bl,&hd->bl, SC_STYLE_CHANGE, 100, MH_MD_FIGHTING, -1);
 	}
 
+#ifndef RENEWAL
 	status->rhw.atk = status->dex;
 	status->rhw.atk2 = status->str + hom->level;
-
-	status->aspd_rate = 1000;
-
-	amotion = (1000 -4*status->agi -status->dex) * hd->homunculusDB->baseASPD/1000;
-	status->amotion = cap_value(amotion,battle_config.max_aspd,2000);
-	status->adelay = status->amotion; //It seems adelay = amotion for Homunculus.
+#endif
 
 	status_calc_misc(&hd->bl, status, hom->level);
 
@@ -3968,8 +3995,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 
 	if(flag&SCB_ASPD) {
 		int amotion;
-		if( bl->type&BL_PC )
-		{
+		if( bl->type&BL_PC ) {
 			amotion = status_base_amotion_pc(sd,status);
 #ifndef RENEWAL_ASPD
 			status->aspd_rate = status_calc_aspd_rate(bl, sc, b_status->aspd_rate);
@@ -3991,11 +4017,12 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			status->amotion = cap_value(amotion,((sd->class_&JOBL_THIRD) ? battle_config.max_third_aspd : battle_config.max_aspd),2000);
 
 			status->adelay = 2*status->amotion;
-		}
-		else
-		if( bl->type&BL_HOM )
-		{
+		} else if( bl->type&BL_HOM ) {
+#ifdef RENEWAL
+			amotion = (1000 -2*status->agi -status->dex) * ((TBL_HOM*)bl)->homunculusDB->baseASPD/1000;
+#else
 			amotion = (1000 -4*status->agi -status->dex) * ((TBL_HOM*)bl)->homunculusDB->baseASPD/1000;
+#endif
 			status->aspd_rate = status_calc_aspd_rate(bl, sc, b_status->aspd_rate);
 
 			if(status->aspd_rate != 1000)
@@ -4005,9 +4032,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			status->amotion = cap_value(amotion,battle_config.max_aspd,2000);
 
 			status->adelay = status->amotion;
-		}
-		else // mercenary and mobs
-		{
+		} else { // mercenary and mobs
 			amotion = b_status->amotion;
 			status->aspd_rate = status_calc_aspd_rate(bl, sc, b_status->aspd_rate);
 
@@ -5364,10 +5389,10 @@ static short status_calc_aspd(struct block_list *bl, struct status_change *sc, s
 			skills1 = 5;
 
 		if(sc->data[SC_ASSNCROS] &&
-			skills1 < 5+1*sc->data[SC_ASSNCROS]->val1) // needs more info
+			skills1 < sc->data[SC_ASSNCROS]->val2/10)
 		{
 			if (bl->type!=BL_PC)
-				skills1 = 4+1*sc->data[SC_ASSNCROS]->val1;
+				skills1 = sc->data[SC_ASSNCROS]->val2/10;
 			else
 			switch(((TBL_PC*)bl)->status.weapon)
 			{
@@ -5379,7 +5404,7 @@ static short status_calc_aspd(struct block_list *bl, struct status_change *sc, s
 				case W_GRENADE:
 					break;
 				default:
-					skills1 = 5+1*sc->data[SC_ASSNCROS]->val1;
+					skills1 = sc->data[SC_ASSNCROS]->val2/10;
 			}
 		}
 	}
@@ -6642,7 +6667,7 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
 	}
 
 	undead_flag = battle_check_undead(status->race,status->def_ele);
-	//Check for inmunities / sc fails
+	//Check for immunities / sc fails
 	switch (type) {
 	case SC_ANGRIFFS_MODUS:
 	case SC_GOLDENE_FERSE:
@@ -8746,7 +8771,7 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
 			val2 = 3*val1; //activation chance
 			break;
 		case SC_PYROCLASTIC:
-			val2 += 10*val1*status_get_lv(src); //atk bonus
+			val2 += 10*val1+status_get_lv(src); //atk bonus
 			val3 = 2*val1;//Chance To AutoCast Hammer Fall %
 			break;
 		case SC_PARALYSIS: //[Lighta] need real info
@@ -9237,7 +9262,6 @@ int status_change_clear(struct block_list* bl, int type) {
 	sc->opt1 = 0;
 	sc->opt2 = 0;
 	sc->opt3 = 0;
-	sc->option &= OPTION_MASK;
 
 	if( type == 0 || type == 2 )
 		clif_changeoption(bl);
@@ -10113,6 +10137,9 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 		if (--(sce->val4) >= 0) {
 			int hp =  rnd()%600 + 200;
 			struct block_list* src = map_id2bl(sce->val2);
+			if( src && bl && bl->type == BL_MOB ){
+				mob_log_damage( (TBL_MOB*)bl, src, sd || hp < status->hp ? hp : status->hp - 1 );
+			}
 			map_freeblock_lock();
 			status_fix_damage(src, bl, sd||hp<status->hp?hp:status->hp-1, 1);
 			if( sc->data[type] ) {
@@ -10541,7 +10568,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				break;
 			map_freeblock_lock();
 			damage =  200 + 100 * sce->val1 + status_get_int(src);
-			status_damage(src, bl, damage, 0, clif_damage(bl,bl,tick,status->amotion,status->dmotion+200,damage,1,0,0), 1);
+			status_damage(src, bl, damage, 0, clif_damage(bl,bl,tick,status->amotion,status->dmotion+200,damage,1,0,0), 0);
 			unit_skillcastcancel(bl,1);
 			if ( sc->data[type] ) {
 				sc_timer_next(1000 + tick, status_change_timer, bl->id, data);

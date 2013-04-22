@@ -310,7 +310,9 @@ int merc_hom_levelup(struct homun_data *hd)
 		return 0;
 	}
 
-	if((m_class&HOM_REG) && (hd->homunculus.level >= battle_config.hom_max_level || ((m_class&HOM_S) && hd->homunculus.level >= battle_config.hom_S_max_level) || !hd->exp_next || hd->homunculus.exp < hd->exp_next))
+	if(((m_class&HOM_REG) && hd->homunculus.level >= battle_config.hom_max_level)
+		|| ((m_class&HOM_S) && hd->homunculus.level >= battle_config.hom_S_max_level)
+		|| !hd->exp_next || hd->homunculus.exp < hd->exp_next)
 		return 0;
 
 	hom = &hd->homunculus;
@@ -707,7 +709,7 @@ int merc_hom_change_name_ack(struct map_session_data *sd, char* name, int flag)
 	normalize_name(name," ");//bugreport:3032
 
 	if ( !flag || !strlen(name) ) {
-		clif_displaymessage(sd->fd, msg_txt(280)); // You cannot use this name
+		clif_displaymessage(sd->fd, msg_txt(sd,280)); // You cannot use this name
 		return 0;
 	}
 	safestrncpy(hd->homunculus.name,name,NAME_LENGTH);
@@ -1150,7 +1152,7 @@ static bool read_homunculusdb_sub(char* str[], int columns, int current)
 int read_homunculusdb(void)
 {
 	int i;
-	const char *filename[]={"homunculus_db.txt","homunculus_db2.txt"};
+	const char *filename[]={DBPATH"homunculus_db.txt","homunculus_db2.txt"};
 
 	memset(homunculus_db,0,sizeof(homunculus_db));
 	for(i = 0; i<ARRAYLENGTH(filename); i++)

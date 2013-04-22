@@ -334,7 +334,7 @@ int unit_walktoxy( struct block_list *bl, short x, short y, int flag)
 
 	if (flag&4 && DIFF_TICK(ud->canmove_tick, gettick()) > 0 &&
 		DIFF_TICK(ud->canmove_tick, gettick()) < 2000)
-  	{	// Delay walking command. [Skotlex]
+	{	// Delay walking command. [Skotlex]
 		add_timer(ud->canmove_tick+1, unit_delay_walktoxy_timer, bl->id, (x<<16)|(y&0xFFFF));
 		return 1;
 	}
@@ -924,10 +924,10 @@ int unit_can_move(struct block_list *bl) {
 			|| (sc->data[SC_FEAR] && sc->data[SC_FEAR]->val2 > 0)
 			|| (sc->data[SC_SPIDERWEB] && sc->data[SC_SPIDERWEB]->val1)
 			|| (sc->data[SC_DANCING] && sc->data[SC_DANCING]->val4 && (
-																	!sc->data[SC_LONGING] ||
-																	(sc->data[SC_DANCING]->val1&0xFFFF) == CG_MOONLIT ||
-																	(sc->data[SC_DANCING]->val1&0xFFFF) == CG_HERMODE
-																	) )
+				!sc->data[SC_LONGING] ||
+				(sc->data[SC_DANCING]->val1&0xFFFF) == CG_MOONLIT ||
+				(sc->data[SC_DANCING]->val1&0xFFFF) == CG_HERMODE
+				) )
 			|| (sc->data[SC_CLOAKING] && //Need wall at level 1-2
 				sc->data[SC_CLOAKING]->val1 < 3 && !(sc->data[SC_CLOAKING]->val4&1))
 			)
@@ -1100,6 +1100,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 			if(sc->data[SC_COMBO] && sc->data[SC_COMBO]->val1 == skill_id2){ //it,s a combo
 				target_id = sc->data[SC_COMBO]->val2;
 				combo = 1;
+				casttime = -1;
 			}
 			break;
 		}
@@ -2292,6 +2293,31 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 
 			if( sd->duel_invite > 0 )
 				duel_reject(sd->duel_invite, sd);
+
+			if( raChSys.ally && sd->status.guild_id ) {
+				struct guild *g = sd->guild, *sg;
+				if( g ) {
+					if( idb_exists(((struct raChSysCh *)g->channel)->users, sd->status.char_id) )
+						clif_chsys_left((struct raChSysCh *)g->channel,sd);
+					for (i = 0; i < MAX_GUILDALLIANCE; i++) {
+						if( g->alliance[i].guild_id && (sg = guild_search(g->alliance[i].guild_id) ) ) {
+							if( idb_exists(((struct raChSysCh *)sg->channel)->users, sd->status.char_id) )
+								clif_chsys_left((struct raChSysCh *)sg->channel,sd);
+							break;
+						}
+					}
+				}
+			}
+
+			if( sd->channel_count ) {
+				uint8 ch_count = sd->channel_count;
+				for( i = 0; i < ch_count; i++ ) {
+					if( sd->channels[i] != NULL )
+						clif_chsys_left(sd->channels[i],sd);
+				}
+				if( raChSys.closing )
+					aFree(sd->channels);
+			}
 
 			// Notify friends that this char logged out. [Skotlex]
 			map_foreachpc(clif_friendslist_toggle_sub, sd->status.account_id, sd->status.char_id, 0);

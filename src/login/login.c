@@ -12,6 +12,7 @@
 #include "../common/timer.h"
 #include "../common/msg_conf.h"
 #include "../common/cli.h"
+#include "../common/ers.h"
 #include "account.h"
 #include "ipban.h"
 #include "login.h"
@@ -366,49 +367,62 @@ int login_lan_config_read(const char *lancfgName)
 //-----------------------
 // Console Command Parser [Wizputer]
 //-----------------------
-int parse_console(const char* command)
-{
-	ShowNotice("Console command: %s\n", command);
+int parse_console(const char* buf){
+	char type[64];
+	char command[64];
+	int n=0;
 
-	if( strcmpi("shutdown", command) == 0 || strcmpi("exit", command) == 0 || strcmpi("quit", command) == 0 || strcmpi("end", command) == 0 )
-		runflag = 0;
-	else if( strcmpi("alive", command) == 0 || strcmpi("status", command) == 0 )
-		ShowInfo(CL_CYAN"Console: "CL_BOLD"I'm Alive."CL_RESET"\n");
-	else if( strcmpi("help", command) == 0 )
-	{
-		ShowInfo("To shutdown the server:\n");
-		ShowInfo("  'shutdown|exit|quit|end'\n");
-		ShowInfo("To know if server is alive:\n");
-		ShowInfo("  'alive|status'\n");
-		ShowInfo("To create a new account:\n");
-		ShowInfo("  'create'\n");
+	if( ( n = sscanf(buf, "%127[^:]:%255[^\n\r]", type, command) ) < 2 ){
+		if((n = sscanf(buf, "%63[^\n]", type))<1) return -1; //nothing to do no arg
+	}
+	if( n != 2 ){ //end string
+		ShowNotice("Type: '%s'\n",type);
+		command[0] = '\0';
 	}
 	else
-	{// commands with parameters
-		char cmd[128], params[256];
+		ShowNotice("Type of command: '%s' || Command: '%s'\n",type,command);
 
-		if( sscanf(command, "%127s %255[^\r\n]", cmd, params) < 2 )
-		{
-			return 0;
+	if( n == 2 ){
+		if(strcmpi("server", type) == 0 ){
+			if( strcmpi("shutdown", command) == 0 || strcmpi("exit", command) == 0 || strcmpi("quit", command) == 0 ){
+				runflag = 0;
+			}
+			else if( strcmpi("alive", command) == 0 || strcmpi("status", command) == 0 )
+				ShowInfo(CL_CYAN"Console: "CL_BOLD"I'm Alive."CL_RESET"\n");
 		}
-
-		if( strcmpi(cmd, "create") == 0 )
+		if( strcmpi("create",type) == 0 )
 		{
-			char username[NAME_LENGTH], password[NAME_LENGTH], sex;
-
-			if( sscanf(params, "%23s %23s %c", username, password, &sex) < 3 || strnlen(username, sizeof(username)) < 4 || strnlen(password, sizeof(password)) < 1 )
-			{
-				ShowWarning("Console: Invalid parameters for '%s'. Usage: %s <username> <password> <sex:F/M>\n", cmd, cmd);
+			char username[NAME_LENGTH], password[NAME_LENGTH], md5password[32+1], sex; //23+1 plaintext 32+1 md5
+			bool md5 = 0;
+			if( sscanf(command, "%23s %23s %c", username, password, &sex) < 3 || strnlen(username, sizeof(username)) < 4 || strnlen(password, sizeof(password)) < 1 ){
+				ShowWarning("Console: Invalid parameters for '%s'. Usage: %s <username> <password> <sex:F/M>\n", type, type);
 				return 0;
 			}
-
-			if( mmo_auth_new(username, password, TOUPPER(sex), "0.0.0.0") != -1 )
-			{
+			if( login_config.use_md5_passwds ){
+				MD5_String(password,md5password);
+				md5 = 1;
+			}
+			if( mmo_auth_new(username,(md5?md5password:password), TOUPPER(sex), "0.0.0.0") != -1 ){
 				ShowError("Console: Account creation failed.\n");
 				return 0;
 			}
 			ShowStatus("Console: Account '%s' created successfully.\n", username);
 		}
+	}
+	else if( strcmpi("ers_report", type) == 0 ){
+		ers_report();
+	}
+	else if( strcmpi("help", type) == 0 ){
+		ShowInfo("Available commands:\n");
+		ShowInfo("\t server:shutdown => Stops the server.\n");
+		ShowInfo("\t server:alive => Checks if the server is running.\n");
+		ShowInfo("\t ers_report => Displays database usage.\n");
+		ShowInfo("\t create:<username> <password> <sex:M|F> => Creates a new account.\n");
+	}
+	else{ // commands with parameters
+
+
+
 	}
 
 	return 0;
@@ -553,9 +567,9 @@ int parse_fromchar(int fd){
 				char birthdate[10+1] = "";
 				char pincode[PINCODE_LENGTH+1];
 				int account_id = RFIFOL(fd,2);
-				
+
 				memset(pincode,0,PINCODE_LENGTH+1);
-				
+
 				RFIFOSKIP(fd,6);
 
 				if( !accounts->load_num(accounts, &acc, account_id) )
@@ -1111,8 +1125,8 @@ int mmo_auth(struct login_session_data* sd, bool isServer) {
 
 	// update session data
 	sd->account_id = acc.account_id;
-	sd->login_id1 = rnd();
-	sd->login_id2 = rnd();
+	sd->login_id1 = rnd() + 1;
+	sd->login_id2 = rnd() + 1;
 	safestrncpy(sd->lastlogin, acc.lastlogin, sizeof(sd->lastlogin));
 	sd->sex = acc.sex;
 	sd->group_id = acc.group_id;
@@ -1309,18 +1323,31 @@ void login_auth_failed(struct login_session_data* sd, int result)
 	if( result == 1 && login_config.dynamic_pass_failure_ban )
 		ipban_log(ip); // log failed password attempt
 
+#if PACKETVER >= 20120000 /* not sure when this started */
+	WFIFOHEAD(fd,26);
+	WFIFOW(fd,0) = 0x83e;
+	WFIFOL(fd,2) = result;
+	if( result != 6 )
+		memset(WFIFOP(fd,6), '\0', 20);
+	else { // 6 = Your are Prohibited to log in until %s
+		struct mmo_account acc;
+		time_t unban_time = ( accounts->load_str(accounts, &acc, sd->userid) ) ? acc.unban_time : 0;
+		timestamp2string((char*)WFIFOP(fd,6), 20, unban_time, login_config.date_format);
+	}
+	WFIFOSET(fd,26);
+#else
 	WFIFOHEAD(fd,23);
 	WFIFOW(fd,0) = 0x6a;
 	WFIFOB(fd,2) = (uint8)result;
 	if( result != 6 )
 		memset(WFIFOP(fd,3), '\0', 20);
-	else
-	{// 6 = Your are Prohibited to log in until %s
+	else { // 6 = Your are Prohibited to log in until %s
 		struct mmo_account acc;
 		time_t unban_time = ( accounts->load_str(accounts, &acc, sd->userid) ) ? acc.unban_time : 0;
 		timestamp2string((char*)WFIFOP(fd,3), 20, unban_time, login_config.date_format);
 	}
 	WFIFOSET(fd,23);
+#endif
 }
 
 
@@ -1850,11 +1877,11 @@ int do_init(int argc, char** argv)
 
 	LOGIN_CONF_NAME = "conf/login_athena.conf";
 	LAN_CONF_NAME = "conf/subnet_athena.conf";
-	MSG_CONF_NAME = "conf/msg_conf/login_msg.conf";
+	MSG_CONF_NAME_EN = "conf/msg_conf/login_msg.conf";
 
 	cli_get_options(argc,argv);
 
-	msg_config_read(MSG_CONF_NAME);
+	msg_config_read(MSG_CONF_NAME_EN);
 	login_config_read(LOGIN_CONF_NAME);
 	login_lan_config_read(LAN_CONF_NAME);
 
@@ -1903,10 +1930,6 @@ int do_init(int argc, char** argv)
 		}
 	}
 
-	if( login_config.console ) {
-		//##TODO invoke a CONSOLE_START plugin event
-	}
-
 	// server port open & binding
 	if( (login_fd = make_listen_bind(login_config.login_ip,login_config.login_port)) == -1 ) {
 		ShowFatalError("Failed to bind to port '"CL_WHITE"%d"CL_RESET"'\n",login_config.login_port);
@@ -1920,6 +1943,11 @@ int do_init(int argc, char** argv)
 
 	ShowStatus("The login-server is "CL_GREEN"ready"CL_RESET" (Server is listening on the port %u).\n\n", login_config.login_port);
 	login_log(0, "login server", 100, "login server started");
+
+	if( login_config.console ) {
+		add_timer_func_list(parse_console_timer, "parse_console_timer");
+		add_timer_interval(gettick()+1000, parse_console_timer, 0, 0, 1000); //start in 1s each 1sec
+	}
 
 	return 0;
 }

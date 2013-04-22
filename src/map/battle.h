@@ -485,6 +485,7 @@ extern struct Battle_Config
 	int item_restricted_consumption_type;
 	int max_walk_path;
 	int item_enabled_npc;
+	int item_onfloor; // Whether to drop an undroppable item on the map or destroy it if inventory is full.
 
 	int mado_skill_limit;
 	int block_relocation;

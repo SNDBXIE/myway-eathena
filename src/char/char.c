@@ -14,6 +14,7 @@
 #include "../common/utils.h"
 #include "../common/cli.h"
 #include "../common/random.h"
+#include "../common/ers.h"
 #include "int_guild.h"
 #include "int_homun.h"
 #include "int_mercenary.h"
@@ -1053,6 +1054,10 @@ int mmo_chars_fromsql(struct char_session_data* sd, uint8* buf)
 	}
 	memset(&p, 0, sizeof(p));
 
+	for( i = 0; i < MAX_CHARS; i++ ){
+		sd->found_char[i] = -1;
+	}
+
 	// read char data
 	if( SQL_ERROR == SqlStmt_Prepare(stmt, "SELECT "
 		"`char_id`,`char_num`,`name`,`class`,`base_level`,`job_level`,`base_exp`,`job_exp`,`zeny`,"
@@ -1104,11 +1109,6 @@ int mmo_chars_fromsql(struct char_session_data* sd, uint8* buf)
 		SqlStmt_ShowDebug(stmt);
 		SqlStmt_Free(stmt);
 		return 0;
-	}
-
-	for( i = 0; i < MAX_CHARS; i++ ){
-		sd->found_char[i] = -1;
-		sd->char_moves[i] = 0;
 	}
 
 	for( i = 0; i < MAX_CHARS && SQL_SUCCESS == SqlStmt_NextRow(stmt); i++ )
@@ -4344,20 +4344,37 @@ int parse_char(int fd)
 }
 
 // Console Command Parser [Wizputer]
-int parse_console(const char* command)
+int parse_console(const char* buf)
 {
-	ShowNotice("Console command: %s\n", command);
+	char type[64];
+	char command[64];
+	int n=0;
 
-	if( strcmpi("shutdown", command) == 0 || strcmpi("exit", command) == 0 || strcmpi("quit", command) == 0 || strcmpi("end", command) == 0 )
-		runflag = 0;
-	else if( strcmpi("alive", command) == 0 || strcmpi("status", command) == 0 )
-		ShowInfo(CL_CYAN"Console: "CL_BOLD"I'm Alive."CL_RESET"\n");
-	else if( strcmpi("help", command) == 0 )
-	{
-		ShowInfo("To shutdown the server:\n");
-		ShowInfo("  'shutdown|exit|quit|end'\n");
-		ShowInfo("To know if server is alive:\n");
-		ShowInfo("  'alive|status'\n");
+	if( ( n = sscanf(buf, "%63[^:]:%63[^\n]", type, command) ) < 2 ){
+		if((n = sscanf(buf, "%63[^\n]", type))<1) return -1; //nothing to do no arg
+	}
+	if( n != 2 ){ //end string
+		ShowNotice("Type: '%s'\n",type);
+		command[0] = '\0';
+	}
+	else
+		ShowNotice("Type of command: '%s' || Command: '%s'\n",type,command);
+
+	if( n == 2 && strcmpi("server", type) == 0 ){
+		if( strcmpi("shutdown", command) == 0 || strcmpi("exit", command) == 0 || strcmpi("quit", command) == 0 ){
+			runflag = 0;
+		}
+		else if( strcmpi("alive", command) == 0 || strcmpi("status", command) == 0 )
+			ShowInfo(CL_CYAN"Console: "CL_BOLD"I'm Alive."CL_RESET"\n");
+	}
+	else if( strcmpi("ers_report", type) == 0 ){
+		ers_report();
+	}
+	else if( strcmpi("help", type) == 0 ){
+		ShowInfo("Available commands:\n");
+		ShowInfo("\t server:shutdown => Stops the server.\n");
+		ShowInfo("\t server:alive => Checks if the server is running.\n");
+		ShowInfo("\t ers_report => Displays database usage.\n");
 	}
 
 	return 0;
@@ -4614,13 +4631,13 @@ void pincode_notifyLoginPinError( int account_id ){
 
 void pincode_decrypt( uint32 userSeed, char* pin ){
 	int i, pos;
-	char tab[10] = {0,1,2,3,4,5,6,7,8,9};
+	char tab[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	char *buf;
 	uint32 multiplier = 0x3498, baseSeed = 0x881234;
 
 	for( i = 1; i < 10; i++ ){
 		userSeed = baseSeed + userSeed * multiplier;
-		pos = userSeed % (i + 1);
+		pos = userSeed % ( i + 1 );
 		if( i != pos ){
 			tab[i] ^= tab[pos];
 			tab[pos] ^= tab[i];
@@ -4628,13 +4645,13 @@ void pincode_decrypt( uint32 userSeed, char* pin ){
 		}
 	}
 
-	buf = (char *)malloc(sizeof(pin));
-	memset(buf,0,PINCODE_LENGTH+1);
+	buf = (char *)malloc( sizeof(char) * ( PINCODE_LENGTH + 1 ) );
+	memset( buf, 0, PINCODE_LENGTH + 1 );
 	for( i = 0; i < PINCODE_LENGTH; i++ ){
-		sprintf(buf+i,"%d",tab[pin[i] - '0']);
+		sprintf( buf + i, "%d", tab[pin[i] - '0'] );
 	}
-	strcpy(pin,buf);
-	free(buf);
+	strcpy( pin, buf );
+	free( buf );
 }
 
 //------------------------------------------------
@@ -5125,14 +5142,14 @@ int do_init(int argc, char **argv)
 	mapindex_init();
 	start_point.map = mapindex_name2id("new_zone01");
 
-	CHAR_CONF_NAME = "conf/char_athena.conf";
-	LAN_CONF_NAME =	"conf/subnet_athena.conf";
-	SQL_CONF_NAME =	"conf/inter_athena.conf";
-	MSG_CONF_NAME =	"conf/msg_conf/char_msg.conf";
+	CHAR_CONF_NAME =   "conf/char_athena.conf";
+	LAN_CONF_NAME =    "conf/subnet_athena.conf";
+	SQL_CONF_NAME =    "conf/inter_athena.conf";
+	MSG_CONF_NAME_EN = "conf/msg_conf/char_msg.conf";
 
 	cli_get_options(argc,argv);
 
-	msg_config_read(MSG_CONF_NAME);
+	msg_config_read(MSG_CONF_NAME_EN);
 	char_config_read(CHAR_CONF_NAME);
 	char_lan_config_read(LAN_CONF_NAME);
 	sql_config_read(SQL_CONF_NAME);
@@ -5183,11 +5200,6 @@ int do_init(int argc, char **argv)
 	add_timer_func_list(online_data_cleanup, "online_data_cleanup");
 	add_timer_interval(gettick() + 1000, online_data_cleanup, 0, 0, 600 * 1000);
 
-	if( console )
-	{
-		//##TODO invoke a CONSOLE_START plugin event
-	}
-
 	//Cleaning the tables for NULL entrys @ startup [Sirius]
 	//Chardb clean
 	if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `account_id` = '0'", char_db) )
@@ -5216,6 +5228,10 @@ int do_init(int argc, char **argv)
 		runflag = CHARSERVER_ST_RUNNING;
 	}
 
+	if( console ){ //start listening
+		add_timer_func_list(parse_console_timer, "parse_console_timer");
+		add_timer_interval(gettick()+1000, parse_console_timer, 0, 0, 1000); //start in 1s each 1sec
+	}
 	return 0;
 }
 

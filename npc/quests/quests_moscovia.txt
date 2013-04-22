@@ -3,7 +3,7 @@
 //===== By: ================================================== 
 //= Kisuka
 //===== Current Version: ===================================== 
-//= 2.0a
+//= 2.0b
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
@@ -23,6 +23,7 @@
 //= 1.9 Corrected NPC counting mobs for the wrong NPC. (bugreport:4736) [L0ne_W0lf]
 //= 2.0 Optimized. [Joseph]
 //= 2.0a Bug fixes. [Euphy]
+//= 2.0b Bug fixes. [Lemongrass]
 //============================================================ 
 
 //============================================================================
@@ -269,7 +270,14 @@ moscovia,135,52,0	script	Bulletin Board#npc	837,{
 // Mr. Ibanoff - Docks
 //----------------------------------------------------------------------------
 moscovia,135,49,5	script	Mr. Ibanoff#npc	964,{
-	if (mos_whale_edq == 1 || mos_whale_edq == 2) {
+	if (mos_whale_edq == 0) {
+		mes "[Mr. Ibanoff]";
+		mes "You are also an adventurer from another province. I also was a great adventurer.";
+		next;
+		mes "[Mr. Ibanoff]";
+		mes "Uf...I just want to be 20 years younger, so I can travel here and there with invigorating youth such as you... Time is an enemy. Hahahahaha!";
+		close;
+	} else if (mos_whale_edq == 1 || mos_whale_edq == 2) {
 		mes "["+strcharinfo(0)+"]";
 		mes "Hello. Are you Mr. Ibanoff?";
 		next;
@@ -740,13 +748,6 @@ moscovia,135,49,5	script	Mr. Ibanoff#npc	964,{
 		mes "What's going on?";
 		mes "You should ride a ship now? Let's ready to leave hurry up.";
 		set mos_whale_edq,19;
-		close;
-	} else {
-		mes "[Mr. Ibanoff]";
-		mes "You are also an adventurer from another province. I also was a great adventurer.";
-		next;
-		mes "[Mr. Ibanoff]";
-		mes "Uf...I just want to be 20 years younger, so I can travel here and there with invigorating youth such as you... Time is an enemy. Hahahahaha!";
 		close;
 	}
 	if ((gettime(3) >= 0 && gettime(3) < 3) || (gettime(3) >= 6 && gettime(3) < 9) || (gettime(3) >= 12 && gettime(3) < 15) || (gettime(3) >= 18 && gettime(3) < 21))  {
@@ -11274,7 +11275,7 @@ mosk_dun02,57,220,0	script	House Ghost Jar#rus43	111,{
 				mes "One! Two! Three!!";
 				next;
 				if (.@rucard_game01 == 1) {
-					cutin "Poring_Card.bmp",4;
+					cutin "포링카드",4; // Poring Card
 					emotion 0;
 					emotion 5,1;
 					next;
@@ -11286,8 +11287,10 @@ mosk_dun02,57,220,0	script	House Ghost Jar#rus43	111,{
 					cutin "",255;
 					next;
 				} else {
-					if (.@rucard_game01 == 2) cutin "?↔Ð??┢??┢?.bmp",4;
-					else cutin "▲Ø?o???┢??┢?.bmp",4;
+					if (.@rucard_game01 == 2)
+						cutin "엔젤링카드",4; // Angeling Card
+					else
+						cutin "고스트링카드",4; // Ghostring Card
 					emotion 0;
 					emotion 23,1;
 					next;
@@ -11308,7 +11311,7 @@ mosk_dun02,57,220,0	script	House Ghost Jar#rus43	111,{
 				mes "One! Two! Three!!";
 				next;
 				if (.@rucard_game01 == 2) {
-					cutin "?↔Ð??┢??┢?.bmp",4;
+					cutin "고스트링카드",4; // Angeling Card
 					emotion 0;
 					emotion 5,1;
 					next;
@@ -11320,8 +11323,10 @@ mosk_dun02,57,220,0	script	House Ghost Jar#rus43	111,{
 					cutin "",255;
 					next;
 				} else {
-					if (.@rucard_game01 == 1) cutin "Poring_Card.bmp",4;
-					else cutin "▲Ø?o???┢??┢?.bmp",4;
+					if (.@rucard_game01 == 1)
+						cutin "포링카드",4; // Poring Card
+					else
+						cutin "고스트링카드",4; // Ghostring Card
 					emotion 0;
 					emotion 23,1;
 					next;
@@ -11342,7 +11347,7 @@ mosk_dun02,57,220,0	script	House Ghost Jar#rus43	111,{
 				mes "One! Two! Three!!";
 				next;
 				if (.@rucard_game01 == 3) {
-					cutin "▲Ø?o???┢??┢?.bmp",4;
+					cutin "고스트링카드",4; // Ghostring Card
 					emotion 0;
 					emotion 5,1;
 					next;
@@ -11354,8 +11359,10 @@ mosk_dun02,57,220,0	script	House Ghost Jar#rus43	111,{
 					cutin "",255;
 					next;
 				} else {
-					if (.@rucard_game01 == 1) cutin "Poring_Card.bmp",4;
-					else cutin "?↔Ð??┢??┢?.bmp",4;
+					if (.@rucard_game01 == 1)
+						cutin "포링카드",4; // Poring Card
+					else
+						cutin "고스트링카드",4; // Angeling Card
 					emotion 0;
 					emotion 23,1;
 					next;
