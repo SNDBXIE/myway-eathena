@@ -793,7 +793,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,struct Damag
 		}
 
 		if(sc->data[SC_ZEPHYR] &&
-			flag&(BF_LONG|BF_SHORT)){
+			(flag&(BF_LONG|BF_SHORT)) == (BF_SHORT|BF_LONG)){
 				d->dmg_lv = ATK_BLOCK;
 				return 0;
 		}
@@ -1200,7 +1200,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,struct Damag
 	}
 
 	if (battle_config.pk_mode && sd && bl->type == BL_PC && damage && map[bl->m].flag.pvp)
-  	{
+	{
 		if (flag & BF_SKILL) { //Skills get a different reduction than non-skills. [Skotlex]
 			if (flag&BF_WEAPON)
 				DAMAGE_RATE(battle_config.pk_weapon_damage_rate)
@@ -1987,7 +1987,11 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src,struct blo
 	if (flag.cri)
 	{
 		wd.type = 0x0a;
+#ifdef RENEWAL
+		flag.hit = 1;
+#else
 		flag.idef = flag.idef2 = flag.hit = 1;
+#endif
 	} else {	//Check for Perfect Hit
 		if(sd && sd->bonus.perfect_hit > 0 && rnd()%100 < sd->bonus.perfect_hit)
 			flag.hit = 1;
@@ -2386,15 +2390,13 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src,struct blo
 					break;
 				case NPC_DARKCROSS:
 				case CR_HOLYCROSS:
-				{
-					int ratio = 35*skill_lv;
 					#ifdef RENEWAL
 						if(sd && sd->status.weapon == W_2HSPEAR)
-							ratio *= 2;
+							skillratio += 2*(35*skill_lv);
+						else
 					#endif
-					skillratio += ratio;
+					skillratio += 35*skill_lv;
 					break;
-				}
 				case AM_DEMONSTRATION:
 					skillratio += 20*skill_lv;
 					break;
@@ -2409,12 +2411,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src,struct blo
 					flag.pdef = flag.pdef2 = 2;
 					break;
 				case MO_EXTREMITYFIST:
-					{	//Overflow check. [Skotlex]
-						unsigned int ratio = skillratio + 100*(8 + sstatus->sp/10);
-						//You'd need something like 6K SP to reach this max, so should be fine for most purposes.
-						if (ratio > 60000) ratio = 60000; //We leave some room here in case skillratio gets further increased.
-						skillratio = (unsigned short)ratio;
-					}
+					skillratio += 100*(8 + sstatus->sp/10) - 100;
+					skillratio = min(500000,skillratio); //We stop at roughly 50k SP for overflow protection
 					break;
 				case MO_TRIPLEATTACK:
 					skillratio += 20*skill_lv;
@@ -2625,9 +2623,9 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src,struct blo
 						else if( i > 3 )
 							dmg -= 50; // Greater than 3 cells, less than 7. (250 damage)
 						dmg = (dmg * skill_lv) * (100 + (status_get_lv(src) - 100) / 12) / 100;
-						// Elemental check, +100% damage if your element is fire.
-						if( sstatus->rhw.ele  == ELE_FIRE )
-							dmg += skill_lv * 100 / 100;
+						// Elemental check, 1.5x damage if your element is fire.
+						if( sstatus->rhw.ele == ELE_FIRE )
+							dmg += dmg/2;
 						skillratio = dmg;
 					}
 					break;
@@ -3496,6 +3494,12 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src,struct blo
 		if( flag.lh )
 			wd.damage2 = battle_calc_cardfix(BF_WEAPON, src, target, nk, s_ele, s_ele_, wd.damage2, 3, wd.flag);
 
+#ifdef RENEWAL
+		if( flag.cri ){
+			ATK_ADDRATE( sd->bonus.crit_atk_rate >= 100 ? sd->bonus.crit_atk_rate - 60 : 40 );
+		}
+#endif
+
 		if( skill_id == CR_SHIELDBOOMERANG || skill_id == PA_SHIELDCHAIN )
 		{ //Refine bonus applies after cards and elements.
 			short index= sd->equip_index[EQI_HAND_L];
@@ -4276,9 +4280,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 
 	if (flag.infdef && ad.damage)
 		ad.damage = ad.damage>0?1:-1;
-
-	if( sc && skill_id == WL_COMET && map_getcell(target->m, target->x, target->y, CELL_CHKLANDPROTECTOR) )
-		ad.damage = 0; // Comet damage should be 0 on Land Protector
 
 	ad.damage=battle_calc_damage(src,target,&ad,ad.damage,skill_id,skill_lv);
 	if( map_flag_gvg2(target->m) )
@@ -6029,6 +6030,7 @@ static const struct _battle_data {
 	{ "item_restricted_consumption_type",   &battle_config.item_restricted_consumption_type,1,      0,      1,              },
 	{ "max_walk_path",                      &battle_config.max_walk_path,                   17,     1,      MAX_WALKPATH,   },
 	{ "item_enabled_npc",                   &battle_config.item_enabled_npc,                1,      0,      1,              },
+	{ "item_flooritem_check",               &battle_config.item_onfloor,                    1,      0,      1,              },
 
 	//Custom Setting
 	{ "mado_skill_limit",                   &battle_config.mado_skill_limit,                 1,     0,      1,        		},

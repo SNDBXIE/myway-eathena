@@ -405,11 +405,11 @@ int guild_created(int account_id,int guild_id)
 	if(sd==NULL)
 		return 0;
 	if(!guild_id) {
-        clif_guild_created(sd, 2); // Creation failure (presence of the same name Guild)
+		clif_guild_created(sd, 2); // Creation failure (presence of the same name Guild)
 		return 0;
 	}
-	//struct guild *g;
-	sd->status.guild_id=guild_id;
+
+	sd->status.guild_id = guild_id;
 	clif_guild_created(sd,0);
 	if(battle_config.guild_emperium_check)
 		pc_delitem(sd,pc_search_inventory(sd,ITEMID_EMPERIUM),1,0,0,LOG_TYPE_CONSUME);	//emperium consumption
@@ -464,6 +464,7 @@ int guild_check_member(struct guild *g)
 
 		i = guild_getindex(g,sd->status.account_id,sd->status.char_id);
 		if (i < 0) {
+			sd->guild = NULL;
 			sd->status.guild_id=0;
 			sd->guild_emblem_id=0;
 			ShowWarning("guild: check_member %d[%s] is not member\n",sd->status.account_id,sd->status.name);
@@ -550,6 +551,7 @@ int guild_recv_info(struct guild *sg)
 				guild_block_skill(sd, 300000);
 
 			//Also set the guild master flag.
+			sd->guild = g;
 			sd->state.gmaster_flag = g;
 			clif_charnameupdate(sd); // [LuzZza]
 			clif_guild_masterormember(sd);
@@ -583,6 +585,7 @@ int guild_recv_info(struct guild *sg)
 		sd = g->member[i].sd;
 		if( sd==NULL )
 			continue;
+		sd->guild = g;
 
 		if (before.guild_lv != g->guild_lv || bm != m ||
 			before.max_member != g->max_member) {
@@ -604,7 +607,7 @@ int guild_recv_info(struct guild *sg)
 		}
 	}
 
-    //Occurrence of an event
+	//Occurrence of an event
 	if (guild_infoevent_db->remove(guild_infoevent_db, db_i2key(sg->guild_id), &data)) {
 		struct eventlist *ev = db_data2ptr(&data), *ev2;
 		while(ev) {
@@ -1426,7 +1429,7 @@ int guild_reqalliance(struct map_session_data *sd,struct map_session_data *tsd)
 	int i;
 
 	if(agit_flag || agit2_flag)	{	// Disable alliance creation during woe [Valaris]
-		clif_displaymessage(sd->fd,msg_txt(676)); //"Alliances cannot be made during Guild Wars!"
+		clif_displaymessage(sd->fd,msg_txt(sd,676)); //"Alliances cannot be made during Guild Wars!"
 		return 0;
 	}	// end addition [Valaris]
 
@@ -1544,7 +1547,7 @@ int guild_delalliance(struct map_session_data *sd,int guild_id,int flag)
 	nullpo_ret(sd);
 
 	if(agit_flag || agit2_flag)	{	// Disable alliance breaking during woe [Valaris]
-		clif_displaymessage(sd->fd,msg_txt(677)); //"Alliances cannot be broken during Guild Wars!"
+		clif_displaymessage(sd->fd,msg_txt(sd,677)); //"Alliances cannot be broken during Guild Wars!"
 		return 0;
 	}	// end addition [Valaris]
 
@@ -1806,12 +1809,12 @@ int guild_gm_changed(int guild_id, int account_id, int char_id)
 	strcpy(g->master, g->member[0].name);
 
 	if (g->member[pos].sd && g->member[pos].sd->fd) {
-		clif_displaymessage(g->member[pos].sd->fd, msg_txt(678)); //"You no longer are the Guild Master."
+		clif_displaymessage(g->member[pos].sd->fd, msg_txt(g->member[pos].sd,678)); //"You no longer are the Guild Master."
 		g->member[pos].sd->state.gmaster_flag = 0;
 	}
 
 	if (g->member[0].sd && g->member[0].sd->fd) {
-		clif_displaymessage(g->member[0].sd->fd, msg_txt(679)); //"You have become the Guild Master!"
+		clif_displaymessage(g->member[0].sd->fd, msg_txt(g->member[pos].sd,679)); //"You have become the Guild Master!"
 		g->member[0].sd->state.gmaster_flag = g;
 		//Block his skills for 5 minutes to prevent abuse.
 		guild_block_skill(g->member[0].sd, 300000);

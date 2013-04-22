@@ -47,6 +47,7 @@
 #include "atcommand.h"
 #include "log.h"
 #include "mail.h"
+#include "cashshop.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -69,6 +70,8 @@ int db_use_sqldbs = 0;
 char item_db_db[32] = "item_db";
 char item_db2_db[32] = "item_db2";
 char item_db_re_db[32] = "item_db_re";
+char item_cash_db_db[32] = "item_cash_db";
+char item_cash_db2_db[32] = "item_cash_db2";
 char mob_db_db[32] = "mob_db";
 char mob_db2_db[32] = "mob_db2";
 char mob_skill_db_db[32] = "mob_skill_db";
@@ -91,6 +94,7 @@ static DBMap* map_db=NULL; // unsigned int mapindex -> struct map_data*
 static DBMap* nick_db=NULL; // int char_id -> struct charid2nick* (requested names of offline characters)
 static DBMap* charid_db=NULL; // int char_id -> struct map_session_data*
 static DBMap* regen_db=NULL; // int id -> struct block_list* (status_natural_heal processing)
+static DBMap* map_msg_db=NULL;
 
 static int map_users=0;
 
@@ -104,7 +108,6 @@ static struct block_list *bl_list[BL_LIST_MAX];
 static int bl_list_count = 0;
 
 #define MAP_MAX_MSG 1500
-static char* msg_table[MAP_MAX_MSG]; // map Server messages
 
 struct map_data map[MAX_MAP_PER_SERVER];
 int map_num = 0;
@@ -1426,6 +1429,9 @@ int map_addflooritem(struct item *item_data,int amount,int16 m,int16 x,int16 y,i
 
 	nullpo_ret(item_data);
 
+	if(battle_config.item_onfloor && (itemdb_traderight(item_data->nameid)&1) )
+		return 0; //can't be dropped
+
 	if(!map_searchrandfreecell(m,&x,&y,flags&2?1:0))
 		return 0;
 	r=rnd();
@@ -1695,31 +1701,6 @@ int map_quit(struct map_session_data *sd) {
 	if( sd->ed ) {
 		elemental_clean_effect(sd->ed);
 		unit_remove_map(&sd->ed->bl,CLR_TELEPORT);
-	}
-
-	if( raChSys.ally && sd->status.guild_id ) {
-		struct guild *g = sd->guild, *sg;
-		if( g ) {
-			if( idb_exists(((struct raChSysCh *)g->channel)->users, sd->status.char_id) )
-				clif_chsys_left((struct raChSysCh *)g->channel,sd);
-			for (i = 0; i < MAX_GUILDALLIANCE; i++) {
-				if( g->alliance[i].guild_id && (sg = guild_search(g->alliance[i].guild_id) ) ) {
-					if( idb_exists(((struct raChSysCh *)sg->channel)->users, sd->status.char_id) )
-						clif_chsys_left((struct raChSysCh *)sg->channel,sd);
-					break;
-				}
-			}
-		}
-	}
-
-	if( sd->channel_count ) {
-		uint8 ch_count = sd->channel_count;
-		for( i = 0; i < ch_count; i++ ) {
-			if( sd->channels[i] != NULL )
-				clif_chsys_left(sd->channels[i],sd);
-		}
-		if( raChSys.closing )
-			aFree(sd->channels);
 	}
 
 	unit_remove_map_pc(sd,CLR_TELEPORT);
@@ -2924,8 +2905,6 @@ void map_flags_init(void)
 		map[i].jexp      = 100;  // per map job exp multiplicator
 		memset(map[i].drop_list, 0, sizeof(map[i].drop_list));  // pvp nightmare drop list
 
-		memset( map[i].mobitemadder_droplist, 0, sizeof( map[i].mobitemadder_droplist ) ); // mobitemadder (Zephyr)
-		
 		// adjustments
 		if( battle_config.pk_mode )
 			map[i].flag.pvp = 1; // make all maps pvp for pk_mode [Valaris]
@@ -3124,8 +3103,7 @@ static int char_ip_set = 0;
 /*==========================================
  * Console Command Parser [Wizputer]
  *------------------------------------------*/
-int parse_console(const char* buf)
-{
+int parse_console(const char* buf){
 	char type[64];
 	char command[64];
 	char map[64];
@@ -3138,65 +3116,58 @@ int parse_console(const char* buf)
 	memset(&sd, 0, sizeof(struct map_session_data));
 	strcpy(sd.status.name, "console");
 
-	if( ( n = sscanf(buf, "%63[^:]:%63[^:]:%63s %hd %hd[^\n]", type, command, map, &x, &y) ) < 5 )
-	{
-		if( ( n = sscanf(buf, "%63[^:]:%63[^\n]", type, command) ) < 2 )
-		{
-			n = sscanf(buf, "%63[^\n]", type);
+	if( ( n = sscanf(buf, "%63[^:]:%63[^:]:%63s %hd %hd[^\n]", type, command, map, &x, &y) ) < 5 ){
+		if( ( n = sscanf(buf, "%63[^:]:%63[^\n]", type, command) ) < 2 )		{
+			if((n = sscanf(buf, "%63[^\n]", type))<1) return -1; //nothing to do no arg
 		}
 	}
 
-	if( n == 5 )
-	{
-		m = map_mapname2mapid(map);
-		if( m < 0 )
-		{
-			ShowWarning("Console: Unknown map.\n");
-			return 0;
+	if( n != 5 ){ //end string and display
+		if( n < 2 ) {
+			ShowNotice("Type of command: '%s'\n", type);
+			command[0] = '\0';
+			map[0] = '\0';
 		}
-		sd.bl.m = m;
-		map_search_freecell(&sd.bl, m, &sd.bl.x, &sd.bl.y, -1, -1, 0);
-		if( x > 0 )
-			sd.bl.x = x;
-		if( y > 0 )
-			sd.bl.y = y;
+		else {
+			ShowNotice("Type of command: '%s' || Command: '%s'\n", type, command);
+			map[0] = '\0';
+		}
 	}
 	else
-	{
-		map[0] = '\0';
-		if( n < 2 )
-			command[0] = '\0';
-		if( n < 1 )
-			type[0] = '\0';
-	}
+		ShowNotice("Type of command: '%s' || Command: '%s' || Map: '%s' Coords: %d %d\n", type, command, map, x, y);
 
-	ShowNotice("Type of command: '%s' || Command: '%s' || Map: '%s' Coords: %d %d\n", type, command, map, x, y);
-
-	if( n == 5 && strcmpi("admin",type) == 0 )
-	{
-		if( !is_atcommand(sd.fd, &sd, command, 0) )
-			ShowInfo("Console: not atcommand\n");
+	if(strcmpi("admin",type) == 0 ) {
+		if(strcmpi("map",command) == 0){
+			m = map_mapname2mapid(map);
+			if( m < 0 ){
+				ShowWarning("Console: Unknown map.\n");
+				return 0;
+			}
+			sd.bl.m = m;
+			map_search_freecell(&sd.bl, m, &sd.bl.x, &sd.bl.y, -1, -1, 0);
+			if( x > 0 )
+				sd.bl.x = x;
+			if( y > 0 )
+				sd.bl.y = y;
+			ShowNotice("Now at: '%s' Coords: %d %d\n", map, x, y);
+		}
+		else if( !is_atcommand(sd.fd, &sd, command, 0) )
+			ShowInfo("Console: Invalid atcommand.\n");
 	}
-	else if( n == 2 && strcmpi("server", type) == 0 )
-	{
-		if( strcmpi("shutdown", command) == 0 || strcmpi("exit", command) == 0 || strcmpi("quit", command) == 0 )
-		{
+	else if( n == 2 && strcmpi("server", type) == 0 ){
+		if( strcmpi("shutdown", command) == 0 || strcmpi("exit", command) == 0 || strcmpi("quit", command) == 0 ){
 			runflag = 0;
 		}
 	}
 	else if( strcmpi("ers_report", type) == 0 ){
 		ers_report();
 	}
-	else if( strcmpi("help", type) == 0 )
-	{
-		ShowInfo("To use GM commands:\n");
-		ShowInfo("  admin:<gm command>:<map of \"gm\"> <x> <y>\n");
-		ShowInfo("You can use any GM command that doesn't require the GM.\n");
-		ShowInfo("No using @item or @warp however you can use @charwarp\n");
-		ShowInfo("The <map of \"gm\"> <x> <y> is for commands that need coords of the GM\n");
-		ShowInfo("IE: @spawn\n");
-		ShowInfo("To shutdown the server:\n");
-		ShowInfo("  server:shutdown\n");
+	else if( strcmpi("help", type) == 0 ) {
+		ShowInfo("Available commands:\n");
+		ShowInfo("\t admin:@<atcommand> => Uses an atcommand. Do NOT use commands requiring an attached player.\n");
+		ShowInfo("\t admin:map:<map> <x> <y> => Changes the map from which console commands are executed.\n");
+		ShowInfo("\t server:shutdown => Stops the server.\n");
+		ShowInfo("\t ers_report => Displays database usage.\n");
 	}
 
 	return 0;
@@ -3392,6 +3363,10 @@ int inter_config_read(char *cfgName)
 		else
 		if(strcmpi(w1,"mob_db2_db")==0)
 			strcpy(mob_db2_db,w2);
+		else if( strcmpi( w1, "item_cash_db_db" ) == 0 )
+			strcpy( item_cash_db_db, w2 );
+		else if( strcmpi( w1, "item_cash_db2_db" ) == 0 )
+			strcpy( item_cash_db2_db, w2 );
 		else
 		//Map Server SQL DB
 		if(strcmpi(w1,"map_server_ip")==0)
@@ -3588,8 +3563,11 @@ void do_final(void)
 	// remove all objects on maps
 	for (i = 0; i < map_num; i++) {
 		ShowStatus("Cleaning up maps [%d/%d]: %s..."CL_CLL"\r", i+1, map_num, map[i].name);
-		if (map[i].m >= 0)
+		if (map[i].m >= 0) {
 			map_foreachinmap(cleanup_sub, i, BL_ALL);
+			if( map[i].channel != NULL )
+				clif_chsys_delete((struct raChSysCh *)map[i].channel);
+		}
 	}
 	ShowStatus("Cleaned up %d maps."CL_CLL"\n", map_num);
 
@@ -3618,6 +3596,7 @@ void do_final(void)
 	do_final_battleground();
 	do_final_duel();
 	do_final_elemental();
+	do_final_cashshop();
 
 	map_db->destroy(map_db, map_db_final);
 
@@ -3713,6 +3692,86 @@ void set_server_type(void)
 	SERVER_TYPE = ATHENA_SERVER_MAP;
 }
 
+/*======================================================
+ * Message System
+ *------------------------------------------------------*/
+struct msg_data {
+	char* msg[MAP_MAX_MSG];
+};
+struct msg_data *map_lang2msgdb(uint8 lang){
+	return (struct msg_data*)idb_get(map_msg_db, lang);
+}
+
+void map_do_init_msg(void){
+	int test=0, i=0, size;
+	char * listelang[] = {
+		MSG_CONF_NAME_EN,	//default
+		MSG_CONF_NAME_RUS,
+		MSG_CONF_NAME_SPN,
+		MSG_CONF_NAME_GRM,
+		MSG_CONF_NAME_CHN,
+		MSG_CONF_NAME_MAL,
+		MSG_CONF_NAME_IDN,
+		MSG_CONF_NAME_FRN,
+		MSG_CONF_NAME_POR
+	};
+
+	map_msg_db = idb_alloc(DB_OPT_BASE);
+	size = ARRAYLENGTH(listelang); //avoid recalc
+	while(test!=-1 && size>i){ //for all enable lang +(English default)
+		test = msg_checklangtype(i,false);
+		if(test == 1) msg_config_read(listelang[i],i); //if enabled read it and assign i to langtype
+		i++;
+	}
+}
+void map_do_final_msg(void){
+	DBIterator *iter = db_iterator(map_msg_db);
+	struct msg_data *mdb;
+
+	for (mdb = dbi_first(iter); dbi_exists(iter); mdb = dbi_next(iter)) {
+		_do_final_msg(MAP_MAX_MSG,mdb->msg);
+		aFree(mdb);
+	}
+	dbi_destroy(iter);
+	map_msg_db->destroy(map_msg_db, NULL);
+}
+void map_msg_reload(void){
+	map_do_final_msg(); //clear data
+	map_do_init_msg();
+}
+int map_msg_config_read(char *cfgName, int lang){
+	struct msg_data *mdb;
+
+	if( (mdb = map_lang2msgdb(lang)) == NULL )
+		CREATE(mdb, struct msg_data, 1);
+	else
+		idb_remove(map_msg_db, lang);
+	idb_put(map_msg_db, lang, mdb);
+
+	if(_msg_config_read(cfgName,MAP_MAX_MSG,mdb->msg)!=0){ //an error occur
+		idb_remove(map_msg_db, lang); //@TRYME
+		aFree(mdb);
+	}
+	return 0;
+}
+const char* map_msg_txt(struct map_session_data *sd, int msg_number){
+	struct msg_data *mdb;
+	uint8 lang = 0; //default
+	const char *tmp; //to verify result
+	if(sd && sd->langtype) lang = sd->langtype;
+
+	if( (mdb = map_lang2msgdb(lang)) != NULL){
+		tmp = _msg_txt(msg_number,MAP_MAX_MSG,mdb->msg);
+		if(strcmp(tmp,"??"))
+			return tmp;
+		ShowDebug("Message #%d not found for langtype %d.\n",msg_number,lang);
+	}
+	ShowDebug("Selected langtype %d not loaded, trying fallback...\n",lang);
+	if(lang != 0 && (mdb = map_lang2msgdb(0)) != NULL) //fallback
+		return _msg_txt(msg_number,MAP_MAX_MSG,mdb->msg);
+	return "??";
+}
+
 
 /// Called when a terminate signal is received.
 void do_shutdown(void)
@@ -3745,8 +3804,19 @@ int do_init(int argc, char *argv[])
 	BATTLE_CONF_FILENAME = "conf/battle_athena.conf";
 	ATCOMMAND_CONF_FILENAME = "conf/atcommand_athena.conf";
 	SCRIPT_CONF_NAME = "conf/script_athena.conf";
-	MSG_CONF_NAME = "conf/msg_conf/map_msg.conf";
 	GRF_PATH_FILENAME = "conf/grf-files.txt";
+
+	/* Multilanguage */
+	MSG_CONF_NAME_EN = "conf/msg_conf/map_msg.conf"; // English (default)
+	MSG_CONF_NAME_RUS = "conf/msg_conf/map_msg_rus.conf";	// Russian
+	MSG_CONF_NAME_SPN = "conf/msg_conf/map_msg_spn.conf";	// Spanish
+	MSG_CONF_NAME_GRM = "conf/msg_conf/map_msg_grm.conf";	// German
+	MSG_CONF_NAME_CHN = "conf/msg_conf/map_msg_chn.conf";	// Chinese
+	MSG_CONF_NAME_MAL = "conf/msg_conf/map_msg_mal.conf";	// Malaysian
+	MSG_CONF_NAME_IDN = "conf/msg_conf/map_msg_idn.conf";	// Indonesian
+	MSG_CONF_NAME_FRN = "conf/msg_conf/map_msg_frn.conf";	// French
+	MSG_CONF_NAME_POR = "conf/msg_conf/map_msg_por.conf";	// Brazilian Portuguese
+	/* Multilanguage */
 
 	cli_get_options(argc,argv);
 
@@ -3778,7 +3848,6 @@ int do_init(int argc, char *argv[])
 	}
 
 	battle_config_read(BATTLE_CONF_FILENAME);
-	msg_config_read(MSG_CONF_NAME);
 	script_config_read(SCRIPT_CONF_NAME);
 	inter_config_read(INTER_CONF_NAME);
 	log_config_read(LOG_CONF_NAME);
@@ -3791,7 +3860,6 @@ int do_init(int argc, char *argv[])
 	nick_db = idb_alloc(DB_OPT_BASE);
 	charid_db = idb_alloc(DB_OPT_BASE);
 	regen_db = idb_alloc(DB_OPT_BASE); // efficient status_natural_heal processing
-
 	iwall_db = strdb_alloc(DB_OPT_RELEASE_DATA,2*NAME_LENGTH+2+1); // [Zephyrus] Invisible Walls
 
 	map_sql_init();
@@ -3809,6 +3877,7 @@ int do_init(int argc, char *argv[])
 	add_timer_func_list(map_removemobs_timer, "map_removemobs_timer");
 	add_timer_interval(gettick()+1000, map_freeblock_timer, 0, 0, 60*1000);
 
+	map_do_init_msg();
 	do_init_atcommand();
 	do_init_battle();
 	do_init_instance();
@@ -3816,6 +3885,7 @@ int do_init(int argc, char *argv[])
 	do_init_clif();
 	do_init_script();
 	do_init_itemdb();
+	do_init_cashshop();
 	do_init_skill();
 	do_init_mob();
 	do_init_pc();
@@ -3835,11 +3905,6 @@ int do_init(int argc, char *argv[])
 
 	npc_event_do_oninit();	// Init npcs (OnInit)
 
-	if( console )
-	{
-		//##TODO invoke a CONSOLE_START plugin event
-	}
-
 	if (battle_config.pk_mode)
 		ShowNotice("Server is running on '"CL_WHITE"PK Mode"CL_RESET"'.\n");
 
@@ -3855,15 +3920,11 @@ int do_init(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 #endif
 
+	if( console ){ //start listening
+		add_timer_func_list(parse_console_timer, "parse_console_timer");
+		add_timer_interval(gettick()+1000, parse_console_timer, 0, 0, 1000); //start in 1s each 1sec
+	}
+
 	return 0;
 }
 
-int map_msg_config_read(char *cfgName){
-	return _msg_config_read(cfgName,MAP_MAX_MSG,msg_table);
-}
-const char* map_msg_txt(int msg_number){
-	return _msg_txt(msg_number,MAP_MAX_MSG,msg_table);
-}
-void map_do_final_msg(void){
-	_do_final_msg(MAP_MAX_MSG,msg_table);
-}

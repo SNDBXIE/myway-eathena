@@ -6239,10 +6239,10 @@ BUILDIN_FUNC(checkweight)
 
 	    switch( pc_checkadditem(sd, nameid, amount) )
 	    {
-		    case ADDITEM_EXIST:
+		    case CHKADDITEM_EXIST:
 			    // item is already in inventory, but there is still space for the requested amount
 			    break;
-		    case ADDITEM_NEW:
+		    case CHKADDITEM_NEW:
 			    if( itemdb_isstackable(nameid) ) {// stackable
 				    amount2++;
 				    if( slots < amount2 ) {
@@ -6258,7 +6258,7 @@ BUILDIN_FUNC(checkweight)
 				    }
 			    }
 			    break;
-		    case ADDITEM_OVERAMOUNT:
+		    case CHKADDITEM_OVERAMOUNT:
 			    script_pushint(st,0);
 			    return 0;
 	    }
@@ -6344,10 +6344,10 @@ BUILDIN_FUNC(checkweight2)
 		continue;
 	    }
 	    switch( pc_checkadditem(sd, nameid, amount) ) {
-		    case ADDITEM_EXIST:
+		    case CHKADDITEM_EXIST:
 			// item is already in inventory, but there is still space for the requested amount
 			    break;
-		    case ADDITEM_NEW:
+		    case CHKADDITEM_NEW:
 			    if( itemdb_isstackable(nameid) ){// stackable
 				    amount2++;
 				    if( slots < amount2 )
@@ -6360,7 +6360,7 @@ BUILDIN_FUNC(checkweight2)
 				    }
 			    }
 			    break;
-		    case ADDITEM_OVERAMOUNT:
+		    case CHKADDITEM_OVERAMOUNT:
 			    fail = 1;
 	    } //end switch
 	} //end loop DO NOT break it prematurly we need to depop all stack
@@ -12910,7 +12910,7 @@ BUILDIN_FUNC(recovery)
 			status_revive(&sd->bl, 100, 100);
 		else
 			status_percent_heal(&sd->bl, 100, 100);
-		clif_displaymessage(sd->fd,msg_txt(680));
+		clif_displaymessage(sd->fd,msg_txt(sd,680));
 	}
 	mapit_free(iter);
 	return 0;
@@ -13464,7 +13464,7 @@ BUILDIN_FUNC(summon)
 		md->special_state.ai = AI_ATTACK;
 		if( md->deletetimer != INVALID_TIMER )
 			delete_timer(md->deletetimer, mob_timer_delete);
-		md->deletetimer = add_timer(tick+(timeout>0?timeout*1000:60000),mob_timer_delete,md->bl.id,0);
+		md->deletetimer = add_timer(tick+(timeout>0?timeout:60000),mob_timer_delete,md->bl.id,0);
 		mob_spawn (md); //Now it is ready for spawning.
 		clif_specialeffect(&md->bl,344,AREA);
 		sc_start4(NULL,&md->bl, SC_MODECHANGE, 100, 1, 0, MD_AGGRESSIVE, 0, 60000);
@@ -17032,7 +17032,7 @@ BUILDIN_FUNC(buyingstore)
 
 	if( npc_isnear(&sd->bl) ) {
 		char output[150];
-		sprintf(output, msg_txt(662), battle_config.min_npc_vendchat_distance);
+		sprintf(output, msg_txt(sd,662), battle_config.min_npc_vendchat_distance);
 		clif_displaymessage(sd->fd, output);
 		return 0;
 	}

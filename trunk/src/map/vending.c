@@ -57,9 +57,9 @@ void vending_vendinglistreq(struct map_session_data* sd, int id)
 
 	if (!pc_can_give_items(sd) || !pc_can_give_items(vsd)) //check if both GMs are allowed to trade
 	{	// GM is not allowed to trade
-		clif_displaymessage(sd->fd, msg_txt(246));
+		clif_displaymessage(sd->fd, msg_txt(sd,246));
 		return;
-	} 
+	}
 
 	sd->vended_id = vsd->vender_id;  // register vending uid
 
@@ -139,11 +139,11 @@ void vending_purchasereq(struct map_session_data* sd, int aid, int uid, const ui
 			clif_buyvending(sd, idx, amount, 2); // you can not buy, because overweight
 			return;
 		}
-		
+
 		//Check to see if cart/vend info is in sync.
 		if( vending[j].amount > vsd->status.cart[idx].amount )
 			vending[j].amount = vsd->status.cart[idx].amount;
-		
+
 		// if they try to add packets (example: get twice or more 2 apples if marchand has only 3 apples).
 		// here, we check cumulative amounts
 		if( vending[j].amount < amount )
@@ -152,18 +152,18 @@ void vending_purchasereq(struct map_session_data* sd, int aid, int uid, const ui
 			clif_buyvending(sd, idx, vsd->vending[j].amount, 4); // not enough quantity
 			return;
 		}
-		
+
 		vending[j].amount -= amount;
 
 		switch( pc_checkadditem(sd, vsd->status.cart[idx].nameid, amount) ) {
-		case ADDITEM_EXIST:
+		case CHKADDITEM_EXIST:
 			break;	//We'd add this item to the existing one (in buyers inventory)
-		case ADDITEM_NEW:
+		case CHKADDITEM_NEW:
 			new_++;
 			if (new_ > blank)
 				return; //Buyer has no space in his inventory
 			break;
-		case ADDITEM_OVERAMOUNT:
+		case CHKADDITEM_OVERAMOUNT:
 			return; //too many items
 		}
 	}
@@ -189,7 +189,7 @@ void vending_purchasereq(struct map_session_data* sd, int aid, int uid, const ui
 		if( battle_config.buyer_name )
 		{
 			char temp[256];
-			sprintf(temp, msg_txt(265), sd->status.name);
+			sprintf(temp, msg_txt(sd,265), sd->status.name);
 			clif_disp_onlyself(vsd,temp,strlen(temp));
 		}
 	}
@@ -199,7 +199,7 @@ void vending_purchasereq(struct map_session_data* sd, int aid, int uid, const ui
 	{
 		if( vsd->vending[i].amount == 0 )
 			continue;
-		
+
 		if( cursor != i ) // speedup
 		{
 			vsd->vending[cursor].index = vsd->vending[i].index;
@@ -286,7 +286,7 @@ void vending_openvending(struct map_session_data* sd, const char* message, const
 	}
 
 	if( i != j )
-		clif_displaymessage (sd->fd, msg_txt(266)); //"Some of your items cannot be vended and were removed from the shop."
+		clif_displaymessage (sd->fd, msg_txt(sd,266)); //"Some of your items cannot be vended and were removed from the shop."
 
 	if( i == 0 )
 	{	// no valid item found

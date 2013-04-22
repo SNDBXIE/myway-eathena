@@ -164,6 +164,7 @@
     <ClInclude Include="..\src\map\battle.h" />
     <ClInclude Include="..\src\map\battleground.h" />
     <ClInclude Include="..\src\map\buyingstore.h" />
+    <ClInclude Include="..\src\map\cashshop.h" />
     <ClInclude Include="..\src\map\chat.h" />
     <ClInclude Include="..\src\map\chrif.h" />
     <ClInclude Include="..\src\map\clif.h" />
@@ -236,6 +237,7 @@
     <ClCompile Include="..\src\map\battle.c" />
     <ClCompile Include="..\src\map\battleground.c" />
     <ClCompile Include="..\src\map\buyingstore.c" />
+    <ClCompile Include="..\src\map\cashshop.c" />
     <ClCompile Include="..\src\map\chat.c" />
     <ClCompile Include="..\src\map\chrif.c" />
     <ClCompile Include="..\src\map\clif.c" />
@@ -280,8 +282,16 @@
     <Copy SourceFiles="..\conf\import-tmpl\log_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\log_conf.txt')" />
     <Copy SourceFiles="..\conf\import-tmpl\login_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\login_conf.txt')" />
     <Copy SourceFiles="..\conf\import-tmpl\map_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\map_conf.txt')" />
-    <Copy SourceFiles="..\conf\import-tmpl\msg_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\msg_conf.txt')" />
     <Copy SourceFiles="..\conf\import-tmpl\packet_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\packet_conf.txt')" />
     <Copy SourceFiles="..\conf\import-tmpl\script_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\script_conf.txt')" />
+    <Copy SourceFiles="..\conf\msg_conf\import-tmpl\map_msg_chn_conf.txt" DestinationFolder="..\conf\msg_conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\msg_conf\import\map_msg_chn_conf.txt')" />
+    <Copy SourceFiles="..\conf\msg_conf\import-tmpl\map_msg_eng_conf.txt" DestinationFolder="..\conf\msg_conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\msg_conf\import\map_msg_eng_conf.txt')" />
+    <Copy SourceFiles="..\conf\msg_conf\import-tmpl\map_msg_frn_conf.txt" DestinationFolder="..\conf\msg_conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\msg_conf\import\map_msg_frn_conf.txt')" />
+    <Copy SourceFiles="..\conf\msg_conf\import-tmpl\map_msg_grm_conf.txt" DestinationFolder="..\conf\msg_conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\msg_conf\import\map_msg_grm_conf.txt')" />
+    <Copy SourceFiles="..\conf\msg_conf\import-tmpl\map_msg_idn_conf.txt" DestinationFolder="..\conf\msg_conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\msg_conf\import\map_msg_idn_conf.txt')" />
+    <Copy SourceFiles="..\conf\msg_conf\import-tmpl\map_msg_mal_conf.txt" DestinationFolder="..\conf\msg_conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\msg_conf\import\map_msg_mal_conf.txt')" />
+    <Copy SourceFiles="..\conf\msg_conf\import-tmpl\map_msg_por_conf.txt" DestinationFolder="..\conf\msg_conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\msg_conf\import\map_msg_por_conf.txt')" />
+    <Copy SourceFiles="..\conf\msg_conf\import-tmpl\map_msg_rus_conf.txt" DestinationFolder="..\conf\msg_conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\msg_conf\import\map_msg_rus_conf.txt')" />
+    <Copy SourceFiles="..\conf\msg_conf\import-tmpl\map_msg_spn_conf.txt" DestinationFolder="..\conf\msg_conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\msg_conf\import\map_msg_spn_conf.txt')" />
   </Target>
 </Project>

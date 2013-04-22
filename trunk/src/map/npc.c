@@ -95,6 +95,7 @@ static DBMap *npc_path_db;
 
 //For holding the view data of npc classes. [Skotlex]
 static struct view_data npc_viewdb[MAX_NPC_CLASS];
+static struct view_data npc_viewdb2[MAX_NPC_CLASS2_END-MAX_NPC_CLASS2_START];
 
 static struct script_event_s
 {	//Holds pointers to the commonly executed scripts for speedup. [Skotlex]
@@ -107,8 +108,13 @@ struct view_data* npc_get_viewdata(int class_)
 {	//Returns the viewdata for normal npc classes.
 	if( class_ == INVISIBLE_CLASS )
 		return &npc_viewdb[0];
-	if (npcdb_checkid(class_) || class_ == WARP_CLASS)
-		return &npc_viewdb[class_];
+	if (npcdb_checkid(class_) || class_ == WARP_CLASS){
+		if( class_ > MAX_NPC_CLASS2_START ){
+			return &npc_viewdb2[class_-MAX_NPC_CLASS2_START];
+		}else{
+			return &npc_viewdb[class_];
+		}
+	}
 	return NULL;
 }
 
@@ -1149,25 +1155,25 @@ int npc_globalmessage(const char* name, const char* mes)
 void run_tomb(struct map_session_data* sd, struct npc_data* nd)
 {
 	char buffer[200];
-    char time[10];
+	char time[10];
 
-    strftime(time, sizeof(time), "%H:%M", localtime(&nd->u.tomb.kill_time));
+	strftime(time, sizeof(time), "%H:%M", localtime(&nd->u.tomb.kill_time));
 
 	// TODO: Find exact color?
-	snprintf(buffer, sizeof(buffer), msg_txt(657), nd->u.tomb.md->db->name);
-    clif_scriptmes(sd, nd->bl.id, buffer);
+	snprintf(buffer, sizeof(buffer), msg_txt(sd,657), nd->u.tomb.md->db->name);
+	clif_scriptmes(sd, nd->bl.id, buffer);
 
-    clif_scriptmes(sd, nd->bl.id, msg_txt(658));
+	clif_scriptmes(sd, nd->bl.id, msg_txt(sd,658));
 
-    snprintf(buffer, sizeof(buffer), msg_txt(659), time);
-    clif_scriptmes(sd, nd->bl.id, buffer);
+	snprintf(buffer, sizeof(buffer), msg_txt(sd,659), time);
+	clif_scriptmes(sd, nd->bl.id, buffer);
 
-    clif_scriptmes(sd, nd->bl.id, msg_txt(660));
+	clif_scriptmes(sd, nd->bl.id, msg_txt(sd,660));
 
-	snprintf(buffer, sizeof(buffer), msg_txt(661), nd->u.tomb.killer_name[0] ? nd->u.tomb.killer_name : "Unknown");
-    clif_scriptmes(sd, nd->bl.id, buffer);
+	snprintf(buffer, sizeof(buffer), msg_txt(sd,661), nd->u.tomb.killer_name[0] ? nd->u.tomb.killer_name : "Unknown");
+	clif_scriptmes(sd, nd->bl.id, buffer);
 
-    clif_scriptclose(sd, nd->bl.id);
+	clif_scriptclose(sd, nd->bl.id);
 }
 
 /*==========================================
@@ -1329,10 +1335,10 @@ int npc_cashshop_buylist(struct map_session_data *sd, int points, int count, uns
 
         switch( pc_checkadditem(sd,nameid,amount) )
         {
-            case ADDITEM_NEW:
+            case CHKADDITEM_NEW:
                 new_++;
                 break;
-            case ADDITEM_OVERAMOUNT:
+            case CHKADDITEM_OVERAMOUNT:
                 return 3;
         }
 
@@ -1349,7 +1355,7 @@ int npc_cashshop_buylist(struct map_session_data *sd, int points, int count, uns
     // Payment Process ----------------------------------------------------
     if( sd->kafraPoints < points || sd->cashPoints < (vt - points) )
         return 6;
-    pc_paycash(sd,vt,points);
+	pc_paycash(sd,vt,points, LOG_TYPE_NPC);
 
     // Delivery Process ----------------------------------------------------
     for( i = 0; i < count; i++ )
@@ -1437,11 +1443,11 @@ int npc_cashshop_buy(struct map_session_data *sd, int nameid, int amount, int po
 
 	switch( pc_checkadditem(sd, nameid, amount) )
 	{
-		case ADDITEM_NEW:
+		case CHKADDITEM_NEW:
 			if( pc_inventoryblank(sd) == 0 )
 				return 3;
 			break;
-		case ADDITEM_OVERAMOUNT:
+		case CHKADDITEM_OVERAMOUNT:
 			return 3;
 	}
 
@@ -1464,7 +1470,7 @@ int npc_cashshop_buy(struct map_session_data *sd, int nameid, int amount, int po
 	if( (sd->kafraPoints < points) || (sd->cashPoints < price - points) )
 		return 6;
 
-	pc_paycash(sd, price, points);
+	pc_paycash(sd, price, points, LOG_TYPE_NPC);
 
 	if( !pet_create_egg(sd, nameid) )
 	{
@@ -1536,14 +1542,14 @@ int npc_buylist(struct map_session_data* sd, int n, unsigned short* item_list)
 
 		switch( pc_checkadditem(sd,nameid,amount) )
 		{
-			case ADDITEM_EXIST:
+			case CHKADDITEM_EXIST:
 				break;
 
-			case ADDITEM_NEW:
+			case CHKADDITEM_NEW:
 				new_++;
 				break;
 
-			case ADDITEM_OVERAMOUNT:
+			case CHKADDITEM_OVERAMOUNT:
 				return 2;
 		}
 
@@ -2132,6 +2138,10 @@ static const char* npc_parse_warp(char* w1, char* w2, char* w3, char* w4, const 
 		return strchr(start,'\n');// skip and continue
 	}
 
+	if( m != -1 && ( x < 0 || x >= map[m].xs || y < 0 || y >= map[m].ys ) ) { 
+		ShowWarning("npc_parse_warp: coordinates %d/%d are out of bounds in map %s(%dx%d), in file '%s', line '%d'\n", x, y, map[m].name, map[m].xs, map[m].ys,filepath,strline(buffer,start-buffer));
+	}
+
 	CREATE(nd, struct npc_data, 1);
 
 	nd->bl.id = npc_get_new_npc_id();
@@ -2196,6 +2206,10 @@ static const char* npc_parse_shop(char* w1, char* w2, char* w3, char* w4, const 
 
 		m = map_mapname2mapid(mapname);
 	}
+
+	if( m != -1 && ( x < 0 || x >= map[m].xs || y < 0 || y >= map[m].ys ) ) {
+		ShowWarning("npc_parse_shop: coordinates %d/%d are out of bounds in map %s(%dx%d), in file '%s', line '%d'\n", x, y, map[m].name, map[m].xs, map[m].ys,filepath,strline(buffer,start-buffer));
+	} 
 
 	if( !strcasecmp(w2,"cashshop") )
 		type = CASHSHOP;
@@ -2580,6 +2594,10 @@ const char* npc_parse_duplicate(char* w1, char* w2, char* w3, char* w4, const ch
 			return end;// next line, try to continue
 		}
 		m = map_mapname2mapid(mapname);
+	}
+
+	if( m != -1 && ( x < 0 || x >= map[m].xs || y < 0 || y >= map[m].ys ) ) {
+		ShowError("npc_parse_duplicate: coordinates %d/%d are out of bounds in map %s(%dx%d), in file '%s', line '%d'\n", x, y, map[m].name, map[m].xs, map[m].ys,filepath,strline(buffer,start-buffer));
 	}
 
 	if( type == WARP && sscanf(w4, "%d,%d", &xs, &ys) == 2 );// <spanx>,<spany>
@@ -3881,6 +3899,8 @@ int do_init_npc(void)
 	npc_viewdb[0].class_ = INVISIBLE_CLASS; //Invisible class is stored here.
 	for( i = 1; i < MAX_NPC_CLASS; i++ )
 		npc_viewdb[i].class_ = i;
+	for( i = MAX_NPC_CLASS2_START; i < MAX_NPC_CLASS2_END; i++ )
+		npc_viewdb2[i - MAX_NPC_CLASS2_START].class_ = i;
 
 	ev_db = strdb_alloc((DBOptions)(DB_OPT_DUP_KEY|DB_OPT_RELEASE_DATA),2*NAME_LENGTH+2+1);
 	npcname_db = strdb_alloc(DB_OPT_BASE,NAME_LENGTH);
