@@ -17,7 +17,7 @@
 
 struct npc_data;
 struct item_data;
-struct raChSysCh;
+struct Channel;
 
 enum E_MAPSERVER_ST {
 	MAPSERVER_ST_RUNNING = CORE_ST_LAST,
@@ -569,7 +569,7 @@ struct map_data {
 		unsigned guildlock :1;
 		unsigned src4instance : 1; // To flag this map when it's used as a src map for instances
 		unsigned reset :1; // [Daegaladh]
-		unsigned chsysnolocalaj : 1;
+		unsigned chmautojoin : 1; //prevent to auto join map channel
 
 		unsigned mobcantattackplayer : 1; // [Goddameit]
 		unsigned mobitemadder :1; // mobitemadder (Zephyr)
@@ -607,7 +607,7 @@ struct map_data {
 	int instance_src_map;
 
 	/* rAthena Local Chat */
-	struct raChSysCh *channel;
+	struct Channel *channel;
 };
 
 /// Stores information about a remote map (for multi-mapserver setups).

@@ -108,6 +108,12 @@ struct s_autobonus {
 	unsigned short pos;
 };
 
+enum npc_timeout_type {
+	NPCT_INPUT = 0,
+	NPCT_MENU  = 1,
+	NPCT_WAIT  = 2,
+};
+
 struct map_session_data {
 	struct block_list bl;
 	struct unit_data ud;
@@ -241,7 +247,7 @@ struct map_session_data {
 	unsigned int canskill_tick; // used to prevent abuse from no-delay ACT files
 	unsigned int cansendmail_tick; // [Mail System Flood Protection]
 	unsigned int ks_floodprotect_tick; // [Kill Steal Protection]
-	 unsigned int bloodylust_tick; // bloodylust player timer [out/in re full-heal protection]
+	unsigned int bloodylust_tick; // bloodylust player timer [out/in re full-heal protection]
 
 	struct {
 		short nameid;
@@ -473,7 +479,7 @@ struct map_session_data {
 	/**
 	 * For the Secure NPC Timeout option (check config/Secure.h) [RR]
 	 **/
-#if SECURE_NPCTIMEOUT
+#ifdef SECURE_NPCTIMEOUT
 	/**
 	 * ID of the timer
 	 * @info
@@ -487,6 +493,8 @@ struct map_session_data {
 	 * - It is updated on every NPC iteration as mentioned above
 	 **/
 	unsigned int npc_idle_tick;
+	/* */
+	enum npc_timeout_type npc_idle_type;
 #endif
 
 	struct {
@@ -503,11 +511,12 @@ struct map_session_data {
 	int shadowform_id;
 
 	/* Channel System [Ind] */
-	struct raChSysCh **channels;
+	struct Channel **channels;
 	unsigned char channel_count;
-	struct raChSysCh *gcbind;
+	struct Channel *gcbind;
 	bool stealth;
 	unsigned char fontcolor; /* debug-only */
+	unsigned int channel_tick;
 
 	// temporary debugging of bug #3504
 	const char* delunit_prevfile;

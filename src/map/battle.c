@@ -662,7 +662,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 					}
 				}
 				cardfix=cardfix*(100-tsd->subsize[sstatus->size])/100;
-	 			cardfix=cardfix*(100-tsd->subrace2[s_race2])/100;
+				cardfix=cardfix*(100-tsd->subrace2[s_race2])/100;
 				cardfix=cardfix*(100-tsd->subrace[sstatus->race])/100;
 				cardfix=cardfix*(100-tsd->subrace[is_boss(src)?RC_BOSS:RC_NONBOSS])/100;
 				if( sstatus->race != RC_DEMIHUMAN )
@@ -1189,7 +1189,9 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,struct Damag
 						break;
 					}
 		}
-		if( sc->data[SC_POISONINGWEAPON] && skill_id != GC_VENOMPRESSURE && (flag&BF_WEAPON) && damage > 0 && rnd()%100 < sc->data[SC_POISONINGWEAPON]->val3 )
+		if( sc->data[SC_POISONINGWEAPON]
+			&& ((flag&BF_WEAPON) && (!skill_id || skill_id == GC_VENOMPRESSURE)) //chk skill type poison_smoke is a unit
+			&& (damage > 0 && rnd()%100 < sc->data[SC_POISONINGWEAPON]->val3 )) //did some dammage and chance ok (why no additional effect ??
 			sc_start(src,bl,sc->data[SC_POISONINGWEAPON]->val2,100,sc->data[SC_POISONINGWEAPON]->val1,skill_get_time2(GC_POISONINGWEAPON, 1));
 		if( sc->data[SC__DEADLYINFECT] && damage > 0 && rnd()%100 < 65 + 5 * sc->data[SC__DEADLYINFECT]->val1 )
 			status_change_spread(src, bl);
@@ -1227,9 +1229,9 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,struct Damag
 	}
 
 	if( bl->type == BL_MOB && !status_isdead(bl) && src != bl) {
-	  if (damage > 0 )
+		if (damage > 0 )
 			mobskill_event((TBL_MOB*)bl,src,gettick(),flag);
-	  if (skill_id)
+		if (skill_id)
 			mobskill_event((TBL_MOB*)bl,src,gettick(),MSC_SKILLUSED|(skill_id<<16));
 	}
 	if( sd ) {
@@ -5296,10 +5298,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 
 	if( (s_bl = battle_get_master(src)) == NULL )
 		s_bl = src;
-		
-	if(s_bl->type == BL_MOB && t_bl->type == BL_PC && map[m].flag.mobcantattackplayer == 1 )	// [Goddameit]
-		return 0;
-		
+
 	if ( s_bl->type == BL_PC ) {
 		switch( t_bl->type ) {
 			case BL_MOB: // Source => PC, Target => MOB
@@ -5401,7 +5400,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 		//All else not specified is an invalid target.
 		default:
 			return 0;
-    } //end switch actual target
+	} //end switch actual target
 
 	switch( t_bl->type )
 	{	//Checks on target master
@@ -5435,7 +5434,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 			break;
 		}
 		default: break; //other type doesn't have slave yet
-    } //end switch master target
+	} //end switch master target
 
 	switch( src->type ) { //Checks on actual src type
 		case BL_PET:
@@ -5462,7 +5461,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 			if (t_bl->type == BL_MOB && ((TBL_MOB*)t_bl)->class_ == MOBID_EMPERIUM && flag&BCT_ENEMY)
 				return 0; //mercenary may not attack Emperium
 			break;
-    } //end switch actual src
+	} //end switch actual src
 
 	switch( s_bl->type )
 	{	//Checks on source master
@@ -5477,7 +5476,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 					strip_enemy = 0;
 				}
 				else if( sd->duel_group && !((!battle_config.duel_allow_pvp && map[m].flag.pvp) || (!battle_config.duel_allow_gvg && map_flag_gvg(m))) )
-		  		{
+				{
 					if( t_bl->type == BL_PC && (sd->duel_group == ((TBL_PC*)t_bl)->duel_group) )
 						return (BCT_ENEMY&flag)?1:-1; // Duel targets can ONLY be your enemy, nothing else.
 					else
@@ -6035,10 +6034,16 @@ static const struct _battle_data {
 	//Custom Setting
 	{ "mado_skill_limit",                   &battle_config.mado_skill_limit,                 1,     0,      1,        		},
 	{ "block_relocation",           		&battle_config.block_relocation,        		 1,     0,      1,              },
-	{ "magic_critical",           			&battle_config.magic_critical,        			 1,     0,      1,              },
 	{ "tickdead_noexp",           			&battle_config.tickdead_noexp,        			 1,     0,      1,              },
 	{ "identify_drop",						&battle_config.identify_drop,        			 1,     0,      1,              },
 
+	// Critical Weapon/Magic Skill
+	{ "scritical_set",						&battle_config.scritical_set,        			 1,     0,      3,              },
+	{ "scritical_ratio_skill",				&battle_config.scritical_ratio_skill,        			 0,     0,      10000,              },
+	{ "scritical_ratio_magic",				&battle_config.scritical_ratio_magic,        			 0,     0,      10000,              },
+	{ "scritical_dmg_skill",				&battle_config.scritical_dmg_skill,        			 5000,     1,      INT_MAX,              },
+	{ "scritical_dmg_magic",				&battle_config.scritical_dmg_magic,        			 5000,     1,      INT_MAX,              },
+		
 	//Extra Bonuses [Lilith]
 	{ "enable_extra_bonus",					&battle_config.enable_extra_bonus,				1,      0,      2				},
 	
@@ -6136,10 +6141,10 @@ void rAthena_report(char* date, char *time_c) {
 	config |= C_RENEWAL_ASPD;
 #endif
 
-/* not a ifdef because SECURE_NPCTIMEOUT is always defined, but either as 0 or higher */
-#if SECURE_NPCTIMEOUT
+#ifdef SECURE_NPCTIMEOUT
 	config |= C_SECURE_NPCTIMEOUT;
 #endif
+
 	/* non-define part */
 	if( db_use_sqldbs )
 		config |= C_SQL_DBS;

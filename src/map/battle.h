@@ -489,9 +489,11 @@ extern struct Battle_Config
 
 	int mado_skill_limit;
 	int block_relocation;
-	int magic_critical;
 	int tickdead_noexp;
 	int identify_drop;
+	
+	// Critical Weapon/Magic Skill
+	int scritical_set, scritical_ratio_skill, scritical_ratio_magic, scritical_dmg_skill, scritical_dmg_magic;
 	
 	//Extra Bonuses [Lilith]
 	int enable_extra_bonus;
