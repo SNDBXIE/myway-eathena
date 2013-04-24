@@ -48,6 +48,8 @@
 #include "log.h"
 #include "mail.h"
 #include "cashshop.h"
+#include "channel.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -554,7 +556,7 @@ int map_foreachinrange(int (*func)(struct block_list*,va_list), struct block_lis
 #ifdef CIRCULAR_AREA
 						&& check_distance_bl(center, bl, range)
 #endif
-					  	&& bl_list_count < BL_LIST_MAX )
+						&& bl_list_count < BL_LIST_MAX )
 						bl_list[ bl_list_count++ ] = bl;
 				}
 			}
@@ -1420,7 +1422,7 @@ int map_search_freecell(struct block_list *src, int16 m, int16 *x,int16 *y, int1
  * @amount quantity
  * @m, @x, @y mapid,x,y
  * @first_charid, @second_charid, @third_charid, looting priority
- * @flag: &1 MVP item. &2 do stacking check.
+ * @flag: &1 MVP item. &2 do stacking check. &4 bypass droppable check.
  *------------------------------------------*/
 int map_addflooritem(struct item *item_data,int amount,int16 m,int16 x,int16 y,int first_charid,int second_charid,int third_charid,int flags)
 {
@@ -1429,7 +1431,7 @@ int map_addflooritem(struct item *item_data,int amount,int16 m,int16 x,int16 y,i
 
 	nullpo_ret(item_data);
 
-	if(battle_config.item_onfloor && (itemdb_traderight(item_data->nameid)&1) )
+	if(!(flags&4) && battle_config.item_onfloor && (itemdb_traderight(item_data->nameid)&1) )
 		return 0; //can't be dropped
 
 	if(!map_searchrandfreecell(m,&x,&y,flags&2?1:0))
@@ -3549,7 +3551,7 @@ void do_final(void)
 	struct s_mapiterator* iter;
 
 	ShowStatus("Terminating...\n");
-	raChSys.closing = true;
+	Channel_Config.closing = true;
 
 	//Ladies and babies first.
 	iter = mapit_getallusers();
@@ -3565,8 +3567,7 @@ void do_final(void)
 		ShowStatus("Cleaning up maps [%d/%d]: %s..."CL_CLL"\r", i+1, map_num, map[i].name);
 		if (map[i].m >= 0) {
 			map_foreachinmap(cleanup_sub, i, BL_ALL);
-			if( map[i].channel != NULL )
-				clif_chsys_delete((struct raChSysCh *)map[i].channel);
+			channel_delete(map[i].channel);
 		}
 	}
 	ShowStatus("Cleaned up %d maps."CL_CLL"\n", map_num);
@@ -3597,6 +3598,7 @@ void do_final(void)
 	do_final_duel();
 	do_final_elemental();
 	do_final_cashshop();
+	do_final_channel(); //should be called after final guild
 
 	map_db->destroy(map_db, map_db_final);
 
@@ -3881,6 +3883,7 @@ int do_init(int argc, char *argv[])
 	do_init_atcommand();
 	do_init_battle();
 	do_init_instance();
+	do_init_channel();
 	do_init_chrif();
 	do_init_clif();
 	do_init_script();

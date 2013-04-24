@@ -16,11 +16,27 @@
  * Optional NPC Dialog Timer
  * When enabled all npcs dialog will 'timeout' if user is on idle for longer than the amount of seconds allowed
  * - On 'timeout' the npc dialog window changes its next/menu to a 'close' button
- * @values
- * - ? : Desired idle time in seconds (e.g. 10)
- * - 0 : Disabled
+ * Comment to disable the timer.
  **/
-#define SECURE_NPCTIMEOUT 0
+#define SECURE_NPCTIMEOUT
+
+/**
++ * Number of seconds after an 'input' field is displayed before invoking an idle timeout.
++ * Default: 180
+ **/
+#define NPC_SECURE_TIMEOUT_INPUT 180
+
+/**
++ * Number of seconds after a 'menu' is displayed before invoking an idle timeout.
++ * Default: 60
+ **/
+#define NPC_SECURE_TIMEOUT_MENU 60
+
+/**
++ * Number of seconds after a 'next' button is displayed before invoking an idle timeout.
++ * Default: 60
+ **/
+#define NPC_SECURE_TIMEOUT_NEXT 60
 
 /**
  * (Secure) Optional NPC Dialog Timer

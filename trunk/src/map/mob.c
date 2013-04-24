@@ -1830,7 +1830,7 @@ static int mob_delay_item_drop(int tid, unsigned int tick, int id, intptr_t data
 	while (ditem) {
 		map_addflooritem(&ditem->item_data,ditem->item_data.amount,
 			list->m,list->x,list->y,
-			list->first_charid,list->second_charid,list->third_charid,0);
+			list->first_charid,list->second_charid,list->third_charid,4);
 		ditem_prev = ditem;
 		ditem = ditem->next;
 		ers_free(item_drop_ers, ditem_prev);
@@ -2425,7 +2425,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				if(temp_rate > 0)
 					sprintf (message, msg_txt(NULL,541), mvp_sd->status.name, md->name, it->jname, (float)temp_rate/100);
 				else
-				sprintf (message, msg_txt(NULL,541), mvp_sd->status.name, md->name, it->jname, (float)drop_rate/100);
+					sprintf (message, msg_txt(NULL,541), mvp_sd->status.name, md->name, it->jname, (float)drop_rate/100);
 				//MSG: "'%s' won %s's %s (chance: %0.02f%%)"
 				intif_broadcast(message,strlen(message)+1,0);
 			}
@@ -2452,7 +2452,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 		if( map[m].mobitemadder_droplist[0].mob_id == md->class_ ) {
 			for( i = 1; i < sizeof( map[m].mobitemadder_droplist ); i = i + 1 ) {
 				drop_rate = map[m].mobitemadder_droplist[i].item_per;
-				if( rand() % 10000 > drop_rate )
+				if( rnd() % 10000 > drop_rate )
 					continue;
 				if( !ditem || !itemdb_exists( map[m].mobitemadder_droplist[i].item_id ) )
 					continue;

@@ -16,6 +16,7 @@
 #include "atcommand.h" // get_atcommand_level()
 #include "battle.h" // battle_config
 #include "battleground.h"
+#include "channel.h"
 #include "chrif.h"
 #include "clif.h"
 #include "date.h" // is_day_of_*()
@@ -971,12 +972,13 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	/**
 	 * For the Secure NPC Timeout option (check config/Secure.h) [RR]
 	 **/
-#if SECURE_NPCTIMEOUT
+#ifdef SECURE_NPCTIMEOUT
 	/**
 	 * Initialize to defaults/expected
 	 **/
 	sd->npc_idle_timer = INVALID_TIMER;
 	sd->npc_idle_tick = tick;
+	sd->npc_idle_type = NPCT_INPUT;
 #endif
 
 	sd->canuseitem_tick = tick;
@@ -1261,7 +1263,7 @@ int pc_reg_received(struct map_session_data *sd)
 		}
 
 		clif_changeoption( &sd->bl );
-	} 
+	}
 
 	return 1;
 }
@@ -4801,9 +4803,7 @@ int pc_setpos(struct map_session_data* sd, unsigned short mapindex, int x, int y
 			vending_closevending(sd);
 		}
 
-		if( raChSys.local && map[sd->bl.m].channel && idb_exists(map[sd->bl.m].channel->users, sd->status.char_id) ) {
-			clif_chsys_left(map[sd->bl.m].channel,sd);
-		}
+		channel_pcquit(sd,4); //quit map chan
 	}
 
 	if( m < 0 )
@@ -6602,6 +6602,10 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 				status_change_end(&devsd->bl, SC_DEVOTION, INVALID_TIMER);
 			sd->devotion[k] = 0;
 		}
+	if(sd->shadowform_id){ //if we were target of shadowform
+		status_change_end(map_id2bl(sd->shadowform_id), SC__SHADOWFORM, INVALID_TIMER);
+		sd->shadowform_id = 0; //should be remove on status end anyway
+	}
 
 	if(sd->status.pet_id > 0 && sd->pd) {
 		struct pet_data *pd = sd->pd;
@@ -6616,8 +6620,8 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 	}
 
 	if (sd->status.hom_id > 0){
-	    if(battle_config.homunculus_auto_vapor && sd->hd && !sd->hd->sc.data[SC_LIGHT_OF_REGENE])
-		    merc_hom_vaporize(sd, HOM_ST_ACTIVE);
+		if(battle_config.homunculus_auto_vapor && sd->hd && !sd->hd->sc.data[SC_LIGHT_OF_REGENE])
+			merc_hom_vaporize(sd, HOM_ST_ACTIVE);
 	}
 
 	if( sd->md )
@@ -6769,7 +6773,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 
 	// activate Steel body if a super novice dies at 99+% exp [celest]
 	if ((sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->state.snovice_dead_flag)
-  	{
+	{
 		unsigned int next = pc_nextbaseexp(sd);
 		if( next == 0 ) next = pc_thisbaseexp(sd);
 		if( get_percentage(sd->status.base_exp,next) >= 99 ) {
@@ -6803,14 +6807,14 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 				break;
 			}
 			if(base_penalty) {
-			  	if (battle_config.pk_mode && src && src->type==BL_PC)
+				if (battle_config.pk_mode && src && src->type==BL_PC)
 					base_penalty*=2;
 				sd->status.base_exp -= min(sd->status.base_exp, base_penalty);
 				clif_updatestatus(sd,SP_BASEEXP);
 			}
 		}
 		if(battle_config.death_penalty_job > 0)
-	  	{
+		{
 			base_penalty = 0;
 			switch (battle_config.death_penalty_type) {
 				case 1:
@@ -6821,14 +6825,14 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 				break;
 			}
 			if(base_penalty) {
-			  	if (battle_config.pk_mode && src && src->type==BL_PC)
+				if (battle_config.pk_mode && src && src->type==BL_PC)
 					base_penalty*=2;
 				sd->status.job_exp -= min(sd->status.job_exp, base_penalty);
 				clif_updatestatus(sd,SP_JOBEXP);
 			}
 		}
 		if(battle_config.zeny_penalty > 0 && !map[sd->bl.m].flag.nozenypenalty)
-	  	{
+		{
 			base_penalty = (unsigned int)((double)sd->status.zeny * (double)battle_config.zeny_penalty / 10000.);
 			if(base_penalty)
 				pc_payzeny(sd, base_penalty, LOG_TYPE_PICKDROP_PLAYER, NULL);
@@ -8541,7 +8545,7 @@ int pc_equipitem(struct map_session_data *sd,int n,int req_pos)
 
 	if(pos == EQP_ARMS && id->equip == EQP_HAND_R)
 	{	//Dual wield capable weapon.
-	  	pos = (req_pos&EQP_ARMS);
+		pos = (req_pos&EQP_ARMS);
 		if (pos == EQP_ARMS) //User specified both slots, pick one for them.
 			pos = sd->equip_index[EQI_HAND_R] >= 0 ? EQP_HAND_L : EQP_HAND_R;
 	}
@@ -9631,7 +9635,7 @@ int pc_readdb(void)
 	FILE *fp;
 	char line[24000],*p;
 
-    //reset
+	//reset
 	memset(exp_table,0,sizeof(exp_table));
 	memset(max_level,0,sizeof(max_level));
 
@@ -9678,7 +9682,7 @@ int pc_readdb(void)
 		//Reverse check in case the array has a bunch of trailing zeros... [Skotlex]
 		//The reasoning behind the -2 is this... if the max level is 5, then the array
 		//should look like this:
-	   //0: x, 1: x, 2: x: 3: x 4: 0 <- last valid value is at 3.
+		//0: x, 1: x, 2: x: 3: x 4: 0 <- last valid value is at 3.
 		while ((ui = max_level[job][type]) >= 2 && exp_table[job][type][ui-2] <= 0)
 			max_level[job][type]--;
 		if (max_level[job][type] < maxlv) {
@@ -9789,7 +9793,7 @@ int pc_readdb(void)
 	fclose(fp);
 	ShowStatus("Done reading '"CL_WHITE"%s"CL_RESET"'.\n","attr_fix.txt");
 
-    // reset then read statspoint
+	 // reset then read statspoint
 	memset(statp,0,sizeof(statp));
 	i=1;
 

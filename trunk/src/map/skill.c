@@ -2287,7 +2287,7 @@ void skill_combo(struct block_list* src,struct block_list *dsrc, struct block_li
 		case AC_DOUBLE: {
 			unsigned char race = status_get_race(bl);
 			if( (race == RC_BRUTE || race == RC_INSECT) && pc_checkskill(sd, HT_POWER))
-			    duration = 2000;
+				duration = 2000;
 			break;
 		}
 		case SR_DRAGONCOMBO:
@@ -2311,15 +2311,15 @@ void skill_combo(struct block_list* src,struct block_list *dsrc, struct block_li
 			break;
 		case MH_EQC:
 		case MH_MIDNIGHT_FRENZY:
-			if(hd->homunculus.spiritball >= 2) duration = 6000;
+			if(hd->homunculus.spiritball >= 2) duration = 2000;
 				delay=1;
 			break;
 		}
 	}
 
 	if (duration) { //Possible to chain
-		if(sd) duration = DIFF_TICK(sd->ud.canact_tick, tick);
-		if (duration < 1) duration = 1;
+		if(sd && duration==1) duration = DIFF_TICK(sd->ud.canact_tick, tick); //auto calc duration
+		duration = max(1,duration);
 		sc_start4(src,src,SC_COMBO,100,skill_id,bl->id,delay,0,duration);
 		clif_combo_delay(src, duration);
 	}
@@ -2372,6 +2372,7 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 	int type,damage,rdamage=0;
 	int8 rmdamage=0;//magic reflected
 	bool additional_effects = true;
+	bool scri_flag = false;
 
 	if(skill_id > 0 && !skill_lv) return 0;
 
@@ -2457,8 +2458,29 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 		 * Official Magic Reflection Behavior : damage reflected depends on gears caster wears, not target
 		 **/
 		#if MAGIC_REFLECTION_TYPE
-			if( dmg.dmg_lv != ATK_MISS )//Wiz SL cancelled and consumed fragment
-				dmg = battle_calc_attack(BF_MAGIC,bl,bl,skill_id,skill_lv,flag&0xFFF);
+			if( dmg.dmg_lv != ATK_MISS ){//Wiz SL cancelled and consumed fragment
+				short s_ele = skill_get_ele(skill_id, skill_lv);
+
+				if (s_ele == -1) // the skill takes the weapon's element
+					s_ele = sstatus->rhw.ele;
+				else if (s_ele == -2) //Use status element
+					s_ele = status_get_attack_sc_element(src,status_get_sc(src));
+				else if( s_ele == -3 ) //Use random element
+					s_ele = rnd()%ELE_MAX;
+
+				dmg.damage = battle_attr_fix(bl, bl, dmg.damage, s_ele, status_get_element(bl), status_get_element_level(bl));
+
+				if( sc && sc->data[SC_ENERGYCOAT] ) {
+					struct status_data *status = status_get_status_data(bl);
+					int per = 100*status->sp / status->max_sp -1; //100% should be counted as the 80~99% interval
+					per /=20; //Uses 20% SP intervals.
+					//SP Cost: 1% + 0.5% per every 20% SP
+					if (!status_charge(bl, 0, (10+5*per)*status->max_sp/1000))
+						status_change_end(bl, SC_ENERGYCOAT, INVALID_TIMER);
+					//Reduction: 6% + 6% every 20%
+					dmg.damage -= dmg.damage * (6 * (1+per)) / 100;
+				}
+		}
 		#endif
 		}
 		if(sc && sc->data[SC_MAGICROD] && src == dsrc) {
@@ -2535,6 +2557,59 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 	//combo handling
 	skill_combo(src,dsrc,bl,skill_id,skill_lv,tick);
 
+	// Critical Weapon/Magic Skill
+	// 0: Disable, 1: Skill Weapon Only, 2: Skill Magic Only, 3: All
+	if(battle_config.scritical_set > 0 && damage > 0 && ( src->type == BL_PC || battle_get_master(src)->type == BL_PC )){
+		switch(battle_config.scritical_set){
+			case 1:
+				if(skill_get_type(skill_id) == BF_WEAPON)
+					scri_flag = true;
+				break;
+			case 2:
+				if(skill_get_type(skill_id) == BF_MAGIC)
+					scri_flag = true;
+				break;
+			case 3:
+				scri_flag = true;
+				break;
+			default:
+				scri_flag = false;
+				break;
+		}
+		if( scri_flag = true){
+			int m_cri = 0;
+			if(skill_get_type(skill_id) == BF_WEAPON){
+				if(battle_config.scritical_ratio_skill > 0)
+					m_cri = battle_config.scritical_ratio_skill;
+				else{
+					if(sd==NULL)
+						m_cri = cap_value(map_id2sd(battle_get_master(src)->id)->battle_status.cri/10,1,100);
+					else
+						m_cri = cap_value(sd->battle_status.cri/10,1,100);				
+				}
+				if( rnd()%100 < m_cri && battle_config.scritical_dmg_skill > 0){
+					scri_flag = true;
+					damage += damage * (battle_config.scritical_dmg_skill /10000);
+				} else
+					scri_flag = false;
+			} else if(skill_get_type(skill_id) == BF_MAGIC){
+				if(battle_config.scritical_ratio_magic > 0)
+					m_cri = battle_config.scritical_ratio_magic;
+				else{
+					if(sd==NULL)
+						m_cri = cap_value(map_id2sd(battle_get_master(src)->id)->battle_status.cri/10,1,100);
+					else
+						m_cri = cap_value(sd->battle_status.cri/10,1,100);				
+				}
+				if( rnd()%100 < m_cri && battle_config.scritical_dmg_magic > 0){
+					scri_flag  = true;
+					damage += damage * (battle_config.scritical_dmg_magic /10000);
+				} else
+					scri_flag = false;
+			}
+		}
+	}
+	
 	//Display damage.
 	switch( skill_id ) {
 	case PA_GOSPEL: //Should look like Holy Cross [Skotlex]
@@ -2631,52 +2706,43 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 		if( flag&SD_ANIMATION && dmg.div_ < 2 ) //Disabling skill animation doesn't works on multi-hit.
 			type = 5;
 
-		//m_cri
-		if (( src->type == BL_PC || battle_get_master(src)->type == BL_PC ) && skill_get_type(skill_id) == BF_MAGIC && battle_config.magic_critical == 1)
+		// Critical Weapon/Magic Skill
+		if (scri_flag = true)
 		{
-			char m_cri = 0;
-			if(sd==NULL)
-				m_cri = cap_value(map_id2sd(battle_get_master(src)->id)->battle_status.cri/10,1,100);
-			else
-				m_cri = cap_value(sd->battle_status.cri/10,1,100);
-			if( rnd()%100 < m_cri )
-			{
-				struct mob_data *md=NULL;
-				struct tmp_data *tmpd=NULL;
-				int d_ = 200;
-				unsigned int u_ = 0;
-				int i=0, num=abs(skill_get_num(skill_id,skill_lv)), _damage=0;
-				damage *= 2;	
-				md = mob_once_spawn_sub(src, src->m, src->x, src->y, "--en--",1083,"", SZ_SMALL, AI_NONE);
-				md->deletetimer=add_timer(tick+d_*num+1,mob_timer_delete,md->bl.id,0);
-				status_set_viewdata(&md->bl, INVISIBLE_CLASS);
-				tmpd = &md->tmpd;				
-				if(skill_get_splash(skill_id,skill_lv)>1&&num>1)
-					num = 1;
-				_damage = damage/num;
-				tmpd->src = src;
-				tmpd->bl = bl;
-				if(bl->type != BL_PC){
-					tmpd->num[0]=skill_id;
-					tmpd->num[1]=skill_lv;
-					u_ = tick+d_*num+1;
-					if( tstatus->hp <= damage )//delay to kill it
-					{
-						damage = 1;
-						status_change_start(src, bl, SC_BLADESTOP_WAIT, 10000, 1, 0, 0, 0, u_, 2);
-						status_change_start(src, bl, SC_INVINCIBLE, 10000, 1, 0, 0, 0, u_, 2);
-						add_timer(u_,skill_mcri_kill_delay,bl->id,(intptr_t)src);
-					}
+			struct mob_data *md=NULL;
+			struct tmp_data *tmpd=NULL;
+			int d_ = 200;
+			unsigned int u_ = 0;
+			int i=0, num=abs(skill_get_num(skill_id,skill_lv)), _damage=0;
+			md = mob_once_spawn_sub(src, src->m, src->x, src->y, "--en--",1083,"", SZ_SMALL, AI_NONE);
+			md->deletetimer=add_timer(tick+d_*num+1,mob_timer_delete,md->bl.id,0);
+			status_set_viewdata(&md->bl, INVISIBLE_CLASS);
+			tmpd = &md->tmpd;				
+			if(skill_get_splash(skill_id,skill_lv)>1&&num>1)
+				num = 1;
+			_damage = damage/num;
+			tmpd->src = src;
+			tmpd->bl = bl;
+			if(bl->type != BL_PC){
+				tmpd->num[0]=skill_id;
+				tmpd->num[1]=skill_lv;
+				u_ = tick+d_*num+1;
+				if( tstatus->hp <= damage )//delay to kill it
+				{
+					damage = 1;
+					status_change_start(src, bl, SC_BLADESTOP_WAIT, 10000, 1, 0, 0, 0, u_, 2);
+					status_change_start(src, bl, SC_INVINCIBLE, 10000, 1, 0, 0, 0, u_, 2);
+					add_timer(u_,skill_mcri_kill_delay,bl->id,(intptr_t)src);
 				}
-				clif_skill_nodamage(src,src,skill_id,skill_lv,1);
-				for(i=0;i<num;i++)
-					if(md!=NULL)
-						add_timer(tick+d_*i +1,skill_mcri_hit,_damage,(intptr_t)md);
-					else
-						add_timer(tick+200*i,skill_mcri_hit,_damage,(intptr_t)sd);
-				u_ = d_ = _damage = 0;
-				break;
 			}
+			clif_skill_nodamage(src,src,skill_id,skill_lv,1);
+			for(i=0;i<num;i++)
+				if(md!=NULL)
+					add_timer(tick+d_*i +1,skill_mcri_hit,_damage,(intptr_t)md);
+				else
+					add_timer(tick+200*i,skill_mcri_hit,_damage,(intptr_t)sd);
+			u_ = d_ = _damage = 0;
+			break;
 		}
 
 		if( bl->type == BL_SKILL ){
@@ -2692,7 +2758,7 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 
 	if(damage > 0 && dmg.flag&BF_SKILL && tsd
 		&& pc_checkskill(tsd,RG_PLAGIARISM)
-	  	&& (!sc || !sc->data[SC_PRESERVE])
+		&& (!sc || !sc->data[SC_PRESERVE])
 		&& damage < tsd->battle_status.hp)
 	{	//Updated to not be able to copy skills if the blow will kill you. [Skotlex]
 		int copy_skill = skill_id;
@@ -4461,6 +4527,9 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, uint
 				if( !skill_check_condition_castbegin(sd, skill_id, skill_lv) )
 					break;
 
+				// SC_MAGICPOWER needs to switch states before any damage is actually dealt
+				skill_toggle_magicpower(src, skill_id);
+
 				switch( skill_get_casttype(skill_id) )
 				{
 					case CAST_GROUND:
@@ -4574,7 +4643,7 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, uint
 					item_tmp.nameid = sg->item_id?sg->item_id:ITEMID_TRAP;
 					item_tmp.identify = 1;
 					if( item_tmp.nameid )
-						map_addflooritem(&item_tmp,1,bl->m,bl->x,bl->y,0,0,0,0);
+						map_addflooritem(&item_tmp,1,bl->m,bl->x,bl->y,0,0,0,4);
 				}
 				skill_delunit(su);
 			}
@@ -7051,7 +7120,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 								if( item_tmp.nameid && (flag=pc_additem(sd,&item_tmp,skill_db[su->group->skill_id].amount[i],LOG_TYPE_OTHER)) )
 								{
 									clif_additem(sd,0,0,flag);
-									map_addflooritem(&item_tmp,skill_db[su->group->skill_id].amount[i],sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0);
+									map_addflooritem(&item_tmp,skill_db[su->group->skill_id].amount[i],sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,4);
 								}
 							}
 						}
@@ -7065,7 +7134,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 						if( item_tmp.nameid && (flag=pc_additem(sd,&item_tmp,1,LOG_TYPE_OTHER)) )
 						{
 							clif_additem(sd,0,0,flag);
-							map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0);
+							map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,4);
 						}
 					}
 				}
@@ -12992,7 +13061,7 @@ int skill_check_condition_castbegin(struct map_session_data* sd, uint16 skill_id
 			break;
 
 		case HT_POWER:
-			if(!(sc && sc->data[SC_COMBO] && sc->data[SC_COMBO]->val1 == skill_id))
+			if(!(sc && sc->data[SC_COMBO] && sc->data[SC_COMBO]->val1 == AC_DOUBLE))
 				return 0;
 			break;
 
@@ -15776,7 +15845,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 					memset(&item_tmp,0,sizeof(item_tmp));
 					item_tmp.nameid = group->item_id?group->item_id:ITEMID_TRAP;
 					item_tmp.identify = 1;
-					map_addflooritem(&item_tmp,1,bl->m,bl->x,bl->y,0,0,0,0);
+					map_addflooritem(&item_tmp,1,bl->m,bl->x,bl->y,0,0,0,4);
 				}
 				skill_delunit(unit);
 			}
