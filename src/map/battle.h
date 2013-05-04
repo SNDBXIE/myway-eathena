@@ -220,6 +220,7 @@ extern struct Battle_Config
 	int wedding_ignorepalette;	//[Skotlex]
 	int xmas_ignorepalette;	// [Valaris]
 	int summer_ignorepalette; // [Zephyrus]
+	int hanbok_ignorepalette;
 	int natural_healhp_interval;
 	int natural_healsp_interval;
 	int natural_heal_skill_interval;
@@ -486,7 +487,8 @@ extern struct Battle_Config
 	int max_walk_path;
 	int item_enabled_npc;
 	int item_onfloor; // Whether to drop an undroppable item on the map or destroy it if inventory is full.
-
+	int bowling_bash_area;
+	
 	int mado_skill_limit;
 	int block_relocation;
 	int tickdead_noexp;

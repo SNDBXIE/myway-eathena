@@ -613,7 +613,7 @@ int guild_invite(struct map_session_data *sd, struct map_session_data *tsd) {
 		return 0; //Invite permission.
 
 	if(!battle_config.invite_request_check) {
-        if (tsd->party_invite > 0 || tsd->trade_partner || tsd->adopt_invite) { //checking if there no other invitation pending
+	if (tsd->party_invite > 0 || tsd->trade_partner || tsd->adopt_invite) { //checking if there no other invitation pending
 			clif_guild_inviteack(sd,0);
 			return 0;
 		}
@@ -632,7 +632,7 @@ int guild_invite(struct map_session_data *sd, struct map_session_data *tsd) {
 		return 0;
 	}
 
-    //search an empty spot in guild
+	//search an empty spot in guild
 	ARR_FIND( 0, g->max_member, i, g->member[i].account_id == 0 );
 	if(i==g->max_member){
 		clif_guild_inviteack(sd,3);
@@ -694,7 +694,7 @@ int guild_reply_invite(struct map_session_data* sd, int guild_id, int flag)
 			if( tsd ) clif_guild_inviteack(tsd,3);
 			return 0;
 		}
-		sd->guild = g;
+
 		guild_makemember(&m,sd);
 		intif_guild_addmember(guild_id, &m);
 		//TODO: send a minimap update to this player
@@ -747,7 +747,7 @@ int guild_member_added(int guild_id,int account_id,int char_id,int flag)
 		return 0;
 
 	if(sd==NULL || sd->guild_invite==0){
-        // cancel if player not present or invalide guild_id invitation
+	// cancel if player not present or invalide guild_id invitation
 		if (flag == 0) {
 			ShowError("guild: member added error %d is not online\n",account_id);
  			intif_guild_leave(guild_id,account_id,char_id,0,"** Data Error **");
@@ -758,15 +758,16 @@ int guild_member_added(int guild_id,int account_id,int char_id,int flag)
 	sd->guild_invite = 0;
 	sd->guild_invite_account = 0;
 
-    if (flag == 1) { //failure
+	if (flag == 1) { //failure
 		if( sd2!=NULL )
 			clif_guild_inviteack(sd2,3);
 		return 0;
 	}
 
-    //if all ok add player to guild
+	//if all ok add player to guild
 	sd->status.guild_id = g->guild_id;
 	sd->guild_emblem_id = g->emblem_id;
+	sd->guild = g;
 	//Packets which were sent in the previous 'guild_sent' implementation.
 	clif_guild_belonginfo(sd,g);
 	clif_guild_notice(sd,g);

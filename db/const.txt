@@ -304,6 +304,7 @@ Option_Summer	0x40000
 Option_Wug	0x100000
 Option_Wugrider	0x200000
 Option_Hanbok	0x8000000
+Option_Mounting	0x10000000
 
 bc_all	0
 bc_map	1
@@ -367,6 +368,13 @@ mf_monster_noteleport	49
 mf_pvp_nocalcrank	50
 mf_battleground	51
 mf_reset	52
+mf_channoautojoin	53
+mf_nousecart	54
+mf_noitemconsumption	55
+mf_sumstartmiracle	56
+mf_nomineeffect	57
+mf_nolockon	58
+
 mf_noequip	98
 mf_mobcantattackplayer	99
 
@@ -1290,6 +1298,8 @@ SC_MAGMA_FLOW	548
 SC_PYROCLASTIC	549
 SC_PARALYSIS	550
 SC_PAIN_KILLER	551
+SC_EXTREMITYFIST2	552
+SC_HANBOK	553
 
 e_gasp	0
 e_what	1

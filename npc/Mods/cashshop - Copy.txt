@@ -1,0 +1,125 @@
+-	script	CashShop	-1,{
+	mes "[Cash&Rental Shop]";
+	mes "ท่านสามารถใช้ CASH ในการซื้อของ";
+	mes "Item มีราคาตามที่ท่านเห็น";
+	mes "แต่ไม่คิดราคาจากการ DC";
+	next;
+	mes "[Cash&Rental Shop]";
+	mes "สามารถหาได้โดย";
+	mes "1. การออนไลน์ครบ 1 ชั่วโมง";
+	mes "2. การโอนเงินเข้าธนาคาร";
+//	mes "3. บัตรทรูมันนี่ ทรูมูฟ และ วันทูคอล";
+	mes "เชิญเลือกจับจ่ายใช้สอยได้ตามสบาย";
+	mes " ";
+	dispbottom "ท่านมี Point อยู่ทั้งสิ้น "+#Point+" Point";
+	next;
+
+	switch(select("Tools Cash Shop 1","Tools Cash Shop 2","Tools Cash Shop 3","Tools Cash Shop 4","Tools Cash Shop 5","ยกเลิก")){
+		case 1:
+			close2;
+			callshop "ToolsCashShop1",1;
+			npcshopattach "ToolsCashShop1";
+			end;
+			break;
+		case 2:
+			close2;
+			callshop "ToolsCashShop2",1;
+			npcshopattach "ToolsCashShop2";
+			end;
+			break;
+		case 3:
+			close2;
+			callshop "ToolsCashShop3",1;
+			npcshopattach "ToolsCashShop3";
+			end;
+			break;
+		case 4:
+			close2;
+			callshop "ToolsCashShop4",1;
+			npcshopattach "ToolsCashShop4";
+			end;
+			break;
+		case 5:
+			close2;
+			callshop "ToolsCashShop5",1;
+			npcshopattach "ToolsCashShop5";
+			end;
+			break;
+		case 6:
+			close;
+			break;
+	}
+	close;
+	
+OnBuyItem:
+	if(getarraysize(@bought_nameid)==1 && getiteminfo(@bought_nameid[0],2)==5 && (getiteminfo(@bought_nameid[0],5)==1 || getiteminfo(@bought_nameid[0],5)==256 || getiteminfo(@bought_nameid[0],5)==512)){
+		mes "[Cash&Rental Shop]";
+		mes "ท่านสามารถเลือกได้ว่าจะทดลองสวมใส่หรือว่าจะซื้อมัน";
+		mes "หากท่านเลือกทดลองสวมใส่ เมื่อปิดหน้าต่างก็จะกลับเป็นเช่นเดิม";
+		mes "ท่านจะไม่ได้รับคุณสมบัติพิเศษของหมวกที่ท่านทดลองสวมใส่";
+		next;
+		switch(select("ข้าต้องการซื้อ","ข้าอยากทดลองใส่ดู","ไม่ละ ข้าไม่ต้องการ")){
+			case 1:
+				goto BuyCash;
+				break;
+			case 2:
+				nude;
+				set @view, getiteminfo(@bought_nameid[0], 11);
+				atcommand "@changelook " + @view;
+				mes "[Cash&Rental Shop]";
+				mes "เมื่อปิดหน้าต่างก็จะกลับเป็นเช่นเดิม";
+				close2;
+				atcommand "@changelook 0";
+				break;
+			case 3:
+				mes "[Cash&Rental Shop]";
+				mes "ขอบคุณที่ใช้บริการ";
+				close;
+				break;
+		}
+		end;
+	} else {
+		goto BuyCash;
+	}
+	end;
+
+BuyCash:
+	//คำนวณ point ที่ใช้ซื้อ
+	set @cashsum,0;
+	for(set @i,0; @i < getarraysize(@bought_nameid); set @i,@i+1){
+		if(getiteminfo(@bought_nameid[@i],0) <= 0 || @bought_quantity[@i] <= 0){
+			mes "[Cash&Rental Shop]";
+			mes "ไม่สามารถคำนวณ Point ที่ใช้ซื้อได้ กรุณาติดต่อ GM";
+			close;
+		}
+		set @cashsum,@cashsum+(getiteminfo(@bought_nameid[@i],0) * @bought_quantity[@i]);
+	}
+	if(@cashsum <= 0) {
+		mes "[Cash&Rental Shop]";
+		mes "ไม่สามารถคำนวณ Point ที่ใช้ซื้อได้ กรุณาติดต่อ GM";
+		close;
+	}
+	if(#Point < @cashsum){
+		mes "[Cash&Rental Shop]";
+		mes "Point ของท่านไม่เพียงพอที่จะซื้อของจากร้านได้";
+		close;
+	}
+	set #Point,#Point-@cashsum;
+	query_sql "insert into gmlog values ("+getcharid(3)+","+getcharid(0)+",'Buy item: "+@cashsum+"',now())";	
+	for(set @i,0; @i < getarraysize(@bought_nameid); set @i,@i+1){
+		getitem @bought_nameid[@i],@bought_quantity[@i];
+	}
+	dispbottom "ท่านใช้ Point ซื้อของไปทั้งสิ้น "+@cashsum+" Point คงเหลืออยู่ "+#Point+" Point";
+	end;
+
+OnInit:
+	npcshopitem "RentalShop",501,-1;
+	waitingroom "[> Cash Shop <]",0;
+	end;
+}
+
+-	shop	ToolsCashShop1	-1,12210:-1,14533:-1,14545:-1,13995:-1,13989:-1,14004:-1,13762:-1,13761:-1,13996:-1,13999:-1,14168:-1,14176:-1,14177:-1,14159:-1,14160:-1,14161:-1,14162:-1,14163:-1,14164:-1,6223:-1,6224:-1,12103:-1
+-	shop	ToolsCashShop2	-1,13024:-1,13025:-1,13409:-1,1173:-1,1267:-1,1273:-1,1373:-1,13026:-1,1419:-1,1372:-1,1174:-1,1565:-1,1228:-1,1230:-1,13021:-1,13017:-1
+-	shop	ToolsCashShop3	-1,5266:-1,2702:-1,5326:-1,5374:-1,5325:-1,5429:-1,5269:-1,5376:-1,2423:-1,2115:-1,2357:-1,2554:-1,2374:-1,2375:-1,2689:-1,2691:-1,2688:-1,2695:-1,2711:-1,2696:-1,2697:-1,2698:-1,2699:-1,4709:-1,4719:-1,4729:-1,4739:-1,4749:-1,4759:-1,2729:-1,2710:-1,2701:-1
+-	shop	ToolsCashShop4	-1,6210:-1,6211:-1,6212:-1,6213:-1,6214:-1,6215:-1,6216:-1,6217:-1,12717:-1,12718:-1,12719:-1,12720:-1,12721:-1,12722:-1,12723:-1,12724:-1,12725:-1,12726:-1,12727:-1,12728:-1,12729:-1,12730:-1,12731:-1,12732:-1,12733:-1,12075:-1
+-	shop	ToolsCashShop5	-1,5451:-1,5452:-1,5453:-1,5564:-1,5512:-1,5513:-1,5514:-1,5515:-1,5545:-1,5546:-1,5549:-1,5550:-1,5569:-1,5570:-1,5581:-1,5582:-1,5588:-1,5589:-1,5592:-1,5598:-1,5599:-1,5662:-1,5663:-1,5676:-1,5677:-1,5739:-1,5740:-1,5744:-1,5745:-1

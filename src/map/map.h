@@ -570,8 +570,12 @@ struct map_data {
 		unsigned src4instance : 1; // To flag this map when it's used as a src map for instances
 		unsigned reset :1; // [Daegaladh]
 		unsigned chmautojoin : 1; //prevent to auto join map channel
-
-		unsigned mobcantattackplayer : 1; // [Goddameit]
+		unsigned nousecart : 1;	//prevent open up cart @FIXME client side only atm
+		unsigned noitemconsumption : 1; //prevent item usage
+		unsigned nosumstarmiracle : 1; //allow SG miracle to happen ?
+		unsigned nomineeffect : 1; //allow /mineeffect
+		unsigned nolockon : 1;
+		
 		unsigned mobitemadder :1; // mobitemadder (Zephyr)
 		unsigned noequip : 1;	//mf_noequip
 	} flag;

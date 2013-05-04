@@ -1629,6 +1629,7 @@ packet_ver: 26
 0x0857,-1
 0x0858,-1
 0x0859,-1
+0x08d0,9
 
 //2011-10-05aRagexeRE
 packet_ver: 27
@@ -1645,6 +1646,7 @@ packet_ver: 27
 0x0838,6,solvecharname,2
 0x0439,8,useitem,2:4
 0x08d2,10
+0x08d1,7
 
 // 2011-11-02aRagexe
 packet_ver: 28
@@ -1756,6 +1758,7 @@ packet_ver: 30
 0x08D7,28,battlegroundreg,2:4 //Added to prevent disconnections
 0x08CF,10 //Amulet spirits
 0x0977,14 //Monster HP Bar
+0x0916,26,guildinvite2,2
 
 //2012-04-18aRagexeRE [Special Thanks to Judas!]
 packet_ver:31
@@ -1801,7 +1804,7 @@ packet_ver: 33
 packet_ver: 34
 0x01FD,15,repairitem,2
 0x086D,26,friendslistadd,2
-0x0897,5,hommenu,2:4
+0x0897,5,changedir,2:4
 0x0947,36,storagepassword,0
 0x086F,26,partyinvite2,2
 0x0888,19,wanttoconnection,2:6:10:14:18
@@ -1809,7 +1812,7 @@ packet_ver: 34
 0x089B,10,useskilltoid,2:4:6
 0x0881,5,walktoxy,2
 0x0363,6,ticksend,2
-0x093F,5,changedir,2:4
+0x093F,5,hommenu,2:4
 0x0933,6,takeitem,2
 0x0438,6,dropitem,2:4
 0x08AC,8,movetokafra,2:4
@@ -1826,12 +1829,23 @@ packet_ver: 34
 0x0998,8,equipitem,2:4
 //0x0281,-1,itemlistwindowselected,2:4:8
 0x0938,-1,reqopenbuyingstore,2:4:8:9:89
-//0x0817,2,reqclosebuyingstore,0
-//0x0360,6,reqclickbuyingstore,2
+0x0886,2,reqclosebuyingstore,0
+0x035f,6,reqclickbuyingstore,2
 0x0922,-1,reqtradebuyingstore,2:4:8:12
 0x094E,-1,searchstoreinfo,2:4:5:9:13:14:15
 //0x0835,2,searchstoreinfonextpage,0
 //0x0838,12,searchstoreinfolistitemclick,2:6:10
+0x0447,2
+0x990,31 //additem
+0x99b,8 //maptypeproperty2
+0x84b,19 //fallitem4
+0x090f,-1 // notify_newentry7
+0x914,-1 // notify_moveentry
+0x915,-1 // notify_standentry
+0x99a,9 // take_off_equipv5
+0x997,-1 //ZC_EQUIPWIN_MICROSCOPE_V5
+0x998,8,equipitem,2:4
+0x999,11 // cz_wear_equipv5
 
 // New cashshop
 0x0844,2,cashshopopen,0

@@ -1255,14 +1255,13 @@ int status_damage(struct block_list *src,struct block_list *target,int hp, int s
 		unit_stop_walking( target, 1 );
 	}
 
-	if( status->hp || (flag&8) )
-	{	//Still lives or has been dead before this damage.
+	if( status->hp || (flag&8) ) { //Still lives or has been dead before this damage.
 		if (walkdelay)
 			unit_set_walkdelay(target, gettick(), walkdelay, 0);
 		return hp+sp;
 	}
 
-	status->hp = 1; //To let the dead function cast skills and all that.
+	status->hp = 0;
 	//NOTE: These dead functions should return: [Skotlex]
 	//0: Death cancelled, auto-revived.
 	//Non-zero: Standard death. Clear status, cancel move/attack, etc
@@ -1283,13 +1282,11 @@ int status_damage(struct block_list *src,struct block_list *target,int hp, int s
 		return hp+sp;
 
 	//Normal death
-	status->hp = 0;
 	if (battle_config.clear_unit_ondeath &&
 		battle_config.clear_unit_ondeath&target->type)
 		skill_clear_unitgroup(target);
 
-	if(target->type&BL_REGEN)
-	{	//Reset regen ticks.
+	if(target->type&BL_REGEN) { //Reset regen ticks.
 		struct regen_data *regen = status_get_regen_data(target);
 		if (regen) {
 			memset(&regen->tick, 0, sizeof(regen->tick));
@@ -1300,8 +1297,7 @@ int status_damage(struct block_list *src,struct block_list *target,int hp, int s
 		}
 	}
 
-	if( sc && sc->data[SC_KAIZEL] && !map_flag_gvg(target->m) )
-	{ //flag&8 = disable Kaizel
+	if( sc && sc->data[SC_KAIZEL] && !map_flag_gvg(target->m) ) { //flag&8 = disable Kaizel
 		int time = skill_get_time2(SL_KAIZEL,sc->data[SC_KAIZEL]->val1);
 		//Look for Osiris Card's bonus effect on the character and revive 100% or revive normally
 		if ( target->type == BL_PC && BL_CAST(BL_PC,target)->special_state.restart_full_recover )
@@ -1317,10 +1313,10 @@ int status_damage(struct block_list *src,struct block_list *target,int hp, int s
 
 		return hp+sp;
 	}
-	if(target->type == BL_PC){
+	if(target->type == BL_PC) {
 		TBL_PC *sd = BL_CAST(BL_PC,target);
 		TBL_HOM *hd = sd->hd;
-		if(hd && hd->sc.data[SC_LIGHT_OF_REGENE]){
+		if(hd && hd->sc.data[SC_LIGHT_OF_REGENE]) {
 			status_change_clear(target,0);
 			clif_skillcasting(&hd->bl, hd->bl.id, target->id, 0,0, MH_LIGHT_OF_REGENE, skill_get_ele(MH_LIGHT_OF_REGENE, 1), 10); //just to display usage
 			clif_skill_nodamage(&sd->bl, target, ALL_RESURRECTION, 1, status_revive(&sd->bl,hd->sc.data[SC_LIGHT_OF_REGENE]->val2,0));
@@ -1328,7 +1324,7 @@ int status_damage(struct block_list *src,struct block_list *target,int hp, int s
 			return hp + sp;
 		}
 	}
-	if (target->type == BL_MOB && sc && sc->data[SC_REBIRTH] && !((TBL_MOB*) target)->state.rebirth) {// Ensure the monster has not already rebirthed before doing so.
+	if (target->type == BL_MOB && sc && sc->data[SC_REBIRTH] && !((TBL_MOB*) target)->state.rebirth) { // Ensure the monster has not already rebirthed before doing so.
 		status_revive(target, sc->data[SC_REBIRTH]->val2, 0);
 		status_change_clear(target,0);
 		((TBL_MOB*)target)->state.rebirth = 1;
@@ -1343,8 +1339,7 @@ int status_damage(struct block_list *src,struct block_list *target,int hp, int s
 	else
 	if(flag&2) //remove from map
 		unit_remove_map(target,CLR_DEAD);
-	else
-	{ //Some death states that would normally be handled by unit_remove_map
+	else { //Some death states that would normally be handled by unit_remove_map
 		unit_stop_attack(target);
 		unit_stop_walking(target,1);
 		unit_skillcastcancel(target,0);
@@ -3601,8 +3596,7 @@ void status_calc_state( struct block_list *bl, struct status_change *sc, enum sc
 				  || (sc->data[SC_BASILICA] && sc->data[SC_BASILICA]->val4 == bl->id) // Basilica caster cannot move
 				  || (sc->data[SC_GRAVITATION] && sc->data[SC_GRAVITATION]->val3 == BCT_SELF)
 				  || (sc->data[SC_CRYSTALIZE] && bl->type != BL_MOB)
-				  || (sc->data[SC_CAMOUFLAGE] && sc->data[SC_CAMOUFLAGE]->val1 < 3
-							&& !(sc->data[SC_CAMOUFLAGE]->val3&1))
+				  || (sc->data[SC_CAMOUFLAGE] && sc->data[SC_CAMOUFLAGE]->val1 < 3)
 				 ) {
 			sc->cant.move += ( start ? 1 : -1 );
 		}
@@ -5257,7 +5251,7 @@ static unsigned short status_calc_speed(struct block_list *bl, struct status_cha
 					val = max( val, 70 );
 				if( sc->data[SC_MARSHOFABYSS] )
 					val = max( val, 40 + 10 * sc->data[SC_MARSHOFABYSS]->val1 );
-				if( sc->data[SC_CAMOUFLAGE] && (sc->data[SC_CAMOUFLAGE]->val3&1) == 0 )
+				if( sc->data[SC_CAMOUFLAGE] )
 					val = max( val, sc->data[SC_CAMOUFLAGE]->val1 < 3 ? 0 : 25 * (5 - sc->data[SC_CAMOUFLAGE]->val1) );
 				if( sc->data[SC__GROOMY] )
 					val = max( val, sc->data[SC__GROOMY]->val2);
@@ -6131,6 +6125,8 @@ void status_set_viewdata(struct block_list *bl, int class_)
 					class_ = JOB_SUMMER;
 				else if (sd->sc.option&OPTION_XMAS)
 					class_ = JOB_XMAS;
+				else if (sd->sc.option&OPTION_HANBOK)
+					class_ = JOB_HANBOK;
 				else if (sd->sc.option&OPTION_RIDING) {
 					switch (class_) {	//Adapt class to a Mounted one.
 						case JOB_KNIGHT:
@@ -6236,6 +6232,7 @@ void status_set_viewdata(struct block_list *bl, int class_)
 		(vd->class_==JOB_WEDDING && battle_config.wedding_ignorepalette)
 		|| (vd->class_==JOB_XMAS && battle_config.xmas_ignorepalette)
 		|| (vd->class_==JOB_SUMMER && battle_config.summer_ignorepalette)
+		|| (vd->class_ == JOB_HANBOK && battle_config.hanbok_ignorepalette)
 	))
 		vd->cloth_color = 0;
 }
@@ -6760,7 +6757,8 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
 
 	case SC_INCREASEAGI:
 		 if(sd && pc_issit(sd)){
-			 pc_setstand(sd);
+			pc_setstand(sd);
+			skill_sit(sd,0);
 		 }
 
 	case SC_CONCENTRATE:
@@ -7004,6 +7002,14 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
 			case SC_MAGNETICFIELD:
 
 				return 0;
+		}
+	}
+	//Check for mvp resistance //atm only those who OS
+	if(status->mode&MD_MVP && !(flag&1)) {
+		 switch (type) {
+		 case SC_COMA:
+		//continue list...
+		     return 0;
 		}
 	}
 
@@ -7571,6 +7577,7 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
 		case SC_WEDDING:
 		case SC_XMAS:
 		case SC_SUMMER:
+		case SC_HANBOK:
 			if (!vd) return 0;
 			//Store previous values as they could be removed.
 			val1 = vd->class_;
@@ -7580,7 +7587,7 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
 			unit_stop_attack(bl);
 			clif_changelook(bl,LOOK_WEAPON,0);
 			clif_changelook(bl,LOOK_SHIELD,0);
-			clif_changelook(bl,LOOK_BASE,type==SC_WEDDING?JOB_WEDDING:type==SC_XMAS?JOB_XMAS:JOB_SUMMER);
+			clif_changelook(bl,LOOK_BASE,type==SC_WEDDING?JOB_WEDDING:type==SC_XMAS?JOB_XMAS:type==SC_SUMMER?JOB_SUMMER:JOB_HANBOK);
 			clif_changelook(bl,LOOK_CLOTHES_COLOR,vd->cloth_color);
 			break;
 		case SC_NOCHAT:
@@ -8581,7 +8588,8 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
 			val_flag |= 1|2|4;
 			break;
 		case SC_CRESCENTELBOW:
-			val2 = 94 + val1;
+			if( sd )
+				val2 = (sd->status.job_level / 2) + (50 + 5 * val1);
 			val_flag |= 1|2;
 			break;
 		case SC_LIGHTNINGWALK: //  [(Job Level / 2) + (40 + 5 * Skill Level)] %
@@ -8823,9 +8831,10 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
 		case SC_WEDDING:
 		case SC_XMAS:
 		case SC_SUMMER:
+		case SC_HANBOK:
 			clif_changelook(bl,LOOK_WEAPON,0);
 			clif_changelook(bl,LOOK_SHIELD,0);
-			clif_changelook(bl,LOOK_BASE,type==SC_WEDDING?JOB_WEDDING:type==SC_XMAS?JOB_XMAS:JOB_SUMMER);
+			clif_changelook(bl,LOOK_BASE,type==SC_WEDDING?JOB_WEDDING:type==SC_XMAS?JOB_XMAS:type==SC_SUMMER?JOB_SUMMER:JOB_HANBOK);
 			clif_changelook(bl,LOOK_CLOTHES_COLOR,val4);
 			break;
 		case SC_KAAHI:
@@ -9035,6 +9044,9 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
 		case SC_SUMMER:
 			sc->option |= OPTION_SUMMER;
 			break;
+		case SC_HANBOK:
+			sc->option |= OPTION_HANBOK;
+			break;
 		case SC_ORCISH:
 			sc->option |= OPTION_ORCISH;
 			break;
@@ -9197,6 +9209,7 @@ int status_change_clear(struct block_list* bl, int type) {
 			case SC_MELTDOWN:
 			case SC_XMAS:
 			case SC_SUMMER:
+			case SC_HANBOK:
 			case SC_NOCHAT:
 			case SC_FUSION:
 			case SC_EARTHSCROLL:
@@ -9346,11 +9359,12 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 		case SC_WEDDING:
 		case SC_XMAS:
 		case SC_SUMMER:
+		case SC_HANBOK:
 			if (!vd) break;
 			if (sd)
 			{	//Load data from sd->status.* as the stored values could have changed.
 				//Must remove OPTION to prevent class being rechanged.
-				sc->option &= type==SC_WEDDING?~OPTION_WEDDING:type==SC_XMAS?~OPTION_XMAS:~OPTION_SUMMER;
+				sc->option &= type==SC_WEDDING?~OPTION_WEDDING:type==SC_XMAS?~OPTION_XMAS:type==SC_SUMMER?~OPTION_SUMMER:~OPTION_HANBOK;
 				clif_changeoption(&sd->bl);
 				status_set_viewdata(bl, sd->status.class_);
 			} else {
@@ -9798,6 +9812,9 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 		break;
 	case SC_SUMMER:
 		sc->option &= ~OPTION_SUMMER;
+		break;
+	case SC_HANBOK:
+		sc->option &= ~OPTION_HANBOK;
 		break;
 	case SC_ORCISH:
 		sc->option &= ~OPTION_ORCISH;
@@ -10507,12 +10524,12 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 		break;
 
 	case SC_CAMOUFLAGE:
-		if(--(sce->val4) > 0){
-			status_charge(bl,0,7 - sce->val1);
-			sc_timer_next(1000 + tick, status_change_timer, bl->id, data);
-			return 0;
-		}
-		break;
+		if (!status_charge(bl, 0, 7 - sce->val1))
+			break;
+		if (--sce->val4 >= 0)
+			sce->val3++;
+		sc_timer_next(1000 + tick, status_change_timer, bl->id, data);
+		return 0;
 
 	case SC__REPRODUCE:
 		if(!status_charge(bl, 0, 1))
@@ -10656,7 +10673,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 		break;
 
 	case SC_REFLECTDAMAGE:
-		if( --(sce->val4) >= 0 ) {
+		if( --(sce->val4) > 0 ) {
 			if( !status_charge(bl,0,10) )
  				break;
 			sc_timer_next(1000 + tick, status_change_timer, bl->id, data);
@@ -10952,6 +10969,7 @@ int status_change_clear_buffs (struct block_list* bl, int type)
 			case SC_ABUNDANCE:
 			case SC_CURSEDCIRCLE_ATKER:
 			case SC_CURSEDCIRCLE_TARGET:
+			case SC_PUSH_CART:
 				continue;
 
 		 //Debuffs that can be removed.

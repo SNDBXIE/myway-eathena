@@ -403,8 +403,13 @@ enum {
 	MF_PVP_NOCALCRANK,	//50
 	MF_BATTLEGROUND,
 	MF_RESET,
+	MF_CHANNELAUTOJOIN,
+	MF_NOUSECART,
+	MF_NOITEMCONSUMPTION,
+	MF_SUMSTARTMIRACLE,
+	MF_NOMINEEFFECT,
+	MF_NOLOCKON,
 	MF_NOEQUIP = 98,	//mf_noequip
-	MF_MOBCANTATTACKPLAYER
 };
 
 const char* script_op2name(int op)
@@ -3604,9 +3609,7 @@ static void script_detach_state(struct script_state* st, bool dequeue_event)
 			st->bk_st = NULL;
 			st->bk_npcid = 0;
 		} else if(dequeue_event) {
-			/**
-			 * For the Secure NPC Timeout option (check config/Secure.h) [RR]
-			 **/
+
 #ifdef SECURE_NPCTIMEOUT
 			/**
 			 * We're done with this NPC session, so we cancel the timer (if existent) and move on
@@ -3650,9 +3653,6 @@ static void script_attach_state(struct script_state* st)
 		sd->st = st;
 		sd->npc_id = st->oid;
 		sd->npc_item_flag = st->npc_item_flag; // load default.
-/**
- * For the Secure NPC Timeout option (check config/Secure.h) [RR]
- **/
 #ifdef SECURE_NPCTIMEOUT
 		if( sd->npc_idle_timer == INVALID_TIMER )
 			sd->npc_idle_timer = add_timer(gettick() + (SECURE_NPCTIMEOUT_INTERVAL*1000),npc_rr_secure_timeout_timer,sd->bl.id,0);
@@ -6038,57 +6038,24 @@ BUILDIN_FUNC(viewpoint)
 }
 
 /*==========================================
- * [Cydh]
- * countitem <item_id>{,<location>}{,<account_id>}
- * countitem "<item_name>"{,<location>}{,<account_id>}
- * countitem <item_id>{,<location>}{,"<char name>"}
- * countitem "<item_name>"{,<location>}{,"<char name>"}
+ *
  *------------------------------------------*/
 BUILDIN_FUNC(countitem)
 {
-	TBL_PC *sd;
 	int nameid, i;
 	int count = 0;
-	int size = 0;
-	int loc = 0;
-	const struct item* items;
-	const struct guild_storage* g_stor;
 	struct item_data* id = NULL;
 	struct script_data* data;
 
-	if( script_hasdata(st,4) )
-	{
-		struct script_data* data_;
-		data_ = script_getdata(st,4);
-		get_val(st, data_);
-
-		if( data_isstring(data_) )
-			sd = map_nick2sd(conv_str(st, data_));
-		else
-			sd = map_id2sd(conv_num(st, data_));
-
-		if( sd == NULL )
-		{
-			ShowError("buildin_countitem: Player not found.\n");
-			script_pushint(st,-1);
-			return 1;
-		} else {
-			sd = script_rid2sd(st);	// attached player
-			if( sd == NULL )
-			{
-				ShowError("buildin_countitem: No player attached.\n");
-				script_pushint(st,-1);
-				return 1;
-			}
-		}
+	TBL_PC* sd = script_rid2sd(st);
+	if (!sd) {
+		script_pushint(st,0);
+		return 0;
 	}
 
 	data = script_getdata(st,2);
 	get_val(st, data);  // convert into value in case of a variable
 
-	if(script_hasdata(st,3))
-		loc = script_getnum(st,3);
-		
 	if( data_isstring(data) )
 	{// item name
 		id = itemdb_searchname(conv_str(st, data));
@@ -6101,55 +6068,15 @@ BUILDIN_FUNC(countitem)
 	if( id == NULL )
 	{
 		ShowError("buildin_countitem: Invalid item '%s'.\n", script_getstr(st,2));  // returns string, regardless of what it was
-		script_pushint(st,-1);
+		script_pushint(st,0);
 		return 1;
 	}
 
 	nameid = id->nameid;
 
-	switch(loc) {
-		case 1:	// cart
-			size = MAX_CART;
-			items = sd->status.cart;
-			if(!pc_iscarton(sd))
-			{
-				ShowError("buildin_countitem: Player doesn't have cart (CID = %d).\n", sd->status.char_id);
-				script_pushint(st,-2);
-				return 1;
-			}
-			break;
-		case 2:	// storage
-			size = MAX_STORAGE;
-			items = sd->status.storage.items;
-			break;
-		case 3:	// guild storage
-			size = MAX_GUILD_STORAGE;
-			if(sd->status.guild_id <= 0)
-			{
-				ShowError("buildin_countitem: Player doesn't have guild (CID = %d).\n", sd->status.char_id);
-				script_pushint(st,-2);
-				return 1;
-			}
-			if((g_stor = guild2storage2(sd->status.guild_id)) == NULL)
-			{
-				ShowError("buildin_countitem: Guild storage isn't opened yet.\n");
-				script_pushint(st,-3);
-				return 1;
-			}
-			items = g_stor->items;
-			break;
-		default:	//inventory
-			size = MAX_INVENTORY;
-			items = sd->status.inventory;
-			break;
-	}
- 
-	for(i = 0; i < size; i++)
-	{
-		const struct item* it = &items[i];
-		if(it->nameid == nameid)
-			count += it->amount;
-	}
+	for(i = 0; i < MAX_INVENTORY; i++)
+		if(sd->status.inventory[i].nameid == nameid)
+			count += sd->status.inventory[i].amount;
 
 	script_pushint(st,count);
 	return 0;
@@ -6773,7 +6700,7 @@ BUILDIN_FUNC(makeitem)
 		else
 			item_tmp.identify=itemdb_isidentified(nameid);
 
-		map_addflooritem(&item_tmp,amount,m,x,y,0,0,0,0);
+		map_addflooritem(&item_tmp,amount,m,x,y,0,0,0,4);
 	}
 
 	return 0;
@@ -6783,60 +6710,20 @@ BUILDIN_FUNC(makeitem)
 /// Counts / deletes the current item given by idx.
 /// Used by buildin_delitem_search
 /// Relies on all input data being already fully valid.
-/// loc: 0 = Inventory, 1 = Cart, 2 = Storage, 3 = Guild Storage. [Cydh]
-static void buildin_delitem_delete(struct map_session_data* sd, int idx, int* amount, bool delete_items, int loc)
+static void buildin_delitem_delete(struct map_session_data* sd, int idx, int* amount, bool delete_items)
 {
 	int delamount;
-	struct item* it_;
-	struct guild_storage* g_stor;
-	struct item_data* id;
+	struct item* inv = &sd->status.inventory[idx];
 
-	switch(loc)
-	{
-		case 1:	// cart
-			it_ = &sd->status.cart[idx];
-			break;
-		case 2:	// storage
-			it_ = &sd->status.storage.items[idx];
-			break;
-		case 3:	// guild storage
-			g_stor = guild2storage2(sd->status.guild_id);
-			it_ = &g_stor->items[idx];
-			break;
-		default:	//inventory
-			it_ = &sd->status.inventory[idx];
-			break;
-	}
- 
-	delamount = ( amount[0] < it_->amount ) ? amount[0] : it_->amount;
-	
-	id = itemdb_search(it_->nameid);
+	delamount = ( amount[0] < inv->amount ) ? amount[0] : inv->amount;
 
 	if( delete_items )
 	{
-		if( id->type == IT_PETEGG && it_->card[0] == CARD0_PET )
+		if( sd->inventory_data[idx]->type == IT_PETEGG && inv->card[0] == CARD0_PET )
 		{// delete associated pet
-			intif_delete_petdata(MakeDWord(it_->card[1], it_->card[2]));
+			intif_delete_petdata(MakeDWord(inv->card[1], inv->card[2]));
 		}
-		
-		switch(loc)
-		{
-			case 1:	// cart
-				pc_cart_delitem(sd, idx, delamount, 0, LOG_TYPE_SCRIPT);
-				break;
-			case 2:	// storage
-				storage_delitem(sd, idx, delamount);
-				log_pick_pc(sd, LOG_TYPE_STORAGE, -delamount, it_);
-				break;
-			case 3:	// guild storage
-				g_stor = guild2storage2(sd->status.guild_id);
-				guild_storage_delitem(sd,g_stor,idx,delamount);
-				log_pick_pc(sd, LOG_TYPE_GSTORAGE, -delamount, it_);
-				break;
-			default:	//inventory
-				pc_delitem(sd, idx, delamount, 0, 0, LOG_TYPE_SCRIPT);
-				break;
-		}
+		pc_delitem(sd, idx, delamount, 0, 0, LOG_TYPE_SCRIPT);
 	}
 
 	amount[0]-= delamount;
@@ -6848,13 +6735,11 @@ static void buildin_delitem_delete(struct map_session_data* sd, int idx, int* am
 /// Relies on all input data being already fully valid.
 /// @param exact_match will also match item attributes and cards, not just name id
 /// @return true when all items could be deleted, false when there were not enough items to delete
-/// loc: 0 = Inventory, 1 = Cart, 2 = Storage, 3 = Guild Storage. [Cydh]
-static bool buildin_delitem_search(struct map_session_data* sd, struct item* it, int loc, bool exact_match)
+static bool buildin_delitem_search(struct map_session_data* sd, struct item* it, bool exact_match)
 {
 	bool delete_items = false;
-	int i, amount, important, size;
-	struct item* items;
-	struct item_data* id;
+	int i, amount, important;
+	struct item* inv;
 
 	// prefer always non-equipped items
 	it->equip = 0;
@@ -6868,43 +6753,22 @@ static bool buildin_delitem_search(struct map_session_data* sd, struct item* it,
 		memset(it->card, 0, sizeof(it->card));
 	}
 
-	switch(loc)
-	{
-		case 1:	// cart
-			size = ARRAYLENGTH(sd->status.cart);
-			items = sd->status.cart;
-			break;
-		case 2:	// storage
-			size = ARRAYLENGTH(sd->status.storage.items);
-			items = sd->status.storage.items;
-			break;
-		case 3:	// guild storage
-			size = ARRAYLENGTH((guild2storage2(sd->status.guild_id))->items);
-			items = (guild2storage2(sd->status.guild_id))->items;
-			break;
-		default:	//inventory
-			size = ARRAYLENGTH(sd->status.inventory);
-			items = sd->status.inventory;
-			break;
-	}
-
 	for(;;)
 	{
 		amount = it->amount;
 		important = 0;
 
 		// 1st pass -- less important items / exact match
-		for( i = 0; amount && i < size; i++ )
+		for( i = 0; amount && i < ARRAYLENGTH(sd->status.inventory); i++ )
 		{
-			struct item* it_ = &items[i];
-			id = itemdb_search(it_->nameid);
+			inv = &sd->status.inventory[i];
 
-			if( !it_->nameid || it_->nameid != it->nameid )
+			if( !inv->nameid || !sd->inventory_data[i] || inv->nameid != it->nameid )
 			{// wrong/invalid item
 				continue;
 			}
 
-			if( it_->equip != it->equip || it_->refine != it->refine )
+			if( inv->equip != it->equip || inv->refine != it->refine )
 			{// not matching attributes
 				important++;
 				continue;
@@ -6912,21 +6776,21 @@ static bool buildin_delitem_search(struct map_session_data* sd, struct item* it,
 
 			if( exact_match )
 			{
-				if( it_->identify != it->identify || it_->attribute != it->attribute || memcmp(it_->card, it->card, sizeof(it_->card)) )
+				if( inv->identify != it->identify || inv->attribute != it->attribute || memcmp(inv->card, it->card, sizeof(inv->card)) )
 				{// not matching exact attributes
 					continue;
 				}
 			}
 			else
 			{
-				if( id->type == IT_PETEGG )
+				if( sd->inventory_data[i]->type == IT_PETEGG )
 				{
-					if( it_->card[0] == CARD0_PET && CheckForCharServer() )
+					if( inv->card[0] == CARD0_PET && CheckForCharServer() )
 					{// pet which cannot be deleted
 						continue;
 					}
 				}
-				else if( memcmp(it_->card, it->card, sizeof(it_->card)) )
+				else if( memcmp(inv->card, it->card, sizeof(inv->card)) )
 				{// named/carded item
 					important++;
 					continue;
@@ -6934,7 +6798,7 @@ static bool buildin_delitem_search(struct map_session_data* sd, struct item* it,
 			}
 
 			// count / delete item
-			buildin_delitem_delete(sd, i, &amount, delete_items, loc);
+			buildin_delitem_delete(sd, i, &amount, delete_items);
 		}
 
 		// 2nd pass -- any matching item
@@ -6942,31 +6806,30 @@ static bool buildin_delitem_search(struct map_session_data* sd, struct item* it,
 		{// either everything was already consumed or no items were skipped
 			;
 		}
-		else for( i = 0; amount && i < size; i++ )
+		else for( i = 0; amount && i < ARRAYLENGTH(sd->status.inventory); i++ )
 		{
-			struct item* it_ = &items[i];
-			id = itemdb_search(it_->nameid);
+			inv = &sd->status.inventory[i];
 
-			if( !it_->nameid || it_->nameid != it->nameid )
+			if( !inv->nameid || !sd->inventory_data[i] || inv->nameid != it->nameid )
 			{// wrong/invalid item
 				continue;
 			}
 
-			if( id->type == IT_PETEGG && it_->card[0] == CARD0_PET && CheckForCharServer() )
+			if( sd->inventory_data[i]->type == IT_PETEGG && inv->card[0] == CARD0_PET && CheckForCharServer() )
 			{// pet which cannot be deleted
 				continue;
 			}
 
 			if( exact_match )
 			{
-				if( it_->refine != it->refine || it_->identify != it->identify || it_->attribute != it->attribute || memcmp(it_->card, it->card, sizeof(it_->card)) )
+				if( inv->refine != it->refine || inv->identify != it->identify || inv->attribute != it->attribute || memcmp(inv->card, it->card, sizeof(inv->card)) )
 				{// not matching attributes
 					continue;
 				}
 			}
 
 			// count / delete item
-			buildin_delitem_delete(sd, i, &amount, delete_items, loc);
+			buildin_delitem_delete(sd, i, &amount, delete_items);
 		}
 
 		if( amount )
@@ -6988,32 +6851,21 @@ static bool buildin_delitem_search(struct map_session_data* sd, struct item* it,
 /// Deletes items from the target/attached player.
 /// Prioritizes ordinary items.
 ///
-/// [Cydh]
-/// delitem <item id>,<amount>{,<location>}{,<account id>}
-/// delitem <"item name">,<amount>{,<location>}{,<account id>}
-/// delitem <item id>,<amount>{,<location>}{,<"player name">}
-/// delitem <"item name">,<amount>{,<location>}{,<"player name">}
+/// delitem <item id>,<amount>{,<account id>}
+/// delitem "<item name>",<amount>{,<account id>}
 BUILDIN_FUNC(delitem)
 {
 	TBL_PC *sd;
-	int loc = 0;
 	struct item it;
 	struct script_data *data;
 
-	if( script_hasdata(st,5) )	// check account id or player name
+	if( script_hasdata(st,4) )
 	{
-		struct script_data* data_;
-		data_ = script_getdata(st,5);
-		get_val(st, data_);
-
-		if( data_isstring(data_) )
-			sd = map_nick2sd(conv_str(st, data_));
-		else
-			sd = map_id2sd(conv_num(st, data_));
-
+		int account_id = script_getnum(st,4);
+		sd = map_id2sd(account_id); // <account id>
 		if( sd == NULL )
 		{
-			ShowError("buildin_delitem: Player not found.\n");
+			ShowError("script:delitem: player not found (AID=%d).\n", account_id);
 			st->state = END;
 			return 1;
 		}
@@ -7022,11 +6874,7 @@ BUILDIN_FUNC(delitem)
 	{
 		sd = script_rid2sd(st);// attached player
 		if( sd == NULL )
-		{
-			ShowError("buildin_delitem: No player attached.\n");
-			st->state = END;
-			return 1;
-		}
+			return 0;
 	}
 
 	data = script_getdata(st,2);
@@ -7037,7 +6885,7 @@ BUILDIN_FUNC(delitem)
 		struct item_data* id = itemdb_searchname(item_name);
 		if( id == NULL )
 		{
-			ShowError("buildin_delitem: Unknown item \"%s\".\n", item_name);
+			ShowError("script:delitem: unknown item \"%s\".\n", item_name);
 			st->state = END;
 			return 1;
 		}
@@ -7048,7 +6896,7 @@ BUILDIN_FUNC(delitem)
 		it.nameid = conv_num(st,data);// <item id>
 		if( !itemdb_exists( it.nameid ) )
 		{
-			ShowError("buildin_delitem: Unknown item \"%d\".\n", it.nameid);
+			ShowError("script:delitem: unknown item \"%d\".\n", it.nameid);
 			st->state = END;
 			return 1;
 		}
@@ -7059,37 +6907,14 @@ BUILDIN_FUNC(delitem)
 	if( it.amount <= 0 )
 		return 0;// nothing to do
 
-	if( script_hasdata(st,4) )	// get the item location
-		loc = script_getnum(st,4);
-
-	if(loc == 1 && !pc_iscarton(sd)){	// if loc is 2 (cart), check the cart is on or not first!
-		ShowError("buildin_delitem: Player doesn't has cart.\n");
-		st->state = END;
-		return 1;
-	}
-	if(loc == 3)
-	{
-		if(sd->status.guild_id <= 0)	// no guild? don't continue this!
-		{
-			ShowError("buildin_countitem: Player doesn't have guild (CID = %d).\n", sd->status.char_id);
-			st->state = END;
-			return 1;
-		}
-		else if(guild2storage2(sd->status.guild_id) == NULL)	// make sure the player opened the guild storage first
-		{
-			ShowError("buildin_countitem: Guild storage isn't opened yet.\n");
-			st->state = END;
-			return 1;
-		}
-	}
-
-	if( buildin_delitem_search(sd, &it, loc, false) )
+	if( buildin_delitem_search(sd, &it, false) )
 	{// success
 		return 0;
 	}
 
-	ShowError("buildin_delitem: failed to delete %d items (AID=%d item_id=%d).\n", it.amount, sd->status.account_id, it.nameid);
+	ShowError("script:delitem: failed to delete %d items (AID=%d item_id=%d).\n", it.amount, sd->status.account_id, it.nameid);
 	st->state = END;
+	st->mes_active = 0;
 	clif_scriptclose(sd, st->oid);
 	return 1;
 }
@@ -7159,13 +6984,14 @@ BUILDIN_FUNC(delitem2)
 	if( it.amount <= 0 )
 		return 0;// nothing to do
 
-	if( buildin_delitem_search(sd, &it, 0, true) )
+	if( buildin_delitem_search(sd, &it, true) )
 	{// success
 		return 0;
 	}
 
 	ShowError("script:delitem2: failed to delete %d items (AID=%d item_id=%d).\n", it.amount, sd->status.account_id, it.nameid);
 	st->state = END;
+	st->mes_active = 0;
 	clif_scriptclose(sd, st->oid);
 	return 1;
 }
@@ -9063,7 +8889,6 @@ BUILDIN_FUNC(monster)
 
 	struct map_session_data* sd;
 	int16 m;
-	int mob_id;
 
 	if (script_hasdata(st, 8))
 	{
@@ -9114,8 +8939,7 @@ BUILDIN_FUNC(monster)
 		}
 	}
 
-	mob_id = mob_once_spawn(sd, m, x, y, str, class_, amount, event, size, ai);
-	script_pushint(st, mob_id);
+	mob_once_spawn(sd, m, x, y, str, class_, amount, event, size, ai);
 	return 0;
 }
 /*==========================================
@@ -10973,12 +10797,12 @@ BUILDIN_FUNC(getmapflag)
 			case MF_NOSAVE:				script_pushint(st,map[m].flag.nosave); break;
 			case MF_NOBRANCH:			script_pushint(st,map[m].flag.nobranch); break;
 			case MF_NOPENALTY:			script_pushint(st,map[m].flag.noexppenalty); break;
-			case MF_NOZENYPENALTY:		script_pushint(st,map[m].flag.nozenypenalty); break;
+			case MF_NOZENYPENALTY:			script_pushint(st,map[m].flag.nozenypenalty); break;
 			case MF_PVP:				script_pushint(st,map[m].flag.pvp); break;
-			case MF_PVP_NOPARTY:		script_pushint(st,map[m].flag.pvp_noparty); break;
-			case MF_PVP_NOGUILD:		script_pushint(st,map[m].flag.pvp_noguild); break;
+			case MF_PVP_NOPARTY:			script_pushint(st,map[m].flag.pvp_noparty); break;
+			case MF_PVP_NOGUILD:			script_pushint(st,map[m].flag.pvp_noguild); break;
 			case MF_GVG:				script_pushint(st,map[m].flag.gvg); break;
-			case MF_GVG_NOPARTY:		script_pushint(st,map[m].flag.gvg_noparty); break;
+			case MF_GVG_NOPARTY:			script_pushint(st,map[m].flag.gvg_noparty); break;
 			case MF_NOTRADE:			script_pushint(st,map[m].flag.notrade); break;
 			case MF_NOSKILL:			script_pushint(st,map[m].flag.noskill); break;
 			case MF_NOWARP:				script_pushint(st,map[m].flag.nowarp); break;
@@ -10993,15 +10817,15 @@ BUILDIN_FUNC(getmapflag)
 			case MF_CLOUDS2:			script_pushint(st,map[m].flag.clouds2); break;
 			case MF_FIREWORKS:			script_pushint(st,map[m].flag.fireworks); break;
 			case MF_GVG_CASTLE:			script_pushint(st,map[m].flag.gvg_castle); break;
-			case MF_GVG_DUNGEON:		script_pushint(st,map[m].flag.gvg_dungeon); break;
-			case MF_NIGHTENABLED:		script_pushint(st,map[m].flag.nightenabled); break;
+			case MF_GVG_DUNGEON:			script_pushint(st,map[m].flag.gvg_dungeon); break;
+			case MF_NIGHTENABLED:			script_pushint(st,map[m].flag.nightenabled); break;
 			case MF_NOBASEEXP:			script_pushint(st,map[m].flag.nobaseexp); break;
 			case MF_NOJOBEXP:			script_pushint(st,map[m].flag.nojobexp); break;
 			case MF_NOMOBLOOT:			script_pushint(st,map[m].flag.nomobloot); break;
 			case MF_NOMVPLOOT:			script_pushint(st,map[m].flag.nomvploot); break;
 			case MF_NORETURN:			script_pushint(st,map[m].flag.noreturn); break;
 			case MF_NOWARPTO:			script_pushint(st,map[m].flag.nowarpto); break;
-			case MF_NIGHTMAREDROP:		script_pushint(st,map[m].flag.pvp_nightmaredrop); break;
+			case MF_NIGHTMAREDROP:			script_pushint(st,map[m].flag.pvp_nightmaredrop); break;
 			case MF_RESTRICTED:			script_pushint(st,map[m].flag.restricted); break;
 			case MF_NOCOMMAND:			script_pushint(st,map[m].nocommand); break;
 			case MF_NODROP:				script_pushint(st,map[m].flag.nodrop); break;
@@ -11010,17 +10834,22 @@ BUILDIN_FUNC(getmapflag)
 			case MF_NOVENDING:			script_pushint(st,map[m].flag.novending); break;
 			case MF_LOADEVENT:			script_pushint(st,map[m].flag.loadevent); break;
 			case MF_NOCHAT:				script_pushint(st,map[m].flag.nochat); break;
-			case MF_NOEXPPENALTY:		script_pushint(st,map[m].flag.noexppenalty ); break;
+			case MF_NOEXPPENALTY:			script_pushint(st,map[m].flag.noexppenalty ); break;
 			case MF_GUILDLOCK:			script_pushint(st,map[m].flag.guildlock); break;
 			case MF_TOWN:				script_pushint(st,map[m].flag.town); break;
 			case MF_AUTOTRADE:			script_pushint(st,map[m].flag.autotrade); break;
 			case MF_ALLOWKS:			script_pushint(st,map[m].flag.allowks); break;
-			case MF_MONSTER_NOTELEPORT:	script_pushint(st,map[m].flag.monster_noteleport); break;
-			case MF_PVP_NOCALCRANK:		script_pushint(st,map[m].flag.pvp_nocalcrank); break;
-			case MF_BATTLEGROUND:		script_pushint(st,map[m].flag.battleground); break;
+			case MF_MONSTER_NOTELEPORT:		script_pushint(st,map[m].flag.monster_noteleport); break;
+			case MF_PVP_NOCALCRANK:			script_pushint(st,map[m].flag.pvp_nocalcrank); break;
+			case MF_BATTLEGROUND:			script_pushint(st,map[m].flag.battleground); break;
 			case MF_RESET:				script_pushint(st,map[m].flag.reset); break;
+			case MF_CHANNELAUTOJOIN:		script_pushint(st,map[m].flag.chmautojoin); break;
+			case MF_NOUSECART:			script_pushint(st,map[m].flag.nousecart); break;
+			case MF_NOITEMCONSUMPTION:		script_pushint(st,map[m].flag.noitemconsumption); break;
+			case MF_SUMSTARTMIRACLE:		script_pushint(st,map[m].flag.nosumstarmiracle); break;
+			case MF_NOMINEEFFECT:			script_pushint(st,map[m].flag.nomineeffect); break;
+			case MF_NOLOCKON:			script_pushint(st,map[m].flag.nolockon); break;
 			case MF_NOEQUIP:			script_pushint(st,map[m].flag.noequip); break;	//mf_noequip
-			case MF_MOBCANTATTACKPLAYER:	script_pushint(st,map[m].flag.mobcantattackplayer); break;
 		}
 	}
 
@@ -11038,6 +10867,7 @@ static int script_mapflag_pvp_sub(struct block_list *bl,va_list ap) {
 		sd->pvp_lost = 0;
 	}
 	clif_map_property(sd, MAPPROPERTY_FREEPVPZONE);
+	clif_maptypeproperty2(&sd->bl,SELF);
 	return 0;
 }
 BUILDIN_FUNC(setmapflag)
@@ -11068,9 +10898,14 @@ BUILDIN_FUNC(setmapflag)
 				break;
 			case MF_PVP_NOPARTY:		map[m].flag.pvp_noparty = 1; break;
 			case MF_PVP_NOGUILD:		map[m].flag.pvp_noguild = 1; break;
-			case MF_GVG:
+			case MF_GVG: {
+				struct block_list bl;
 				map[m].flag.gvg = 1;
 				clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
+				bl.type = BL_NUL;
+				bl.m = m;
+				clif_maptypeproperty2(&bl,ALL_SAMEMAP);
+				}
 				break;
 			case MF_GVG_NOPARTY:		map[m].flag.gvg_noparty = 1; break;
 			case MF_NOTRADE:			map[m].flag.notrade = 1; break;
@@ -11116,8 +10951,13 @@ BUILDIN_FUNC(setmapflag)
 			case MF_PVP_NOCALCRANK:		map[m].flag.pvp_nocalcrank = 1; break;
 			case MF_BATTLEGROUND:		map[m].flag.battleground = (val <= 0 || val > 2) ? 1 : val; break;
 			case MF_RESET:				map[m].flag.reset = 1; break;
+			case MF_CHANNELAUTOJOIN:		map[m].flag.chmautojoin = 1 ; break;
+			case MF_NOUSECART:			map[m].flag.nousecart = 1 ; break;
+			case MF_NOITEMCONSUMPTION:		map[m].flag.noitemconsumption = 1 ; break;
+			case MF_SUMSTARTMIRACLE:		map[m].flag.nosumstarmiracle = 1 ; break;
+			case MF_NOMINEEFFECT:		map[m].flag.nomineeffect = 1 ; break;
+			case MF_NOLOCKON:		map[m].flag.nolockon = 1 ; break;
 			case MF_NOEQUIP:			map[m].flag.noequip = 1; break;	//mf_noequip
-			case MF_MOBCANTATTACKPLAYER:	map[m].flag.mobcantattackplayer = 1; break;
 		}
 	}
 
@@ -11144,15 +10984,25 @@ BUILDIN_FUNC(removemapflag)
 			case MF_NOBRANCH:			map[m].flag.nobranch = 0; break;
 			case MF_NOPENALTY:			map[m].flag.noexppenalty = 0; map[m].flag.nozenypenalty = 0; break;
 			case MF_NOZENYPENALTY:		map[m].flag.nozenypenalty = 0; break;
-			case MF_PVP:
+			case MF_PVP: {
+				struct block_list bl;
+				bl.type = BL_NUL;
+				bl.m = m;
 				map[m].flag.pvp = 0;
 				clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
+				clif_maptypeproperty2(&bl,ALL_SAMEMAP);
+				}
 				break;
 			case MF_PVP_NOPARTY:		map[m].flag.pvp_noparty = 0; break;
 			case MF_PVP_NOGUILD:		map[m].flag.pvp_noguild = 0; break;
-			case MF_GVG:
+			case MF_GVG: {
+				struct block_list bl;
+				bl.type = BL_NUL;
+				bl.m = m;
 				map[m].flag.gvg = 0;
 				clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
+				clif_maptypeproperty2(&bl,ALL_SAMEMAP);
+				}
 				break;
 			case MF_GVG_NOPARTY:		map[m].flag.gvg_noparty = 0; break;
 			case MF_NOTRADE:			map[m].flag.notrade = 0; break;
@@ -11200,8 +11050,13 @@ BUILDIN_FUNC(removemapflag)
 			case MF_PVP_NOCALCRANK:		map[m].flag.pvp_nocalcrank = 0; break;
 			case MF_BATTLEGROUND:		map[m].flag.battleground = 0; break;
 			case MF_RESET:				map[m].flag.reset = 0; break;
+			case MF_CHANNELAUTOJOIN:		map[m].flag.chmautojoin = 0 ; break;
+			case MF_NOUSECART:			map[m].flag.nousecart = 0 ; break;
+			case MF_NOITEMCONSUMPTION:		map[m].flag.noitemconsumption = 0 ; break;
+			case MF_SUMSTARTMIRACLE:		map[m].flag.nosumstarmiracle = 0 ; break;
+			case MF_NOMINEEFFECT:		map[m].flag.nomineeffect = 0 ; break;
+			case MF_NOLOCKON:		map[m].flag.nolockon = 0 ; break;
 			case MF_NOEQUIP:			map[m].flag.noequip=0; break;	//mf_noequip
-			case MF_MOBCANTATTACKPLAYER:	map[m].flag.mobcantattackplayer = 0; break;
 		}
 	}
 
@@ -11214,6 +11069,7 @@ BUILDIN_FUNC(pvpon)
 	const char *str;
 	TBL_PC* sd = NULL;
 	struct s_mapiterator* iter;
+	struct block_list bl;
 
 	str = script_getstr(st,2);
 	m = map_mapname2mapid(str);
@@ -11222,6 +11078,9 @@ BUILDIN_FUNC(pvpon)
 
 	map[m].flag.pvp = 1;
 	clif_map_property_mapall(m, MAPPROPERTY_FREEPVPZONE);
+	bl.type = BL_NUL;
+	bl.m = m;
+	clif_maptypeproperty2(&bl,ALL_SAMEMAP);
 
 	if(battle_config.pk_mode) // disable ranking functions if pk_mode is on [Valaris]
 		return 0;
@@ -11259,6 +11118,7 @@ BUILDIN_FUNC(pvpoff)
 {
 	int16 m;
 	const char *str;
+	struct block_list bl;
 
 	str=script_getstr(st,2);
 	m = map_mapname2mapid(str);
@@ -11267,6 +11127,9 @@ BUILDIN_FUNC(pvpoff)
 
 	map[m].flag.pvp = 0;
 	clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
+	bl.type = BL_NUL;
+	bl.m = m;
+	clif_maptypeproperty2(&bl,ALL_SAMEMAP);
 
 	if(battle_config.pk_mode) // disable ranking options if pk_mode is on [Valaris]
 		return 0;
@@ -11279,12 +11142,16 @@ BUILDIN_FUNC(gvgon)
 {
 	int16 m;
 	const char *str;
+	struct block_list bl;
 
 	str=script_getstr(st,2);
 	m = map_mapname2mapid(str);
 	if(m >= 0 && !map[m].flag.gvg) {
 		map[m].flag.gvg = 1;
 		clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
+		bl.type = BL_NUL;
+		bl.m = m;
+		clif_maptypeproperty2(&bl,ALL_SAMEMAP);
 	}
 
 	return 0;
@@ -11297,8 +11164,12 @@ BUILDIN_FUNC(gvgoff)
 	str=script_getstr(st,2);
 	m = map_mapname2mapid(str);
 	if(m >= 0 && map[m].flag.gvg) {
+		struct block_list bl;
 		map[m].flag.gvg = 0;
 		clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
+		bl.type = BL_NUL;
+		bl.m = m;
+		clif_maptypeproperty2(&bl,ALL_SAMEMAP);
 	}
 
 	return 0;
@@ -15502,32 +15373,33 @@ BUILDIN_FUNC(pcstopfollow)
 }
 // <--- [zBuffer] List of player cont commands
 // [zBuffer] List of mob control commands --->
-//## TODO always return if the request/whatever was successfull [FlavioJS]
 
 /// Makes the unit walk to target position or map
 /// Returns if it was successfull
 ///
 /// unitwalk(<unit_id>,<x>,<y>) -> <bool>
-/// unitwalk(<unit_id>,<map_id>) -> <bool>
+/// unitwalk(<unit_id>,<target_id>) -> <bool>
 BUILDIN_FUNC(unitwalk)
 {
 	struct block_list* bl;
 
 	bl = map_id2bl(script_getnum(st,2));
 	if( bl == NULL )
-	{
 		script_pushint(st, 0);
-	}
-	else if( script_hasdata(st,4) )
-	{
+	else if( script_hasdata(st,4) ) {
 		int x = script_getnum(st,3);
 		int y = script_getnum(st,4);
-		script_pushint(st, unit_walktoxy(bl,x,y,0));// We'll use harder calculations.
-	}
-	else
-	{
-		int map_id = script_getnum(st,3);
-		script_pushint(st, unit_walktobl(bl,map_id2bl(map_id),65025,1));
+		if( script_pushint(st, unit_can_reach_pos(bl,x,y,0)) ) 
+			add_timer(gettick()+50, unit_delay_walktoxy_timer, bl->id, (x<<16)|(y&0xFFFF)); // Need timer to avoid mismatches
+	} else {
+		struct block_list* tbl = map_id2bl(script_getnum(st,3));
+		if( tbl == NULL ) {
+			ShowError("script:unitwalk: bad target destination\n");
+			script_pushint(st, 0);
+			return 1;
+		}
+		else if (script_pushint(st, unit_can_reach_bl(bl, tbl, distance_bl(bl, tbl)+1, 0, NULL, NULL)))
+			add_timer(gettick()+50, unit_delay_walktobl_timer, bl->id, tbl->id); // Need timer to avoid mismatches
 	}
 
 	return 0;

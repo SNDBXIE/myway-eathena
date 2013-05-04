@@ -172,7 +172,6 @@ struct map_session_data {
 		unsigned int prevend : 1;//used to flag wheather you've spent 40sp to open the vending or not.
 		unsigned int warping : 1;//states whether you're in the middle of a warp processing
 		unsigned int permanent_speed : 1; // When 1, speed cannot be changed through status_calc_pc().
-		unsigned int pk_mode : 1; //@pkmode by malufett
 		unsigned int seeghp :1; // Display the HP of players of clan and alliances. [Created by Rad & Updated by Cainho]
 		unsigned int secure_items : 1; // Item Security [Zephyrus]
 	} state;
@@ -476,9 +475,6 @@ struct map_session_data {
 	unsigned int bg_id;
 	unsigned short user_font;
 
-	/**
-	 * For the Secure NPC Timeout option (check config/Secure.h) [RR]
-	 **/
 #ifdef SECURE_NPCTIMEOUT
 	/**
 	 * ID of the timer
@@ -724,6 +720,8 @@ int pc_setnewpc(struct map_session_data*,int,int,int,unsigned int,int,int);
 bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_time, int group_id, struct mmo_charstatus *st, bool changing_mapservers);
 void pc_authfail(struct map_session_data *);
 int pc_reg_received(struct map_session_data *sd);
+void pc_close_npc(struct map_session_data *sd,int flag);
+int pc_close_npc_timer(int tid, unsigned int tick, int id, intptr_t data);
 
 int pc_isequip(struct map_session_data *sd,int n);
 int pc_equippoint(struct map_session_data *sd,int n);
