@@ -6,30 +6,23 @@
 	end;
 
 OnSettings:
+	if(#SECURITYCODE$ == null){
+		set .@Option,4;
+	} else {
+		
+	}
+
+
 	while( 1 )
 	{
 		mes "[^FFA500Security System^000000]";
 		mes "Current Status";
-
 		mes "- Security Code:";
-		if( #SECURITYCODE )
+		if( #SECURITYCODE$ )
 		{
 			mes "^FFFFFF__________^2E8B57Enable^000000.";
-
-			mes "- Item transfers:";
-			if( getsecurity() )
-			{
-				mes "^FFFFFF__________^2E8B57Blocked^000000.";
-				set .@Menu2$, "Allow Item transfers";
-			}
-			else
-			{
-				mes "^FFFFFF__________^FF0000Allowed^000000.";
-				set .@Menu2$, "Block Item transfers";
-			}
-
 			next;
-			set .@Option, select("Change Password",.@Menu2$,"Remove Password","Exit");
+			set .@Option, select("Change Password","Remove Password","Exit");
 		}
 		else
 		{
@@ -40,14 +33,13 @@ OnSettings:
 		
 		switch( .@Option )
 		{
-			case 1: // Cambiar Clave
+			case 1:
 				mes "[^FFA500Security System^000000]";
-				mes "Password is a number between 1000 and 9999.";
-				mes "Enter your current password...";
+				mes "Master Password is a number or letters/symbols between 10 - 12 charater.";
+				mes "Don't add spaces in your password.";
 				next;
-
-				input .@Pass;
-				if( .@Pass != #SECURITYCODE )
+				input .@Pass$;
+				if( .@Pass$ != #SECURITYCODE$ )
 				{
 					mes "[^FFA500Security System^000000]";
 					mes "Wrong password!!.";
@@ -56,70 +48,53 @@ OnSettings:
 			
 			case 5:
 				mes "[^FFA500Security System^000000]";
-				mes "Enter your new password...";
-				mes "Password is a number between 1000 and 9999.";
-				next;
-				
-				input .@Pass;
-				if( .@Pass < 1000 || .@Pass > 9999 )
+				mes "Enter your new Master password...";
+				mes "Master Password is a number or letters/symbols between 10 - 12 charater.";
+				mes "Don't add spaces in your Password.";
+				next;				
+				input .@Pass$;
+				set @str1$,replacestr(.@Pass$," ","");
+				if( getstrlen(@str1$) < 9 || getstrlen(@str1$) > 13 )
 				{
 					mes "[^FFA500Security System^000000]";
 					mes "Invalid value!!.";
 					close;
 				}
-				
 				mes "[^FFA500Security System^000000]";
-				mes "Confirm your new password.";
+				mes "Confirm your new Master Password.";
 				next;
-
-				input .@CPass;
-				if( .@CPass != .@Pass )
+				input .@CPass$;
+				set @str2$,replacestr(.@CPass$," ","");
+				if( @str1$ != @str2$ )
 				{
 					mes "[^FFA500Security System^000000]";
 					mes "The passwords are different.";
 					mes "Operation canceled.";
 					close;
-				}
-				
-				set #SECURITYCODE, .@Pass;
+				}				
+				set #SECURITYCODE$, @str1$;
 				break;
-			case 2: // Permitir Salidas - Bloquear Salidas
+			case 2: 
 				if( getsecurity() )
 				{
 					mes "[^FFA500Security System^000000]";
-					mes "Please enter your Password to allow item transfers.";
+					set @num,getstrlen(#SECURITYCODE$);
+					setarray @pass[0],rand(@num -1),rand(@num -1),rand(@num -1);
+					mes "Please enter characters " + @pass[0] + ", " + @pass[1] + " and " + @pass[2] + " from your Master Password to unlock your ID";
 					next;
-					
-					input .@Pass;
-					if( #SECURITYCODE != .@Pass )
+					input .@Pass$;
+					if(charat(#SECURITYCODE$,@pass[0]) != charat(.@Pass$,0) || charat(#SECURITYCODE$,@pass[1]) != charat(.@Pass$,1) || charat(#SECURITYCODE$,@pass[2]) != charat(.@Pass$,2) )
 					{
 						mes "[^FFA500Security System^000000]";
 						mes "Wrong password!!.";
 						close;
-					}
-					
+					}					
 					setsecurity 0;
 				}
-				else if( #SECURITYCODE > 0 )
+				else if( #SECURITYCODE$ != null )
 					setsecurity 1;
 				else
 					setsecurity 0;
-				break;
-			case 3: // Quitar Clave
-				mes "[^FFA500Security System^000000]";
-				mes "Enter your current password.";
-				next;
-				
-				input .@Pass;
-				if( #SECURITYCODE != .@Pass )
-				{
-					mes "[^FFA500Security System^000000]";
-					mes "Wrong password!!.";
-					close;
-				}
-				
-				set #SECURITYCODE, 0;
-				setsecurity 0;
 				break;
 			case 4:
 			case 6:

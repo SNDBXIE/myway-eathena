@@ -118,8 +118,8 @@ function	script	F_Kafra	{
 			// NPC has it's own welcome message. (Display nothing)
 			break;
 	}
+	next;
 	while (1) {
-		next;
 		deletearray @K_Menu0$[0],getarraysize(@K_Menu0$);
 		if (getarg(0) == 2) {
 			// Guild Kafra Menu override (free Teleport, free Storage, Free Cart)
@@ -161,6 +161,7 @@ function	script	F_Kafra	{
 				callfunc "F_KafStor",2,0,0;
 			else 
 				callfunc "F_KafStor",0,getarg(3),getarg(0);
+			next;
 		} else if (@K_Menu0$[.@j] == "Use Teleport Service") {
 			// Display Einbroch "No Teleport Service" notice.
 			if(getarg(1) != 4) callfunc "F_KafTele",getarg(0);
@@ -178,16 +179,19 @@ function	script	F_Kafra	{
 				mes "instead. Thank you for your";
 				mes "understanding and cooperation.";
 			}
+			next;
 		} else if (@K_Menu0$[.@j] == "Rent a Pushcart") {
 			if(callfunc("F_KafCart",getarg(0),getarg(4)) == 1) 
-			next;
+				next;
 		} else if (@K_Menu0$[.@j] == "Check Other Information") {
 			callfunc "F_KafInfo",getarg(2);
+			next;
 		} else if (@K_Menu0$[.@j] == "Cancel"){
 			callfunc "F_KafEnd",getarg(0),0;
 			end;
 		} else if (@K_Menu0$[.@j] == "Use Guild Storage") {
 			callfunc "F_KafStor",1,0;
+			next;
 		}
 	}
 }

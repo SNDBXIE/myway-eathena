@@ -3,9 +3,9 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Current Version: =====================================
-//= $Revision: 17279 $
+//= $Revision: 17311 $
 //===== Last Updated: ========================================
-//= $LastChangedDate: 2013-04-22 01:40:10 +0100 (Mon, 22 Apr 2013) $
+//= $LastChangedDate: 2013-05-03 07:20:47 +0100 (Fri, 03 May 2013) $
 //===== Description: =========================================
 //= A reference manual for the rAthena scripting language.
 //= Commands are sorted depending on their functionality.
@@ -1064,7 +1064,7 @@ of the ways to end a speech from an NPC. Once the button is clicked, the NPC
 script execution will end, and the message box will disappear.
 
     mes "[Woman]";
-    mes "I am finished talking to you. Click the close button.;
+    mes "I am finished talking to you. Click the close button.";
     close;
     mes "This command will not run at all, since the script has ended.";
 
@@ -3458,8 +3458,8 @@ bird and 0 if they aren't.
 The 'setdragon' function toggles mounting a dragon for the invoking character.
 It will return 1 if successful, 0 otherwise.
 
-If the character can mount a dragon, the <color> options are:
- 1 - Green Dragon (default when omitted)
+The available colors are:
+ 1 - Green Dragon (default)
  2 - Brown Dragon
  3 - Gray Dragon
  4 - Blue Dragon
@@ -4306,23 +4306,11 @@ the results array is limited to 10 items.
 
 ---------------------------------------
 
-*delitem (<item_id>,<amount>{,<location>}{,<account id>})
-*delitem ("<item name>",<amount>{,<location>}{,<account id>})
-*delitem (<item_id>,<amount>{,<location>}{,"<char name>"})
-*delitem ("<item name>",<amount>{,<location>}{,"<char name>"})
+*delitem <item id>,<amount>{,<account ID>};
+*delitem "<item name>",<amount>{,<account ID>};
 
-<location> is used to delete item(s) in:
-0 - inventory
-1 - cart
-2 - storage
-3 - guild storage
-<account id> can be replaced by "<char name>" is used to delete other online player's item
-
-This command will take a specified amount of items from the invoking/target character. 
-As all the item commands, this one uses the ID of the item found inside 
-'db/(pre-)re/item_db.txt'. The items are destroyed - there is no way an NPC can simply 
-own items and have an inventory of them, other as by destroying and recreating 
-them when needed.
+This command will remove a specified amount of items from the invoking/target character. 
+Like all the item commands, it uses the item ID found inside 'db/(pre-)re/item_db.txt'.
 
     delitem 502,10; // The person will lose 10 apples
     delitem 617,1;  // The person will lose 1 Old Violet Box
@@ -4344,17 +4332,8 @@ Check 'getitem2' to understand its expanded parameters.
 
 ---------------------------------------
 
-*countitem (<item_id>{,<location>}{,<account id>})
-*countitem ("<item name>"{,<location>}{,<account id>})
-*countitem (<item_id>{,<location>}{,"<char name>"})
-*countitem ("<item name>"{,<location>}{,"<char name>"})
-
-<location> is used to check in:
-0 - inventory
-1 - cart
-2 - storage
-3 - guild storage
-<account id> or "<char name>" is used to count other online player item
+*countitem(<item id>)
+*countitem("<item name>")
 
 This function will return the number of items for the specified item ID that the 
 invoking character has in the inventory.
@@ -5419,22 +5398,35 @@ summon "--ja--",-1;
 ---------------------------------------
 
 *unitwalk <GID>,<x>,<y>;
-*unitwalk <GID>,<mapid>;
+*unitwalk <GID>,<Target ID>;
 
-This is one command, but can be used in two ways. If only the first argument is given,
-the unit whose GID is given will start walking towards the map with the given mapid 
-(we believe these are the map-indexes found in db/map_index.txt).
+This command will tell a <GID> to walk to a position.  The destination can be defined
+as either set coordinates, or another object.
 
-When 2 arguments are passed, the given unit will walk to the given x,y coordinates on 
-the map where the unit currently is.
+When 2 arguments are passed, the <GID> will walk to the given x,y coordinates on 
+the map where the unit currently is.  This command returns a 1 or 0 for success and failure
+checks.  While there is no way to move across an entire map with 1 command use, there
+doesn't seem to be any reason this couldn't be used in a loop to move long distances.
+
+The second method of using this command makes the first <GID> walk to the <Target ID> (not unlike walking to attack)
+Using this method will also return a 1 or 0 for success or failure.  This is based on distance from <GID> to <Target ID>.
+It is good to note that this command uses a hard walk check, so it will calculate a walkpath with obstacles.
 
 Examples:
 
-//Will move/walk the poring we made to the coordinates 150,150
-	unitwalk .GID,150,150;
+//Move/walk NPC invoker to the coordinates 150,150
+	unitwalk getcharid(3),150,150;
 
-//Will move the poring towards alberta (if my assumed map-indexes are correct).
-	unitwalk .GID,3;
+//Doing a conditional check with the command and reporting to player success or failure
+	if(unitwalk(getcharid(3),150,150))
+		dispbottom "Walking you there...";
+	else
+		dispbottom "That's too far away, man.";
+
+//Sends NPC invoker to another character with name WalkToMe
+	unitwalk getcharid(3),getcharid(3,"WalkToMe");
+
+Note: Sending a bad target ID to this command will result in an error.
 
 ---------------------------------------
 

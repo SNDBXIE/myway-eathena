@@ -1492,8 +1492,10 @@ ACMD_FUNC(pvpoff)
 
 	map[sd->bl.m].flag.pvp = 0;
 
-	if (!battle_config.pk_mode)
+	if (!battle_config.pk_mode){
 		clif_map_property_mapall(sd->bl.m, MAPPROPERTY_NOTHING);
+		clif_maptypeproperty2(&sd->bl,ALL_SAMEMAP);
+	}
 	map_foreachinmap(atcommand_pvpoff_sub,sd->bl.m, BL_PC);
 	map_foreachinmap(atcommand_stopattack,sd->bl.m, BL_CHAR, 0);
 	clif_displaymessage(fd, msg_txt(sd,31)); // PvP: Off.
@@ -1528,9 +1530,9 @@ ACMD_FUNC(pvpon)
 
 	map[sd->bl.m].flag.pvp = 1;
 
-	if (!battle_config.pk_mode)
-	{// display pvp circle and rank
+	if (!battle_config.pk_mode) {// display pvp circle and rank
 		clif_map_property_mapall(sd->bl.m, MAPPROPERTY_FREEPVPZONE);
+		clif_maptypeproperty2(&sd->bl,ALL_SAMEMAP);
 		map_foreachinmap(atcommand_pvpon_sub,sd->bl.m, BL_PC);
 	}
 
@@ -1553,6 +1555,7 @@ ACMD_FUNC(gvgoff)
 
 	map[sd->bl.m].flag.gvg = 0;
 	clif_map_property_mapall(sd->bl.m, MAPPROPERTY_NOTHING);
+	clif_maptypeproperty2(&sd->bl,ALL_SAMEMAP);
 	map_foreachinmap(atcommand_stopattack,sd->bl.m, BL_CHAR, 0);
 	clif_displaymessage(fd, msg_txt(sd,33)); // GvG: Off.
 
@@ -1573,6 +1576,7 @@ ACMD_FUNC(gvgon)
 
 	map[sd->bl.m].flag.gvg = 1;
 	clif_map_property_mapall(sd->bl.m, MAPPROPERTY_AGITZONE);
+	clif_maptypeproperty2(&sd->bl,ALL_SAMEMAP);
 	clif_displaymessage(fd, msg_txt(sd,34)); // GvG: On.
 
 	return 0;
@@ -3746,8 +3750,8 @@ ACMD_FUNC(reloadmotd)
 ACMD_FUNC(reloadscript)
 {
 	nullpo_retr(-1, sd);
-	//atcommand_broadcast( fd, sd, "@broadcast", "Server is reloading scripts..." );
-	//atcommand_broadcast( fd, sd, "@broadcast", "You will feel a bit of lag at this point !" );
+	atcommand_broadcast( fd, sd, "@broadcast", "Server is reloading scripts..." );
+	atcommand_broadcast( fd, sd, "@broadcast", "You will feel a bit of lag at this point !" );
 
 	flush_fifos();
 	map_reloadnpc(true); // reload config files seeking for npcs
@@ -5621,7 +5625,6 @@ ACMD_FUNC(changelook)
  * Turns on/off Autotrade for a specific player
  *------------------------------------------*/
 ACMD_FUNC(autotrade) {
-	int i;
 	nullpo_retr(-1, sd);
 
 	if( map[sd->bl.m].flag.autotrade != battle_config.autotrade_mapflag ) {
@@ -8809,11 +8812,10 @@ ACMD_FUNC(cart) {
 
 /* Channel System [Ind] */
 ACMD_FUNC(join){
-	struct Channel *channel;
 	char chname[CHAN_NAME_LENGTH], pass[CHAN_NAME_LENGTH];
 
 	if( !message || !*message || sscanf(message, "%s %s", chname, pass) < 1 ) {
-		sprintf(atcmd_output, msg_txt(sd,1399),command); // Unknown Channel (usage: %s <#channel_name>)
+		sprintf(atcmd_output, msg_txt(sd,1399),command); // Unknown channel (usage: %s <#channel_name>).
 		clif_displaymessage(fd, atcmd_output);
 		return -1;
 	}
@@ -8839,9 +8841,9 @@ static inline void atcmd_channel_help(struct map_session_data *sd, const char *c
 
 	//option delete
 	if(can_delete){
-		sprintf(atcmd_output, msg_txt(sd,1469),command);// * %s delete <channel_name>
+		sprintf(atcmd_output, msg_txt(sd,1469),command);// * %s delete <#channel_name>
 		clif_displaymessage(fd, atcmd_output);
-		clif_displaymessage(fd, msg_txt(sd,1470)); // -- Force people leave and destroy the specified channel
+		clif_displaymessage(fd, msg_txt(sd,1470)); // -- Destroys the specified channel.
 	}
 
 	//option list
@@ -8850,7 +8852,7 @@ static inline void atcmd_channel_help(struct map_session_data *sd, const char *c
 	clif_displaymessage(fd, msg_txt(sd,1418));// -- Lists all public channels.
 	sprintf(atcmd_output, msg_txt(sd,1471),command);// * %s list mine
 	clif_displaymessage(fd, atcmd_output);
-	clif_displaymessage(fd, msg_txt(sd,1472));
+	clif_displaymessage(fd, msg_txt(sd,1472));// -- Lists all channels you have joined.
 	if( can_create ) {
 		sprintf(atcmd_output, msg_txt(sd,1419),command);// * %s list colors
 		clif_displaymessage(fd, atcmd_output);
@@ -8865,9 +8867,9 @@ static inline void atcmd_channel_help(struct map_session_data *sd, const char *c
 	}
 
 	//option join
-	sprintf(atcmd_output, msg_txt(sd,1473),command);// * %s join <channel_name>
+	sprintf(atcmd_output, msg_txt(sd,1473),command);// * %s join <#channel_name> <channel_password>
 	clif_displaymessage(fd, atcmd_output);
-	clif_displaymessage(fd, msg_txt(sd,1474));
+	clif_displaymessage(fd, msg_txt(sd,1474));// -- Joins the specified channel.
 
 	//option leave
 	sprintf(atcmd_output, msg_txt(sd,1423),command);// * %s leave <#channel_name>
@@ -8886,25 +8888,25 @@ static inline void atcmd_channel_help(struct map_session_data *sd, const char *c
 
 	//option ban/unban/banlist
 	if( can_create ) {
-		sprintf(atcmd_output, msg_txt(sd,1456),command);// -- %s ban <channel name> <character name>
+		sprintf(atcmd_output, msg_txt(sd,1456),command);// * %s ban <#channel_name> <player>
 		clif_displaymessage(fd, atcmd_output);
-		clif_displaymessage(fd, msg_txt(sd,1457));// - bans <character name> from <channel name> channel
-		sprintf(atcmd_output, msg_txt(sd,1458),command);// -- %s banlist <channel name>
+		clif_displaymessage(fd, msg_txt(sd,1457));// -- Bans the specified player from the channel.
+		sprintf(atcmd_output, msg_txt(sd,1458),command);// * %s banlist <#channel_name>
 		clif_displaymessage(fd, atcmd_output);
-		clif_displaymessage(fd, msg_txt(sd,1459));// - lists all banned characters from <channel name> channel
-		sprintf(atcmd_output, msg_txt(sd,1460),command);// -- %s unban <channel name> <character name>
+		clif_displaymessage(fd, msg_txt(sd,1459));// -- Lists all players banned from the specified channel.
+		sprintf(atcmd_output, msg_txt(sd,1460),command);// * %s unban <#channel_name> <player>
 		clif_displaymessage(fd, atcmd_output);
-		clif_displaymessage(fd, msg_txt(sd,1461));// - unban <character name> from <channel name> channel
-		sprintf(atcmd_output, msg_txt(sd,1467),command);// -- %s unbanall <channel name>
+		clif_displaymessage(fd, msg_txt(sd,1461));// -- Unbans the specified player from the channel.
+		sprintf(atcmd_output, msg_txt(sd,1467),command);// * %s unbanall <#channel_name>
 		clif_displaymessage(fd, atcmd_output);
-		clif_displaymessage(fd, msg_txt(sd,1468));// - unbans everyone from <channel name>
+		clif_displaymessage(fd, msg_txt(sd,1468));// -- Clears all bans from the specified channel.
 	}
 
 	//option setopt
 	if(can_create){
-		sprintf(atcmd_output, msg_txt(sd,1462),command);// -- %s setopt <channel name> <option name> <option value>
+		sprintf(atcmd_output, msg_txt(sd,1462),command);// * %s setopt <#channel_name> <option> <value>
 		clif_displaymessage(fd, atcmd_output);
-		clif_displaymessage(fd, msg_txt(sd,1463));// - adds or removes <option name> with <option value> to <channel name> channel
+		clif_displaymessage(fd, msg_txt(sd,1463));// -- Sets an option and value for the specified channel.
 	}
 
 	sprintf(atcmd_output, msg_txt(sd,1404),command); // %s failed.
@@ -8922,7 +8924,7 @@ ACMD_FUNC(channel) {
 
 	if( strcmpi(key,"create") == 0 && ( Channel_Config.user_chenable || pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN) ) ) {
 		if(sub3[0] != '\0'){
-			clif_displaymessage(fd, msg_txt(sd,1408)); // Channel password may not contain spaces
+			clif_displaymessage(fd, msg_txt(sd,1408)); // Channel password may not contain spaces.
 			return -1;
 		}
 		return channel_pccreate(sd,sub1,sub2);
@@ -8942,6 +8944,8 @@ ACMD_FUNC(channel) {
 		return channel_pcunbind(sd);
 	} else if ( strcmpi(key,"ban") == 0 ) {
 		return channel_pcban(sd,sub1,map_nick2sd(sub2),0);
+	} else if ( strcmpi(key,"banlist") == 0 ) {
+		return channel_pcban(sd,sub1,NULL,3);
 	} else if ( strcmpi(key,"unban") == 0 ) {
 		return channel_pcban(sd,sub1,map_nick2sd(sub2),1);
 	} else if ( strcmpi(key,"unbanall") == 0 ) {
@@ -9026,36 +9030,6 @@ ACMD_FUNC(reloadmsgconf)
 {
 	map_msg_reload();
 	clif_displaymessage(fd, msg_txt(sd,463)); // Message configuration has been reloaded.
-	return 0;
-}
-
-//@ignorebattle [Goddameit]
-ACMD_FUNC(ignorebattle) {	
-	int m;
-	m = sd->bl.m;
-	if( !map[m].flag.mobcantattackplayer )
-	{
-		clif_displaymessage(fd, "Battle ignore [on]");
-		map[m].flag.mobcantattackplayer = 1;
-	}else{
-		clif_displaymessage(fd, "Battle ignore [off]");
-		map[m].flag.mobcantattackplayer = 0;
-	}
-	return 0;
-}
-
-//@pkmode by malufett
-ACMD_FUNC(pkmode) {	
-	nullpo_retr(-1, sd);
-
-	if (!sd->state.pk_mode) {
-		sd->state.pk_mode = 1;
-		clif_displaymessage(sd->fd, "You are now no longer in PK mode.");
-	} else {
-		sd->state.pk_mode = 0;
-		clif_displaymessage(sd->fd, "Returned to normal state.");
-	}
-
 	return 0;
 }
 
@@ -9249,7 +9223,7 @@ ACMD_FUNC(itemmap)
 	if ( get_type == 2 && sscanf(message, "\"%99[^\"]\" %d, %23[^\n]", item_name, &amount, guild_name) < 2 
 					   && sscanf(message, "%99s %d, %23[^\n]", item_name, &amount, guild_name) < 2 )
 	{
-		clif_displaymessage(fd, "Please, enter an item name/id (usage: @itemmap2 <item id/name> <amount>, <guild name>).");
+		 clif_displaymessage(fd, "Please, enter an item name/id (usage: @itemmap2 <item id/name> <amount>, <guild name>).");
 		return -1;
 	}
 
@@ -9326,6 +9300,90 @@ ACMD_FUNC(security)
 	npc_event(sd,"SecuritySystem::OnSettings",0);
  	return 0;
  }
+static int count_mob(struct block_list *bl, va_list ap) // [FE]
+{
+    struct mob_data *md = (struct mob_data*)bl;
+    short id = va_arg(ap, short);
+    if (md->class_ == id)
+        return 1;
+    return 0;
+}
+
+/*=========================================
+ * @mapmoblist/@ml [FatalEror]
+ *-----------------------------------------*/
+ACMD_FUNC(mapmoblist) // [FE]
+{
+    char temp[100];
+    bool mob_searched[MAX_MOB_DB];
+    bool mob_mvp[MAX_MOB_DB]; // Store mvp data..
+    struct s_mapiterator* it;
+    unsigned short count = 0, i, mapindex = 0;
+    int m = 0;
+
+    memset(mob_searched, 0, MAX_MOB_DB);
+    memset(mob_mvp, 0, MAX_MOB_DB);
+
+    if (message && *message) {
+        // Player input map name, search mob list for that map
+        mapindex = mapindex_name2id(message);
+        if (!mapindex) {
+            clif_displaymessage(fd, "Map not found");
+            return -1;
+        }
+        m = map_mapindex2mapid(mapindex);
+    } else {
+        // Player doesn't input map name, search mob list in player current map
+        mapindex = sd->mapindex;
+        m = sd->bl.m;
+    }
+
+    clif_displaymessage(fd, "--------Monster List--------");
+
+    sprintf(temp, "Mapname: %s", mapindex_id2name(mapindex));
+    clif_displaymessage(fd, temp);
+
+    clif_displaymessage(fd, "Monsters: ");
+
+    //Looping and search for mobs
+    it = mapit_geteachmob();
+    while (true) {
+        TBL_MOB* md = (TBL_MOB*)mapit_next(it);
+        if (md == NULL)
+            break;
+
+        if (md->bl.m != m || md->status.hp <= 0)
+            continue;
+        if (mob_searched[md->class_] == true)
+            continue; // Already found, skip it
+        if (mob_db(md->class_)->mexp) {
+            mob_searched[md->class_] = true;
+            mob_mvp[md->class_] = true; // Save id for later
+            continue; // It's MVP!
+        }
+
+        mob_searched[md->class_] = true;
+        count = map_foreachinmap(count_mob, m, BL_MOB, md->class_);
+
+        sprintf(temp, " %s[%d] : %d", mob_db(md->class_)->jname, md->class_, count);
+
+        clif_displaymessage(fd, temp);
+    }
+    mapit_free(it);
+
+    clif_displaymessage(fd, "MVP: ");
+
+    // Looping again and search for mvp, not sure if this is the best way..
+    for (i = 1000; i < MAX_MOB_DB; i++) { //First monster start at 1001 (Scorpion)
+        if (mob_mvp[i] == true) {
+            count = map_foreachinmap(count_mob, m, BL_MOB, i);
+            sprintf(temp, " %s[%d] : %d", mob_db(i)->jname, i, count);
+            clif_displaymessage(fd, temp);
+        }
+    }
+
+    return 0;
+}
 
 /**
  * Fills the reference of available commands in atcommand DBMap
@@ -9593,18 +9651,16 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(langtype),
 		ACMD_DEF(reloadmsgconf),
 		
-		ACMD_DEF2("ignorebattle", ignorebattle),	// [Goddameit]
-		ACMD_DEF2("pk",pkmode),
 		ACMD_DEF(seeghp),
 		ACMD_DEF(leaveguild),
-		ACMD_DEF(breakguild),
 		ACMD_DEF(guildinvite),
 		ACMD_DEF(zenymap),
 		ACMD_DEF(itemmap),
 		ACMD_DEF2("itemmap1", itemmap),
 		ACMD_DEF2("itemmap2", itemmap),
 		ACMD_DEF2("itemmap3", itemmap),
-		ACMD_DEF(security)	// Item Security [Zephyrus]
+		ACMD_DEF(security),	// Item Security [Zephyrus]
+		ACMD_DEF(mapmoblist)
 	};
 	AtCommandInfo* atcommand;
 	int i;
