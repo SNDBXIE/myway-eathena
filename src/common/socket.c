@@ -213,6 +213,9 @@ int fd_max;
 time_t last_tick;
 time_t stall_time = 60;
 
+//
+uint32 max_packet_spam = 20; // max. allowed TCP packets per second
+
 uint32 addr_[16];   // ip addresses of local host (host byte order)
 int naddr_ = 0;   // # of ip addresses
 
@@ -348,6 +351,21 @@ int recv_to_fifo(int fd)
 
 	session[fd]->rdata_size += len;
 	session[fd]->rdata_tick = last_tick;
+	
+	// packet flood detection
+	if( DIFF_TICK(last_tick, session[fd]->last_reset) >= 1 )
+	{
+		if( !session[fd]->flag.server && session[fd]->packet_counter > max_packet_spam)
+		{
+			ShowWarning("Client %s is spamming packets too fast!\n", ip2str(session[fd]->client_addr, NULL));
+			//set_eof(fd); // uncomment to also kick this spammer
+		}
+
+		session[fd]->packet_counter = 0;
+		session[fd]->last_reset = last_tick;
+	}
+	session[fd]->packet_counter++;
+
 	return 0;
 }
 

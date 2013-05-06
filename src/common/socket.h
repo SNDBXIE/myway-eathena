@@ -91,6 +91,10 @@ struct socket_data
 	SendFunc func_send;
 	ParseFunc func_parse;
 
+	// packet flood detection
+	uint32 packet_counter; // counts received packets per iteration
+	time_t last_reset; // time when the counter was last reset
+
 	void* session_data; // stores application-specific data related to the session
 };
 
