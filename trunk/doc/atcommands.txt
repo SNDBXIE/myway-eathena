@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Current Version: =====================================
-//= 20130429
+//= 20130504
 //===== Description: =========================================
 //= List of available atcommands and their functions.
 //============================================================
@@ -109,14 +109,6 @@ Toggles Kill Steal Protection.
 @font <0-9>
 
 Sets client font (0 is the default).
-
----------------------------------------
-
-@fontcolor <color_name>
-
-Sets global chat font color.
-If no parameter is given, a list of available colors is displayed.
-All colors are defined in '/conf/channels.conf'.
 
 ---------------------------------------
 
@@ -1482,10 +1474,20 @@ Destroys the specified channel.
 
 ---------------------------------------
 
+@fontcolor <color_name>
+
+Sets channel chat font color for the invoking character only.
+Typing "Normal" returns text to the normal channel color.
+If no parameter is given, a list of available colors is displayed.
+Option 'ColorOverride' must be enabled for this to take effect.
+
+---------------------------------------
+
 @channel setcolor <#channel_name> <color_name>
 
 Changes the text color of the specified channel.
 You must either be the channel's owner or have the channel_admin permission.
+All colors are defined in '/conf/channels.conf'.
 
 ---------------------------------------
 
@@ -1497,6 +1499,7 @@ You must either be the channel's owner or have the channel_admin permission.
 Available options:
 -- 'JoinAnnounce <1|0>' : Toggles channel announcement when a new player enters.
 -- 'MessageDelay <0-10>' : Sets the delay (in seconds) for messages sent to the channel.
+-- 'ColorOverride <1|0>' : Toggles the permission for players to change their color through @fontcolor.
 
 ---------------------------------------
 
@@ -1518,8 +1521,7 @@ Binds or unbinds your global chat with the specified channel, which sends all gl
 
 ---------------------------------------
 
-@ignorebattle
-@leaveguild | @breakguild | @guildinvite
+@leaveguild | @guildinvite
 @zenymap
 @itemmap <item id/name> {<amount>}
 @itemmap1 <item id/name> <amount>, <party name>

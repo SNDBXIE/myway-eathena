@@ -2566,6 +2566,9 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 
 	// Critical Weapon/Magic Skill
 	// 0: Disable, 1: Skill Weapon Only, 2: Skill Magic Only, 3: All
+	ShowDebug("scritical_set : %d\n", battle_config.scritical_set);
+	ShowDebug("skill_get_type(skill_id) : %d\n", skill_get_type(skill_id));
+
 	if(battle_config.scritical_set > 0 && damage > 0 && ( src->type == BL_PC || battle_get_master(src)->type == BL_PC )){
 		switch(battle_config.scritical_set){
 			case 1:
@@ -2577,7 +2580,10 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 					scri_flag = true;
 				break;
 			case 3:
-				scri_flag = true;
+				if(skill_get_type(skill_id) == BF_MISC)
+					scri_flag = false;
+				else
+					scri_flag = true;
 				break;
 			default:
 				scri_flag = false;
@@ -2585,7 +2591,7 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 		}
 		if( scri_flag = true){
 			int m_cri = 0;
-			if(skill_get_type(skill_id) == BF_WEAPON){
+			if(skill_get_type(skill_id) == BF_WEAPON){		
 				if(battle_config.scritical_ratio_skill > 0)
 					m_cri = battle_config.scritical_ratio_skill;
 				else{
@@ -2594,9 +2600,9 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 					else
 						m_cri = cap_value(sd->battle_status.cri/10,1,100);				
 				}
-				if( rnd()%100 < m_cri && battle_config.scritical_dmg_skill > 0){
+				if( (rnd()%100 < m_cri) && (battle_config.scritical_dmg_skill > 0)){
 					scri_flag = true;
-					damage += damage * (battle_config.scritical_dmg_skill /10000);
+					damage += (damage * battle_config.scritical_dmg_skill) / 10000;
 				} else
 					scri_flag = false;
 			} else if(skill_get_type(skill_id) == BF_MAGIC){
@@ -2608,9 +2614,9 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 					else
 						m_cri = cap_value(sd->battle_status.cri/10,1,100);				
 				}
-				if( rnd()%100 < m_cri && battle_config.scritical_dmg_magic > 0){
+				if( (rnd()%100 < m_cri) && (battle_config.scritical_dmg_magic > 0)){
 					scri_flag  = true;
-					damage += damage * (battle_config.scritical_dmg_magic /10000);
+					damage += (damage * battle_config.scritical_dmg_magic) / 10000;
 				} else
 					scri_flag = false;
 			}
@@ -2712,46 +2718,6 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 	default:
 		if( flag&SD_ANIMATION && dmg.div_ < 2 ) //Disabling skill animation doesn't works on multi-hit.
 			type = 5;
-
-		// Critical Weapon/Magic Skill
-		if (scri_flag = true)
-		{
-			struct mob_data *md=NULL;
-			struct tmp_data *tmpd=NULL;
-			int d_ = 200;
-			unsigned int u_ = 0;
-			int i=0, num=abs(skill_get_num(skill_id,skill_lv)), _damage=0;
-			md = mob_once_spawn_sub(src, src->m, src->x, src->y, "--en--",1083,"", SZ_SMALL, AI_NONE);
-			md->deletetimer=add_timer(tick+d_*num+1,mob_timer_delete,md->bl.id,0);
-			status_set_viewdata(&md->bl, INVISIBLE_CLASS);
-			tmpd = &md->tmpd;				
-			if(skill_get_splash(skill_id,skill_lv)>1&&num>1)
-				num = 1;
-			_damage = damage/num;
-			tmpd->src = src;
-			tmpd->bl = bl;
-			if(bl->type != BL_PC){
-				tmpd->num[0]=skill_id;
-				tmpd->num[1]=skill_lv;
-				u_ = tick+d_*num+1;
-				if( tstatus->hp <= damage )//delay to kill it
-				{
-					damage = 1;
-					status_change_start(src, bl, SC_BLADESTOP_WAIT, 10000, 1, 0, 0, 0, u_, 2);
-					status_change_start(src, bl, SC_INVINCIBLE, 10000, 1, 0, 0, 0, u_, 2);
-					add_timer(u_,skill_mcri_kill_delay,bl->id,(intptr_t)src);
-				}
-			}
-			clif_skill_nodamage(src,src,skill_id,skill_lv,1);
-			for(i=0;i<num;i++)
-				if(md!=NULL)
-					add_timer(tick+d_*i +1,skill_mcri_hit,_damage,(intptr_t)md);
-				else
-					add_timer(tick+200*i,skill_mcri_hit,_damage,(intptr_t)sd);
-			u_ = d_ = _damage = 0;
-			break;
-		}
-
 		if( bl->type == BL_SKILL ){
 			TBL_SKILL *su = (TBL_SKILL*)bl;
 			if( su->group && skill_get_inf2(su->group->skill_id)&INF2_TRAP )// show damage on trap targets
@@ -4512,12 +4478,6 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, uint
 					j++; //
 				}
 
-			if( j < 4 )
-			{ // Need 4 spheres minimum
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
-				break;
-			}
-
 			// Sphere Sort, this time from new to old
 			for( i = 0; i <= j - 2; i++ )
 				for( k = i + 1; k <= j - 1; k++ )
@@ -4541,6 +4501,8 @@ int skill_castend_damage_id (struct block_list* src, struct block_list *bl, uint
 				clif_skill_nodamage(src, bl, subskill, skill_lv, 1);
 				status_change_end(src, spheres[i], INVALID_TIMER);
 			}
+			if (spheres[4]) // fix to remove last sphere if 5 are present, on official even though only 4 spheres are used, all spheres are removed
+				status_change_end(src, spheres[4], INVALID_TIMER);
 		}
 		break;
 
@@ -9372,8 +9334,8 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 		if(hd->master && hd->sc.data[SC_STYLE_CHANGE]) {
 		    int mode = hd->sc.data[SC_STYLE_CHANGE]->val1;
 		    char output[128];
-		    safesnprintf(output,sizeof(output),"Eleanor is now in %s mode",(sce->val1==MH_MD_FIGHTING?"fighthing":"grappling"));
-		    clif_colormes(hd->master,COLOR_RED,output);
+		    safesnprintf(output,sizeof(output),msg_txt(sd,378),(sce->val1==MH_MD_FIGHTING?"fighthing":"grappling"));
+		    clif_colormes(hd->master,color_table[COLOR_RED],output);
 		}
 	    }
 	    break;
@@ -10531,15 +10493,7 @@ int skill_castend_pos2(struct block_list* src, int x, int y, uint16 skill_id, ui
 		break;
 
 	case LG_OVERBRAND:
-		{
-			int width;//according to data from irowiki it actually is a square
-			for( width = 0; width < 7; width++ )
-				for( i = 0; i < 7; i++ )
-					map_foreachincell(skill_area_sub, src->m, x-2+i, y-2+width, splash_target(src), src, LG_OVERBRAND_BRANDISH, skill_lv, tick, flag|BCT_ENEMY,skill_castend_damage_id);
-			for( width = 0; width < 7; width++ )
-				for( i = 0; i < 7; i++ )
-					map_foreachincell(skill_area_sub, src->m, x-2+i, y-2+width, splash_target(src), src, skill_id, skill_lv, tick, flag|BCT_ENEMY,skill_castend_damage_id);
-		}
+		skill_overbrand(src, skill_id, skill_lv, x, y, tick, flag);
 		break;
 
 	case LG_BANDING:
@@ -13277,12 +13231,14 @@ int skill_check_condition_castbegin(struct map_session_data* sd, uint16 skill_id
 		//	}
 		//	break;
 
-		case AB_ADORAMUS:
+
+		case AB_ADORAMUS: // bugreport:7647 mistress card DOES remove requirements for gemstones from Adoramus and Comet -helvetica
 		/**
 		 * Warlock
 		 **/
 		case WL_COMET:
 			if( skill_check_pc_partner(sd,skill_id,&skill_lv,1,0) <= 0
+				&& sd->special_state.no_gemstone == 0
 				&& ((i = pc_search_inventory(sd,require.itemid[0])) < 0 || sd->status.inventory[i].amount < require.amount[0]) ) {
 				//clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_ITEM,require.amount[0],require.itemid[0]);
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
@@ -13299,6 +13255,25 @@ int skill_check_condition_castbegin(struct map_session_data* sd, uint16 skill_id
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON,0);
 					return 0;
 				}
+			}
+			break;
+		case WL_TETRAVORTEX: // bugreport:7598 moved sphere check to precast to avoid triggering cooldown per official behavior -helvetica
+			if( sc ) {
+				int j = 0;
+
+				for( i = SC_SPHERE_1; i <= SC_SPHERE_5; i++ )
+					if( sc->data[i] ) {
+						j++;
+					}
+
+				if( j < 4 ) { // Need 4 spheres minimum
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
+					return 0;
+				}
+			}
+			else { // no status at all? no spheres present
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
+				return 0;
 			}
 			break;
 		/**
@@ -13397,8 +13372,8 @@ int skill_check_condition_castbegin(struct map_session_data* sd, uint16 skill_id
 			    if (map_foreachinrange(mob_count_sub, &sd->bl, skill_get_splash(skill_id, skill_lv), BL_MOB,
 				    MOBID_EMPERIUM, MOBID_GUARIDAN_STONE1, MOBID_GUARIDAN_STONE2)) {
 				char output[128];
-				sprintf(output, "You're too close to a stone or emperium to do this skill");
-				clif_colormes(sd, COLOR_RED, output);
+				sprintf(output,"%s",msg_txt(sd,382)); // You're too close to a stone or emperium to use this skill.
+				clif_colormes(sd,color_table[COLOR_RED], output);
 				return 0;
 			    }
 			}
@@ -13765,11 +13740,11 @@ int skill_check_condition_castend(struct map_session_data* sd, uint16 skill_id, 
 			return 0;
 		} else if( sd->status.inventory[i].amount < require.ammo_qty ) {
 			char e_msg[100];
-			sprintf(e_msg,"Skill Failed. [%s] requires %dx %s.",
+			sprintf(e_msg,msg_txt(sd,381), //Skill Failed. [%s] requires %dx %s.
 						skill_get_desc(skill_id),
 						require.ammo_qty,
 						itemdb_jname(sd->status.inventory[i].nameid));
-			clif_colormes(sd,COLOR_RED,e_msg);
+			clif_colormes(sd,color_table[COLOR_RED],e_msg);
 			return 0;
 		}
 		if (!(require.ammo&1<<sd->inventory_data[i]->look)) { //Ammo type check. Send the "wrong weapon type" message
@@ -14013,16 +13988,18 @@ struct skill_condition skill_get_requirement(struct map_session_data* sd, uint16
 		if( itemid_isgemstone(req.itemid[i]) && skill_id != HW_GANBANTEIN )
 		{
 			if( sd->special_state.no_gemstone )
-			{	//Make it substract 1 gem rather than skipping the cost.
-				if( --req.amount[i] < 1 )
-					req.itemid[i] = 0;
+			{	// All gem skills except Hocus Pocus and Ganbantein can cast for free with Mistress card -helvetica
+				if( skill_id != SA_ABRACADABRA )
+					req.itemid[i] = req.amount[i] = 0;
+				else if( --req.amount[i] < 1 )
+					req.amount[i] = 1; // Hocus Pocus always use at least 1 gem
 			}
 			if(sc && sc->data[SC_INTOABYSS])
 			{
 				if( skill_id != SA_ABRACADABRA )
 					req.itemid[i] = req.amount[i] = 0;
 				else if( --req.amount[i] < 1 )
-					req.amount[i] = 1; // Hocus Pocus allways use at least 1 gem
+					req.amount[i] = 1; // Hocus Pocus always use at least 1 gem
 			}
 		}
 		if( skill_id >= HT_SKIDTRAP && skill_id <= HT_TALKIEBOX && pc_checkskill(sd, RA_RESEARCHTRAP) > 0){
@@ -14417,6 +14394,45 @@ int skill_delayfix (struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 /*=========================================
  *
  *-----------------------------------------*/
+void skill_overbrand(struct block_list* src, uint16 skill_id, uint16 skill_lv, uint16 x, uint16 y, unsigned int tick, int flag)
+{
+	struct s_skill_unit_layout *layout;
+	int i, ux[53], uy[53]; //Number of cells we are attacking
+	short dir = map_calc_dir(src,x,y);
+	layout = skill_get_unit_layout(skill_id,skill_lv,src,x,y);
+	if(dir > 0 && dir < 4) { //Need to invert the cell locations for directions
+		for(i = 0; i < 53; i++) {
+			ux[i] = layout->dy[i];
+			uy[i] = layout->dx[i] * -1;
+		}
+	} else if(dir == 4) {
+		for(i = 0; i < 53; i++) {
+			ux[i] = layout->dx[i];
+			uy[i] = layout->dy[i];
+		}
+	} else if(dir > 4) {
+		for(i = 0; i < 53; i++) {
+			ux[i] = layout->dy[i] * -1;
+			uy[i] = layout->dx[i];
+		}
+	} else {
+		for(i = 0; i < 53; i++) {
+			ux[i] = layout->dx[i];
+			uy[i] = layout->dy[i] * -1;
+		}
+	}
+	for( i = 0; i < 53; i++ ) {
+		if(i < 12) { //Close range hits twice
+			map_foreachincell(skill_area_sub, src->m, x+ux[i], y+uy[i], splash_target(src), src, LG_OVERBRAND_BRANDISH, skill_lv, tick, flag|BCT_ENEMY,skill_castend_damage_id);
+			map_foreachincell(skill_area_sub, src->m, x+ux[i], y+uy[i], splash_target(src), src, skill_id, skill_lv, tick, flag|BCT_ENEMY,skill_castend_damage_id);
+		} else if(i > 11 && i < 45) //Far sides do knockback damage
+			map_foreachincell(skill_area_sub, src->m, x+ux[i], y+uy[i], splash_target(src), src, skill_id, skill_lv, tick, flag|BCT_ENEMY,skill_castend_damage_id);
+		else //Far middle does piercing damage
+			map_foreachincell(skill_area_sub, src->m, x+ux[i], y+uy[i], splash_target(src), src, LG_OVERBRAND_BRANDISH, skill_lv, tick, flag|BCT_ENEMY,skill_castend_damage_id);
+	}
+
+}
+
 struct square {
 	int val1[5];
 	int val2[5];
@@ -17659,6 +17675,18 @@ void skill_init_unit_layout (void) {
 						static const int dx[] = {-1,-2,-2,-2,-2,-2,-1, 0, 1, 2, 2, 2, 2, 2, 1, 0};
 						static const int dy[] = { 2, 2, 1, 0,-1,-2,-2,-2,-2,-2,-1, 0, 1, 2, 2, 2};
 						skill_unit_layout[pos].count = 16;
+						memcpy(skill_unit_layout[pos].dx,dx,sizeof(dx));
+						memcpy(skill_unit_layout[pos].dy,dy,sizeof(dy));
+					}
+					break;
+				case LG_OVERBRAND: {
+						static const int dx[] = {-1,-1,-1,-1, 0, 0, 0, 0, 1, 1, 1, 1,
+									 -5,-5,-5,-5,-4,-4,-4,-4,-3,-3,-3,-3,-2,-2,-2,-2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
+									 -1,-1,-1, 0, 0, 0, 1, 1, 1};
+						static const int dy[] = { 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3, 
+									  0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3,
+									 -4,-5,-6,-4,-5,-6,-4,-5,-6};
+						skill_unit_layout[pos].count = 53;
 						memcpy(skill_unit_layout[pos].dx,dx,sizeof(dx));
 						memcpy(skill_unit_layout[pos].dy,dy,sizeof(dy));
 					}

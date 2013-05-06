@@ -6028,8 +6028,8 @@ static const struct _battle_data {
 
 	// Critical Weapon/Magic Skill
 	{ "scritical_set",						&battle_config.scritical_set,        			 1,     0,      3,              },
-	{ "scritical_ratio_skill",				&battle_config.scritical_ratio_skill,        			 0,     0,      10000,              },
-	{ "scritical_ratio_magic",				&battle_config.scritical_ratio_magic,        			 0,     0,      10000,              },
+	{ "scritical_ratio_skill",				&battle_config.scritical_ratio_skill,        			 0,     0,      100,              },
+	{ "scritical_ratio_magic",				&battle_config.scritical_ratio_magic,        			 0,     0,      100,              },
 	{ "scritical_dmg_skill",				&battle_config.scritical_dmg_skill,        			 5000,     1,      INT_MAX,              },
 	{ "scritical_dmg_magic",				&battle_config.scritical_dmg_magic,        			 5000,     1,      INT_MAX,              },
 		
