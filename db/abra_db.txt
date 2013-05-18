@@ -1,3 +1,4 @@
+
 // Hocus-Pocus (Abrakadabra) Castable Skills Database
 //
 // Structure of Database:

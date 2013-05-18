@@ -18,7 +18,3 @@
 // 42,1,0,50,-30,10
 // Adoramus: PvP & GvG maps, +50% for players, -50% for mobs, 0% for boss monsters, 0% for others
 // 2040,6,50,-50,0,0
-
-
-//Acid deminstation
-490,6,-40,0,0,0

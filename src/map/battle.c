@@ -2190,16 +2190,22 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src,struct blo
 					(!skill_id && sc && sc->data[SC_CHANGE]?4:0)|
 					(skill_id == MO_EXTREMITYFIST?8:0)|
 					(sc && sc->data[SC_WEAPONPERFECTION]?8:0);
-				if (flag.arrow && sd)
-				switch(sd->status.weapon) {
-					case W_BOW:
-					case W_REVOLVER:
-					case W_GATLING:
-					case W_SHOTGUN:
-					case W_GRENADE:
-						break;
-					default:
-						i |= 16; // for ex. shuriken must not be influenced by DEX
+				if (flag.arrow && sd){
+					if(skill_id == GN_CARTCANNON){
+						i |= 2;
+						i |= 16;
+					} else {
+						switch(sd->status.weapon) {
+							case W_BOW:
+							case W_REVOLVER:
+							case W_GATLING:
+							case W_SHOTGUN:
+							case W_GRENADE:
+								break;
+							default:
+								i |= 16; // for ex. shuriken must not be influenced by DEX
+						}					
+					}
 				}
 				wd.damage = battle_calc_base_damage(sstatus, &sstatus->rhw, sc, tstatus->size, sd, i);
 				if (flag.lh)
@@ -5280,6 +5286,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	int state = 0; //Initial state none
 	int strip_enemy = 1; //Flag which marks whether to remove the BCT_ENEMY status if it's also friend/ally.
 	struct block_list *s_bl = src, *t_bl = target;
+	struct map_session_data *sd = BL_CAST(BL_PC, s_bl);
 
 	nullpo_ret(src);
 	nullpo_ret(target);
@@ -5457,7 +5464,6 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	{	//Checks on source master
 		case BL_PC:
 		{
-			struct map_session_data *sd = BL_CAST(BL_PC, s_bl);
 			if( s_bl != t_bl )
 			{
 				if( sd->state.killer )
@@ -5527,7 +5533,8 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 		return (flag&state)?1:-1;
 	}
 
-	if( map_flag_vs(m) )
+	//cell_PVP by Mr Postman
+	if( map_flag_vs(m) || map_check_pvp(s_bl,t_bl) )
 	{ //Check rivalry settings.
 		int sbg_id = 0, tbg_id = 0;
 		if( map[m].flag.battleground )
@@ -5590,6 +5597,10 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	//Alliance state takes precedence over enemy one.
 	else if( state&BCT_ENEMY && strip_enemy && state&(BCT_SELF|BCT_PARTY|BCT_GUILD) )
 		state&=~BCT_ENEMY;
+	
+	//cell_pvp by Mr Postman
+	if( sd->state.pvp && (sd->state.pvp == ((TBL_PC*)t_bl)->state.pvp) )
+		state |= BCT_ENEMY;
 
 	return (flag&state)?1:-1;
 }

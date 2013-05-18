@@ -1724,6 +1724,10 @@ int map_quit(struct map_session_data *sd) {
 		}
 	}
 
+	//cell_PVP by Mr Postman
+	if( map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP ) )
+		 map[sd->bl.m].pvpuser--;
+
 	party_booking_delete(sd); // Party Booking [Spiria]
 	pc_makesavestatus(sd);
 	pc_clean_skilltree(sd);
@@ -2524,6 +2528,9 @@ int map_getcellp(struct map_data* m,int16 x,int16 y,cell_chk cellchk)
 #else
 			return 0;
 #endif
+		//cell_PVP by Mr Postman
+		case CELL_CHKPVP:
+			 return (cell.pvp);
 
 		default:
 			return 0;
@@ -2556,6 +2563,7 @@ void map_setcell(int16 m, int16 x, int16 y, cell_t cell, bool flag)
 		case CELL_NOCHAT:        map[m].cell[j].nochat = flag;        break;
 		case CELL_MAELSTROM:	 map[m].cell[j].maelstrom = flag;	  break;
 		case CELL_ICEWALL:		 map[m].cell[j].icewall = flag;		  break;
+		case CELL_PVP:			 map[m].cell[j].pvp = flag;			  break;
 		default:
 			ShowWarning("map_setcell: invalid cell type '%d'\n", (int)cell);
 			break;
@@ -3928,6 +3936,45 @@ int do_init(int argc, char *argv[])
 		add_timer_interval(gettick()+1000, parse_console_timer, 0, 0, 1000); //start in 1s each 1sec
 	}
 
+	return 0;
+}
+
+//cell_PVP by Mr Postman
+int map_check_pvp(struct block_list *src, struct block_list *target)
+{
+	if( (src->type && target->type) != BL_PC )
+		return 0;
+
+	if( ( (((TBL_PC*)src)->state.pvp) && (((TBL_PC*)target)->state.pvp) ) == 1 )
+		return 1;
+	else
+		return 0;
+}
+
+
+int map_pvp_area(struct map_session_data* sd, bool flag)
+{
+	if(flag) {
+		clif_map_property(sd, MAPPROPERTY_FREEPVPZONE);
+		map[sd->bl.m].pvpuser++;
+
+		sd->pvp_timer  = add_timer(gettick()+200, pc_calc_pvprank_timer, sd->bl.id, 0);
+		sd->pvp_rank  = 0;
+		sd->pvp_lastusers = 0;
+		sd->pvp_point  = 5;
+		sd->pvp_won   = 0;
+		sd->pvp_lost  = 0;
+		sd->state.pvp  = 1;
+	} else {
+		clif_pvpset(sd, 0, 0, 2);
+		map[sd->bl.m].pvpuser--;
+
+		if( sd->pvp_timer != INVALID_TIMER )
+			delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
+
+		sd->pvp_timer  = INVALID_TIMER;
+		sd->state.pvp  = 0;
+	}
 	return 0;
 }
 

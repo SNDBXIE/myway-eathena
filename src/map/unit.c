@@ -201,6 +201,12 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 			// reset the tick, he is not far anymore
 			sd->md->masterteleport_timer = 0;
 		}
+
+		//cell_PVP by Mr Postman
+		if( !sd->state.pvp && map_getcell( bl->m, bl->x, bl->y, CELL_CHKPVP) )
+			map_pvp_area(sd, 1);
+		else if( sd->state.pvp && !map_getcell( bl->m, bl->x, bl->y, CELL_CHKPVP) )
+			map_pvp_area(sd, 0);
 	} else if (md) {
 		if( map_getcell(bl->m,x,y,CELL_CHKNPC) ) {
 			if( npc_touch_areanpc2(md) ) return 0; // Warped
@@ -675,6 +681,11 @@ int unit_movepos(struct block_list *bl, short dst_x, short dst_y, int easy, bool
 				clif_slide(bl,bl->x,bl->y);
 			}
 		}
+		if( !sd->state.pvp && map_getcell( bl->m, bl->x, bl->y, CELL_CHKPVP) )
+			map_pvp_area(sd, 1);
+		else if( sd->state.pvp && !map_getcell( bl->m, bl->x, bl->y, CELL_CHKPVP) )
+			map_pvp_area(sd, 0);
+
 	}
 	return 1;
 }
@@ -889,6 +900,10 @@ int unit_stop_walking(struct block_list *bl,int type)
 
 int unit_skilluse_id(struct block_list *src, int target_id, uint16 skill_id, uint16 skill_lv)
 {
+	struct map_session_data* dstsd = map_id2sd(target_id);
+	if( src->id != target_id )
+		 if( dstsd &&  dstsd->state.pvp != ((TBL_PC*)src)->state.pvp )
+			 return 0;
 	return unit_skilluse_id2(
 		src, target_id, skill_id, skill_lv,
 		skill_castfix(src, skill_id, skill_lv),
