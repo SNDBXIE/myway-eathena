@@ -2442,19 +2442,6 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			// By popular demand, use base drop rate for autoloot code. [Skotlex]
 			mob_item_drop(md, dlist, ditem, 0, md->db->dropitem[i].p, homkillonly);
 		}
-		
-		// Mapflag 'mobitemadder' (Zephyr)
-		if( map[m].mobitemadder_droplist[0].mob_id == md->class_ ) {
-			for( i = 1; i < sizeof( map[m].mobitemadder_droplist ); i = i + 1 ) {
-				drop_rate = map[m].mobitemadder_droplist[i].item_per;
-				if( rnd() % 10000 > drop_rate )
-					continue;
-				if( !ditem || !itemdb_exists( map[m].mobitemadder_droplist[i].item_id ) )
-					continue;
-				ditem = mob_setdropitem( map[m].mobitemadder_droplist[i].item_id, 1 );
-				mob_item_drop(md, dlist, ditem, 0, map[m].mobitemadder_droplist[i].item_per, homkillonly);
-			}
-		}
 
 		// Ore Discovery [Celest]
 		if (sd == mvp_sd && pc_checkskill(sd,BS_FINDINGORE)>0 && battle_config.finding_ore_rate/10 >= rnd()%10000) {
@@ -2703,15 +2690,6 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 	// MvP tomb [GreenBox]
 	if (battle_config.mvp_tomb_enabled && md->spawn->state.boss)
 		mvptomb_create(md, mvp_sd ? mvp_sd->status.name : NULL, time(NULL));
-
-	// Remove all status changes before creating a respawn
-	if( sc ) {
-		for(i=0; i<SC_MAX; i++){
-			if(sc->data[i] && (sc->data[i]->timer != INVALID_TIMER))
-				delete_timer(sc->data[i]->timer, status_change_timer);
-		}
-		memset( sc, 0, sizeof( struct status_change ) );
-	}
 
 	if( !rebirth )
 		mob_setdelayspawn(md); //Set respawning.

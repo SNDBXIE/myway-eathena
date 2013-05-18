@@ -87,5 +87,7 @@ extern int db_use_sqldbs; // added for sql item_db read for char server [Valaris
 
 extern int guild_exp_rate;
 extern int log_inter;
+extern int guild_base_members;
+extern int guild_add_members;
 
 #endif /* _CHAR_SQL_H_ */

@@ -174,6 +174,7 @@ struct map_session_data {
 		unsigned int permanent_speed : 1; // When 1, speed cannot be changed through status_calc_pc().
 		unsigned int seeghp :1; // Display the HP of players of clan and alliances. [Created by Rad & Updated by Cainho]
 		unsigned int secure_items : 1; // Item Security [Zephyrus]
+		unsigned int pvp : 1;
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;

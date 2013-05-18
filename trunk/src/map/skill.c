@@ -1846,7 +1846,7 @@ int skill_counter_additional_effect (struct block_list* src, struct block_list *
 
 	if( sd && status_isdead(bl) ) {
 		int sp = 0, hp = 0;
-		if( attack_type&BF_WEAPON ) {
+		if( attack_type&(BF_WEAPON|BF_SHORT) == (BF_WEAPON|BF_SHORT) ) {
 			sp += sd->bonus.sp_gain_value;
 			sp += sd->sp_gain_race[status_get_race(bl)];
 			sp += sd->sp_gain_race[is_boss(bl)?RC_BOSS:RC_NONBOSS];
@@ -2566,9 +2566,6 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 
 	// Critical Weapon/Magic Skill
 	// 0: Disable, 1: Skill Weapon Only, 2: Skill Magic Only, 3: All
-	ShowDebug("scritical_set : %d\n", battle_config.scritical_set);
-	ShowDebug("skill_get_type(skill_id) : %d\n", skill_get_type(skill_id));
-
 	if(battle_config.scritical_set > 0 && damage > 0 && ( src->type == BL_PC || battle_get_master(src)->type == BL_PC )){
 		switch(battle_config.scritical_set){
 			case 1:
@@ -9727,7 +9724,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 		}
 	}
 
-	ud->skill_id = ud->skill_lv = ud->skilltarget = 0;
+	ud->skill_id = ud->skilltarget = 0;
 	if( !sd || sd->skillitem != ud->skill_id || skill_get_delay(ud->skill_id,ud->skill_lv) )
 		ud->canact_tick = tick;
 	//You can't place a skill failed packet here because it would be

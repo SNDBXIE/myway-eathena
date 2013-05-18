@@ -3441,26 +3441,6 @@ static const char* npc_parse_mapflag(char* w1, char* w2, char* w3, char* w4, con
 	else if (!strcmpi(w3,"noequip"))	//mf_noequip
 		map[m].flag.noequip=state;
 	else
-	// mobitemadder (Zephyr)
-	if( !strcmpi( w3, "mobitemadder" ) ) {
-		if( state ) {
-			int j;
-			char *checkdroplist = NULL, *droplist = strdup( w4 );
-			checkdroplist = strtok( droplist, ", " );
-			map[m].mobitemadder_droplist[0].mob_id = atoi( checkdroplist );
-			j = 1;
-			do {
-				checkdroplist = strtok( '\0', ", " );
-				if( checkdroplist )
-					map[m].mobitemadder_droplist[j].item_id = atoi( checkdroplist );
-				checkdroplist = strtok( '\0', ", " );
-				if( checkdroplist )
-					map[m].mobitemadder_droplist[j].item_per = atoi( checkdroplist );
-				j++;
-			}
-			while( checkdroplist );
-		}
-	} else
 		ShowError("npc_parse_mapflag: unrecognized mapflag '%s' (file '%s', line '%d').\n", w3, filepath, strline(buffer,start-buffer));
 
 	return strchr(start,'\n');// continue

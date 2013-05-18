@@ -450,6 +450,7 @@ typedef enum {
 	CELL_MAELSTROM,
 	CELL_ICEWALL,
 
+	CELL_PVP = 0xFF,	//cell_PVP by Mr Postman
 } cell_t;
 
 // used by map_getcell()
@@ -474,6 +475,7 @@ typedef enum {
 	CELL_CHKMAELSTROM,
 	CELL_CHKICEWALL,
 
+	CELL_CHKPVP = 0xFF,	//cell_PVP by Mr Postman
 } cell_chk;
 
 struct mapcell
@@ -492,8 +494,8 @@ struct mapcell
 		novending : 1,
 		nochat : 1,
 		maelstrom : 1,
-		icewall : 1;
-
+		icewall : 1,
+		pvp : 1;	//cell_PVP by Mr Postman
 #ifdef CELL_NOSTACK
 	unsigned char cell_bl; //Holds amount of bls in this cell.
 #endif
@@ -519,6 +521,7 @@ struct map_data {
 	int npc_num;
 	int users;
 	int users_pvp;
+	int pvpuser;	//cell_PVP by Mr Postman
 	int iwall_num; // Total of invisible walls in this map
 	struct map_flag {
 		unsigned town : 1; // [Suggestion to protect Mail System]
@@ -575,8 +578,6 @@ struct map_data {
 		unsigned nosumstarmiracle : 1; //allow SG miracle to happen ?
 		unsigned nomineeffect : 1; //allow /mineeffect
 		unsigned nolockon : 1;
-		
-		unsigned mobitemadder :1; // mobitemadder (Zephyr)
 		unsigned noequip : 1;	//mf_noequip
 	} flag;
 	struct point save;
@@ -586,12 +587,6 @@ struct map_data {
 		int drop_type;
 		int drop_per;
 	} drop_list[MAX_DROP_PER_MAP];
-
-	struct {
-		int mob_id;
-		int item_id;
-		int item_per;
-	} mobitemadder_droplist[100]; // mobitemadder (Zephyr)
 
 	struct spawn_data *moblist[MAX_MOB_LIST_PER_MAP]; // [Wizputer]
 	int mob_delete_timer;	// [Skotlex]
@@ -832,5 +827,9 @@ extern char mob_skill_db_db[32];
 extern char mob_skill_db2_db[32];
 
 void do_shutdown(void);
+
+//cell_PVP by Mr Postman
+int map_check_pvp(struct block_list *src, struct block_list *target);
+int map_pvp_area(struct map_session_data* sd, bool flag);
 
 #endif /* _MAP_H_ */
