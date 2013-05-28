@@ -1378,12 +1378,12 @@ void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag)
 {
 	struct status_data *status;
 	unsigned char buf[128];
-	int m_class;
+	int htype;
 
 	nullpo_retv(hd);
 
 	status  = &hd->battle_status;
-	m_class = hom_class2mapid(hd->homunculus.class_);
+	htype = hom_class2type(hd->homunculus.class_);
 
 	memset(buf,0,packet_len(0x22e));
 	WBUFW(buf,0)=0x22e;
@@ -1420,10 +1420,18 @@ void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag)
 		WBUFW(buf,57)=status->max_sp;
 	}
 	WBUFL(buf,59)=hd->homunculus.exp;
-	if( ((m_class&HOM_REG) && hd->homunculus.level >= battle_config.hom_max_level) || ((m_class&HOM_S) && hd->homunculus.level >= battle_config.hom_S_max_level) )
-		WBUFL(buf,63)=0;
-	else
-		WBUFL(buf,63)=hd->exp_next;
+	WBUFL(buf,63)=hd->exp_next;
+	switch( htype ) {
+		case HT_REG:
+		case HT_EVO:
+			if( hd->homunculus.level >= battle_config.hom_max_level )
+				WBUFL(buf,63)=0;
+			break;
+		case HT_S:
+			if( hd->homunculus.level >= battle_config.hom_S_max_level )
+				WBUFL(buf,63)=0;
+			break;
+	}
 	WBUFW(buf,67)=hd->homunculus.skillpts;
 	WBUFW(buf,69)=status_get_range(&hd->bl);
 	clif_send(buf,packet_len(0x22e),&sd->bl,SELF);
@@ -2815,10 +2823,10 @@ void clif_updatestatus(struct map_session_data *sd,int type)
 		WFIFOL(fd,4)=sd->battle_status.cri/10;
 		break;
 	case SP_MATK1:
-            WFIFOL(fd,4)=pc_rightside_matk(sd);
+		WFIFOL(fd,4)=pc_rightside_matk(sd);
 		break;
 	case SP_MATK2:
-            WFIFOL(fd,4)=pc_leftside_matk(sd);
+		WFIFOL(fd,4)=pc_leftside_matk(sd);
 		break;
 
 
@@ -11609,7 +11617,7 @@ void clif_parse_ReplyPartyInvite2(int fd,struct map_session_data *sd)
 /// 0100
 void clif_parse_LeaveParty(int fd, struct map_session_data *sd)
 {
-	if(map[sd->bl.m].flag.partylock) { //Guild locked.
+	if(map[sd->bl.m].flag.partylock) {// Party locked.
 		clif_displaymessage(fd, msg_txt(sd,227));
 		return;
 	}
@@ -11621,7 +11629,7 @@ void clif_parse_LeaveParty(int fd, struct map_session_data *sd)
 /// 0103 <account id>.L <char name>.24B
 void clif_parse_RemovePartyMember(int fd, struct map_session_data *sd)
 {
-	if(map[sd->bl.m].flag.partylock) { //Guild locked.
+	if(map[sd->bl.m].flag.partylock) {// Party locked.
 		clif_displaymessage(fd, msg_txt(sd,227));
 		return;
 	}
@@ -16443,7 +16451,56 @@ void clif_parse_reqworldinfo(int fd,struct map_session_data *sd){
 	if(sd) clif_ackworldinfo(sd);
 }
 
+/// unknown usage (CZ_BLOCKING_PLAY_CANCEL)
+/// 0447
+void clif_parse_blocking_playcancel(int fd,struct map_session_data *sd){
+	//if(sd)
+	;
+}
 
+/// req world info (CZ_CLIENT_VERSION)
+/// 044A <version>.L
+void clif_parse_client_version(int fd,struct map_session_data *sd){
+	//if(sd)
+	;
+}
+
+#ifdef DUMP_UNKNOWN_PACKET
+void DumpUnknow(int fd,TBL_PC *sd,int cmd,int packet_len){
+	const char* packet_txt = "save/packet.txt";
+	FILE* fp;
+	time_t time_server;
+	struct tm *datetime;
+	char datestr[512];
+
+	time(&time_server);  // get time in seconds since 1/1/1970
+	datetime = localtime(&time_server); // convert seconds in structure
+	// like sprintf, but only for date/time (Sunday, November 02 2003 15:12:52)
+	strftime(datestr, sizeof(datestr)-1, "%A, %B %d %Y %X.", datetime); // Server time (normal time): %A, %B %d %Y %X.
+
+
+	if( ( fp = fopen( packet_txt , "a" ) ) != NULL ) {
+		if( sd ) {
+			fprintf(fp, "Unknown packet 0x%04X (length %d), %s session #%d, %d/%d (AID/CID) at %s \n", cmd, packet_len, sd->state.active ? "authed" : "unauthed", fd, sd->status.account_id, sd->status.char_id,datestr);
+		} else {
+			fprintf(fp, "Unknown packet 0x%04X (length %d), session #%d at %s\n", cmd, packet_len, fd,datestr);
+		}
+		WriteDump(fp, RFIFOP(fd,0), packet_len);
+		fprintf(fp, "\n");
+		fclose(fp);
+	} else {
+		ShowError("Failed to write '%s'.\n", packet_txt);
+		// Dump on console instead
+		if( sd ) {
+			ShowDebug("Unknown packet 0x%04X (length %d), %s session #%d, %d/%d (AID/CID) at %s\n", cmd, packet_len, sd->state.active ? "authed" : "unauthed", fd, sd->status.account_id, sd->status.char_id,datestr);
+		} else {
+			ShowDebug("Unknown packet 0x%04X (length %d), session #%d at %s\n", cmd, packet_len, fd,datestr);
+		}
+
+		ShowDump(RFIFOP(fd,0), packet_len);
+	}
+}
+#endif
 
 /*==========================================
  * Main client packet processing function
@@ -16563,37 +16620,9 @@ static int clif_parse(int fd)
 			packet_db[packet_ver][cmd].func(fd, sd);
 	}
 #ifdef DUMP_UNKNOWN_PACKET
-	else {
-		const char* packet_txt = "save/packet.txt";
-		FILE* fp;
-
-		if( ( fp = fopen( packet_txt , "a" ) ) != NULL ) {
-			if( sd ) {
-				fprintf(fp, "Unknown packet 0x%04X (length %d), %s session #%d, %d/%d (AID/CID)\n", cmd, packet_len, sd->state.active ? "authed" : "unauthed", fd, sd->status.account_id, sd->status.char_id);
-			} else {
-				fprintf(fp, "Unknown packet 0x%04X (length %d), session #%d\n", cmd, packet_len, fd);
-			}
-
-			WriteDump(fp, RFIFOP(fd,0), packet_len);
-			fprintf(fp, "\n");
-			fclose(fp);
-		} else {
-			ShowError("Failed to write '%s'.\n", packet_txt);
-
-			// Dump on console instead
-			if( sd ) {
-				ShowDebug("Unknown packet 0x%04X (length %d), %s session #%d, %d/%d (AID/CID)\n", cmd, packet_len, sd->state.active ? "authed" : "unauthed", fd, sd->status.account_id, sd->status.char_id);
-			} else {
-				ShowDebug("Unknown packet 0x%04X (length %d), session #%d\n", cmd, packet_len, fd);
-			}
-
-			ShowDump(RFIFOP(fd,0), packet_len);
-		}
-	}
+	else DumpUnknow(fd,sd,cmd,packet_len);
 #endif
-
 	RFIFOSKIP(fd, packet_len);
-
 	}; // main loop end
 
 	return 0;
@@ -17061,6 +17090,8 @@ void packetdb_readdb(void)
 		{ clif_parse_MoveItem , "moveitem" },
 		{ clif_parse_GuildInvite2 , "guildinvite2" },
 		{ clif_parse_reqworldinfo, "reqworldinfo"},
+		{ clif_parse_client_version, "clientversion"},
+		{ clif_parse_blocking_playcancel, "booking_playcancel"},
 		{NULL,NULL}
 	};
 

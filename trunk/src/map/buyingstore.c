@@ -12,6 +12,7 @@
 #include "clif.h"  // clif_buyingstore_*
 #include "log.h"  // log_pick_pc, log_zeny
 #include "pc.h"  // struct map_session_data
+#include "chrif.h"
 
 
 /// constants (client-side restrictions)
@@ -44,10 +45,8 @@ static unsigned int buyingstore_getuid(void)
 }
 
 
-bool buyingstore_setup(struct map_session_data* sd, unsigned char slots)
-{
-	if( !battle_config.feature_buying_store || sd->state.vending || sd->state.buyingstore || sd->state.trading || slots == 0 )
-	{
+bool buyingstore_setup(struct map_session_data* sd, unsigned char slots){
+	if (!battle_config.feature_buying_store || sd->state.vending || sd->state.buyingstore || sd->state.trading || slots == 0) {
 		return false;
 	}
 
@@ -387,6 +386,11 @@ void buyingstore_trade(struct map_session_data* sd, int account_id, unsigned int
 		clif_buyingstore_update_item(pl_sd, nameid, amount);
 	}
 
+	if( save_settings&128 ) {
+		chrif_save(sd, 0);
+		chrif_save(pl_sd, 0);
+	}
+	
 	// check whether or not there is still something to buy
 	ARR_FIND( 0, pl_sd->buyingstore.slots, i, pl_sd->buyingstore.items[i].amount != 0 );
 	if( i == pl_sd->buyingstore.slots )

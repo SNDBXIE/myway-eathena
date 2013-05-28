@@ -163,9 +163,9 @@ static void set_sc(uint16 skill_id, sc_type sc, int icon, unsigned int flag)
 	}
 
 	if( StatusSkillChangeTable[sc] == 0 )
-  		StatusSkillChangeTable[sc] = skill_id;
+		StatusSkillChangeTable[sc] = skill_id;
 	if( StatusIconChangeTable[sc] == SI_BLANK )
-  		StatusIconChangeTable[sc] = icon;
+		StatusIconChangeTable[sc] = icon;
 	StatusChangeFlagTable[sc] |= flag;
 
 	if( SkillStatusChangeTable[idx] == SC_NONE )
@@ -954,6 +954,7 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_SPCOST_RATE] |= SCB_ALL;
 	StatusChangeFlagTable[SC_WALKSPEED] |= SCB_SPEED;
 	StatusChangeFlagTable[SC_ITEMSCRIPT] |= SCB_ALL;
+	StatusChangeFlagTable[SC_SLOWDOWN] |= SCB_SPEED;
 	// Cash Items
 	StatusChangeFlagTable[SC_FOOD_STR_CASH] = SCB_STR;
 	StatusChangeFlagTable[SC_FOOD_AGI_CASH] = SCB_AGI;
@@ -2014,7 +2015,7 @@ int status_calc_mob_(struct mob_data* md, bool first)
 	if (battle_config.slaves_inherit_speed && md->master_id)
 		flag|=8;
 
-	if (md->master_id && md->special_state.ai>1)
+	if (md->master_id && md->special_state.ai>AI_ATTACK)
 		flag|=16;
 
 	if (!flag)
@@ -2050,28 +2051,28 @@ int status_calc_mob_(struct mob_data* md, bool first)
 		struct unit_data *ud = unit_bl2ud(mbl);
 		//Remove special AI when this is used by regular mobs.
 		if (mbl->type == BL_MOB && !((TBL_MOB*)mbl)->special_state.ai)
-			md->special_state.ai = 0;
+			md->special_state.ai = AI_NONE;
 		if (ud)
 		{	// different levels of HP according to skill level
 			switch(ud->skill_id){
 				case AM_SPHEREMINE:
-				    status->max_hp = 2000 + 400*ud->skill_lv;
-				    break;
+					status->max_hp = 2000 + 400*ud->skill_lv;
+					break;
 				case KO_ZANZOU:
-				    status->max_hp = 3000 + 3000 * ud->skill_lv;
-				    break;
+					status->max_hp = 3000 + 3000 * ud->skill_lv;
+					break;
 				case AM_CANNIBALIZE:
-				    status->max_hp = 1500 + 200*ud->skill_lv + 10*status_get_lv(mbl);
-				    status->mode|= MD_CANATTACK|MD_AGGRESSIVE;
-				    break;
+					status->max_hp = 1500 + 200*ud->skill_lv + 10*status_get_lv(mbl);
+					status->mode|= MD_CANATTACK|MD_AGGRESSIVE;
+					break;
 				case MH_SUMMON_LEGION:{
-				    int homblvl = status_get_lv(mbl);
-				    status->max_hp = 10 * (100 * (ud->skill_lv + 2) + homblvl);
-				    status->batk = 100 * (ud->skill_lv+5) / 2;
-				    status->def = 10 * (100 * (ud->skill_lv+2) + homblvl);
-				//    status->aspd_rate = 10 * (2 * (20 - ud->skill_lv) - homblvl/10);
-				//    status->aspd_rate = max(100,status->aspd_rate);
-				    break;
+					int homblvl = status_get_lv(mbl);
+					status->max_hp = 10 * (100 * (ud->skill_lv + 2) + homblvl);
+					status->batk = 100 * (ud->skill_lv+5) / 2;
+					status->def = 10 * (100 * (ud->skill_lv+2) + homblvl);
+					//status->aspd_rate = 10 * (2 * (20 - ud->skill_lv) - homblvl/10);
+					//status->aspd_rate = max(100,status->aspd_rate);
+					break;
 				}
 			}
 			status->hp = status->max_hp;
@@ -2182,9 +2183,9 @@ int status_calc_pet_(struct pet_data *pd, bool first)
 		}
 	}
 
-	if (battle_config.pet_lv_rate && pd->msd)
+	if (battle_config.pet_lv_rate && pd->master)
 	{
-		struct map_session_data *sd = pd->msd;
+		struct map_session_data *sd = pd->master;
 		int lv;
 
 		lv =sd->status.base_level*battle_config.pet_lv_rate/100;
@@ -3184,6 +3185,8 @@ int status_calc_mercenary_(struct mercenary_data *md, bool first)
 		status->sp = status->max_sp;
 		md->battle_status.hp = merc->hp;
 		md->battle_status.sp = merc->sp;
+		if (md->master)
+			status->speed = status_get_speed(&md->master->bl);
 	}
 
 	status_calc_misc(&md->bl, status, md->db->lv);
@@ -3313,6 +3316,9 @@ int status_calc_elemental_(struct elemental_data *ed, bool first) {
 		status->mdef += ele->mdef;
 		status->flee = ele->flee;
 		status->hit = ele->hit;
+
+		if (ed->master)
+			status->speed = status_get_speed(&ed->master->bl);
 
 		memcpy(&ed->battle_status,status,sizeof(struct status_data));
 	} else {
@@ -3834,7 +3840,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 		//Re-walk to adjust speed (we do not check if walktimer != INVALID_TIMER
 		//because if you step on something while walking, the moment this
 		//piece of code triggers the walk-timer is set on INVALID_TIMER) [Skotlex]
-	  	if (ud)
+		if (ud)
 			ud->state.change_walk_target = ud->state.speed_changed = 1;
 
 		if( bl->type&BL_PC && status->speed < battle_config.max_walk_speed )
@@ -3842,6 +3848,10 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 
 		if( bl->type&BL_HOM && battle_config.hom_setting&0x8 && ((TBL_HOM*)bl)->master)
 			status->speed = status_get_speed(&((TBL_HOM*)bl)->master->bl);
+		if( bl->type&BL_MER && ((TBL_MER*)bl)->master)
+			status->speed = status_get_speed(&((TBL_MER*)bl)->master->bl);
+		if( bl->type&BL_ELEM && ((TBL_ELEM*)bl)->master)
+			status->speed = status_get_speed(&((TBL_ELEM*)bl)->master->bl);
 
 
 	}
@@ -4394,7 +4404,7 @@ static unsigned short status_calc_vit(struct block_list *bl, struct status_chang
 	if(sc->data[SC_KYOUGAKU])
 		vit -= sc->data[SC_KYOUGAKU]->val2;
 
-	if(sc->data[SC_STRIPARMOR])
+	if(sc->data[SC_STRIPARMOR] && bl->type != BL_PC)
 		vit -= vit * sc->data[SC_STRIPARMOR]->val2/100;
 
 	return (unsigned short)cap_value(vit,0,USHRT_MAX);
@@ -4448,10 +4458,12 @@ static unsigned short status_calc_int(struct block_list *bl, struct status_chang
 	if(sc->data[SC_KYOUGAKU])
 		int_ -= sc->data[SC_KYOUGAKU]->val2;
 
-	if(sc->data[SC_STRIPHELM])
-		int_ -= int_ * sc->data[SC_STRIPHELM]->val2/100;
-	if(sc->data[SC__STRIPACCESSORY])
-		int_ -= int_ * sc->data[SC__STRIPACCESSORY]->val2 / 100;
+	if(bl->type != BL_PC){
+		if(sc->data[SC_STRIPHELM])
+			int_ -= int_ * sc->data[SC_STRIPHELM]->val2/100;
+		if(sc->data[SC__STRIPACCESSORY])
+			int_ -= int_ * sc->data[SC__STRIPACCESSORY]->val2 / 100;
+	}
 
 	return (unsigned short)cap_value(int_,0,USHRT_MAX);
 }
@@ -4506,7 +4518,7 @@ static unsigned short status_calc_dex(struct block_list *bl, struct status_chang
 	if(sc->data[SC_KYOUGAKU])
 		dex -= sc->data[SC_KYOUGAKU]->val2;
 
-	if(sc->data[SC__STRIPACCESSORY])
+	if(sc->data[SC__STRIPACCESSORY]  && bl->type != BL_PC)
 		dex -= dex * sc->data[SC__STRIPACCESSORY]->val2 / 100;
 
 	return (unsigned short)cap_value(dex,0,USHRT_MAX);
@@ -4552,7 +4564,7 @@ static unsigned short status_calc_luk(struct block_list *bl, struct status_chang
 	if(sc->data[SC_LAUDARAMUS])
 		luk += 4 + sc->data[SC_LAUDARAMUS]->val1;
 
-	if(sc->data[SC__STRIPACCESSORY])
+	if(sc->data[SC__STRIPACCESSORY] && bl->type != BL_PC)
 		luk -= luk * sc->data[SC__STRIPACCESSORY]->val2 / 100;
 	if(sc->data[SC_BANANA_BOMB])
 		luk -= luk * sc->data[SC_BANANA_BOMB]->val1 / 100;
@@ -4690,7 +4702,7 @@ static unsigned short status_calc_watk(struct block_list *bl, struct status_chan
 		watk += watk * sc->data[SC_FLEET]->val3/100;
 	if(sc->data[SC_CURSE])
 		watk -= watk * 25/100;
-	if(sc->data[SC_STRIPWEAPON])
+	if(sc->data[SC_STRIPWEAPON]  && bl->type != BL_PC)
 		watk -= watk * sc->data[SC_STRIPWEAPON]->val2/100;
 	if(sc->data[SC__ENERVATION])
 		watk -= watk * sc->data[SC__ENERVATION]->val2 / 100;
@@ -4996,7 +5008,7 @@ static defType status_calc_def(struct block_list *bl, struct status_change *sc, 
 		def >>=1;
 	if(sc->data[SC_PROVOKE] && bl->type != BL_PC) // Provoke doesn't alter player defense->
 		def -= def * sc->data[SC_PROVOKE]->val4/100;
-	if(sc->data[SC_STRIPSHIELD])
+	if(sc->data[SC_STRIPSHIELD] && bl->type != BL_PC) //Player doesn't have def reduction only equip removed
 		def -= def * sc->data[SC_STRIPSHIELD]->val2/100;
 	if (sc->data[SC_FLING])
 		def -= def * (sc->data[SC_FLING]->val2)/100;
@@ -5932,8 +5944,8 @@ int status_get_party_id(struct block_list *bl) {
 		case BL_PC:
 			return ((TBL_PC*)bl)->status.party_id;
 		case BL_PET:
-			if (((TBL_PET*)bl)->msd)
-				return ((TBL_PET*)bl)->msd->status.party_id;
+			if (((TBL_PET*)bl)->master)
+				return ((TBL_PET*)bl)->master->status.party_id;
 			break;
 		case BL_MOB: {
 				struct mob_data *md=(TBL_MOB*)bl;
@@ -5969,8 +5981,8 @@ int status_get_guild_id(struct block_list *bl) {
 		case BL_PC:
 			return ((TBL_PC*)bl)->status.guild_id;
 		case BL_PET:
-			if (((TBL_PET*)bl)->msd)
-				return ((TBL_PET*)bl)->msd->status.guild_id;
+			if (((TBL_PET*)bl)->master)
+				return ((TBL_PET*)bl)->master->status.guild_id;
 			break;
 		case BL_MOB: {
 				struct map_session_data *msd;
@@ -6009,8 +6021,8 @@ int status_get_emblem_id(struct block_list *bl) {
 		case BL_PC:
 			return ((TBL_PC*)bl)->guild_emblem_id;
 		case BL_PET:
-			if (((TBL_PET*)bl)->msd)
-				return ((TBL_PET*)bl)->msd->guild_emblem_id;
+			if (((TBL_PET*)bl)->master)
+				return ((TBL_PET*)bl)->master->guild_emblem_id;
 			break;
 		case BL_MOB: {
 				struct map_session_data *msd;
@@ -7604,30 +7616,30 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
 			break;
 
 		case SC_DPOISON:
-		//Lose 10/15% of your life as long as it doesn't brings life below 25%
-		if (status->hp > status->max_hp>>2) {
-			int diff = status->max_hp*(bl->type==BL_PC?10:15)/100;
-			if (status->hp - diff < status->max_hp>>2)
-				diff = status->hp - (status->max_hp>>2);
-			if( val2 && bl->type == BL_MOB ) {
-				struct block_list* src = map_id2bl(val2);
-				if( src )
-					mob_log_damage((TBL_MOB*)bl,src,diff);
+			//Lose 10/15% of your life as long as it doesn't brings life below 25%
+			if (status->hp > status->max_hp>>2) {
+				int diff = status->max_hp*(bl->type==BL_PC?10:15)/100;
+				if (status->hp - diff < status->max_hp>>2)
+					diff = status->hp - (status->max_hp>>2);
+				if( val2 && bl->type == BL_MOB ) {
+					struct block_list* src = map_id2bl(val2);
+					if( src )
+						mob_log_damage((TBL_MOB*)bl,src,diff);
+				}
+				status_zap(bl, diff, 0);
 			}
-			status_zap(bl, diff, 0);
-		}
-		// fall through
 		case SC_POISON:
-		val3 = tick/1000; //Damage iterations
-		if(val3 < 1) val3 = 1;
-		tick_time = 1000; // [GodLesZ] tick time
-		//val4: HP damage
-		if (bl->type == BL_PC)
-			val4 = (type == SC_DPOISON) ? 3 + status->max_hp/50 : 3 + status->max_hp*3/200;
-		else
-			val4 = (type == SC_DPOISON) ? 3 + status->max_hp/100 : 3 + status->max_hp/200;
+			// fall through
+			val3 = tick/1000; //Damage iterations
+			if(val3 < 1) val3 = 1;
+			tick_time = 1000; // [GodLesZ] tick time
+			//val4: HP damage
+			if (bl->type == BL_PC)
+				val4 = (type == SC_DPOISON) ? 2 + status->max_hp/50 : 2 + status->max_hp*3/200;
+			else
+				val4 = (type == SC_DPOISON) ? 2 + status->max_hp/100 : 2 + status->max_hp/200;
+			break;
 
-		break;
 		case SC_CONFUSION:
 			clif_emotion(bl,E_WHAT);
 			break;
@@ -10112,8 +10124,6 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 		break;
 
 	case SC_POISON:
-		if(status->hp <= max(status->max_hp>>2, sce->val4)) //Stop damaging after 25% HP left.
-			break;
 	case SC_DPOISON:
 		if (--(sce->val3) > 0) {
 			if (!sc->data[SC_SLOWPOISON]) {
@@ -10123,7 +10133,8 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 						mob_log_damage((TBL_MOB*)bl,src,sce->val4);
 				}
 				map_freeblock_lock();
-				status_zap(bl, sce->val4, 0);
+				if(status->hp >= max(status->max_hp>>2, sce->val4)) //Stop damaging after 25% HP left.
+					status_zap(bl, sce->val4, 0);
 				if (sc->data[type]) { // Check if the status still last ( can be dead since then ).
 					sc_timer_next(1000 + tick, status_change_timer, bl->id, data );
 				}
@@ -10131,6 +10142,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			}
 			return 0;
 		}
+
 		break;
 
 	case SC_TENSIONRELAX:

@@ -2,4 +2,10 @@
 OnInit:
 	setcell "morocc.gat",151,83,168,102,cell_pvp,1;
 	end;
+	
+//OnPCDieEvent:
+//	getmapxy(@mapname$,@mapx,@mapy,0,strcharinfo(0));
+//	if(checkcell(@mapname$,@mapx,@mapy,cell_chkpvp) == 1)
+//		warp "SavePoint",0,0;
+//	end;
 }

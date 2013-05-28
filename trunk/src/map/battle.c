@@ -1740,8 +1740,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src,struct blo
 	wd.type=0; //Normal attack
 	wd.div_=skill_id?skill_get_num(skill_id,skill_lv):1;
 	wd.amotion=(skill_id && skill_get_inf(skill_id)&INF_GROUND_SKILL)?0:sstatus->amotion; //Amotion should be 0 for ground skills.
-	if(skill_id == KN_AUTOCOUNTER)
-		wd.amotion >>= 1;
+		/*if(skill_id == KN_AUTOCOUNTER) // counter attack obeys ASPD delay on official
+			wd.amotion >>= 1; */
 	wd.dmotion=tstatus->dmotion;
 	wd.blewcount=skill_get_blewcount(skill_id,skill_lv);
 	wd.flag = BF_WEAPON; //Initial Flag
@@ -5242,8 +5242,8 @@ struct block_list* battle_get_master(struct block_list *src)
 		prev = src;
 		switch (src->type) {
 			case BL_PET:
-				if (((TBL_PET*)src)->msd)
-					src = (struct block_list*)((TBL_PET*)src)->msd;
+				if (((TBL_PET*)src)->master)
+					src = (struct block_list*)((TBL_PET*)src)->master;
 				break;
 			case BL_MOB:
 				if (((TBL_MOB*)src)->master_id)
@@ -5286,7 +5286,6 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	int state = 0; //Initial state none
 	int strip_enemy = 1; //Flag which marks whether to remove the BCT_ENEMY status if it's also friend/ally.
 	struct block_list *s_bl = src, *t_bl = target;
-	struct map_session_data *sd = BL_CAST(BL_PC, s_bl);
 
 	nullpo_ret(src);
 	nullpo_ret(target);
@@ -5328,9 +5327,9 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 			}
 			break;
 		case BL_MOB:
-			if(((((TBL_MOB*)target)->special_state.ai == 2 || //Marine Spheres
-				(((TBL_MOB*)target)->special_state.ai == 3 && battle_config.summon_flora&1)) && //Floras
-				s_bl->type == BL_PC && src->type != BL_MOB) || (((TBL_MOB*)target)->special_state.ai == 4 && t_bl->id != s_bl->id)) //Zanzoe
+			if(((((TBL_MOB*)target)->special_state.ai == AI_SPHERE || //Marine Spheres
+				(((TBL_MOB*)target)->special_state.ai == AI_FLORA && battle_config.summon_flora&1)) && //Floras
+				s_bl->type == BL_PC && src->type != BL_MOB) || (((TBL_MOB*)target)->special_state.ai == AI_ZANZOU && t_bl->id != s_bl->id)) //Zanzoe
 			{	//Targettable by players
 				state |= BCT_ENEMY;
 				strip_enemy = 0;
@@ -5464,6 +5463,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	{	//Checks on source master
 		case BL_PC:
 		{
+			struct map_session_data *sd = BL_CAST(BL_PC, s_bl);
 			if( s_bl != t_bl )
 			{
 				if( sd->state.killer )
@@ -5478,6 +5478,8 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 					else
 						return 0; // You can't target anything out of your duel
 				}
+				 else if( map_getcell( s_bl->m, s_bl->x, s_bl->y, CELL_CHKPVP ) && map_getcell( t_bl->m, t_bl->x, t_bl->y, CELL_CHKPVP ) )
+					 state |= BCT_ENEMY;
 			}
 			if( map_flag_gvg(m) && !sd->status.guild_id && t_bl->type == BL_MOB && ((TBL_MOB*)t_bl)->class_ == MOBID_EMPERIUM )
 				return 0; //If you don't belong to a guild, can't target emperium.
@@ -5494,7 +5496,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 			if( !md->special_state.ai )
 			{ //Normal mobs
 				if(
-					( target->type == BL_MOB && t_bl->type == BL_PC && ( ((TBL_MOB*)target)->special_state.ai != 4 && ((TBL_MOB*)target)->special_state.ai != 1 ) ) ||
+					( target->type == BL_MOB && t_bl->type == BL_PC && ( ((TBL_MOB*)target)->special_state.ai != AI_ZANZOU && ((TBL_MOB*)target)->special_state.ai != AI_ATTACK ) ) ||
 					( t_bl->type == BL_MOB && !((TBL_MOB*)t_bl)->special_state.ai )
 				  )
 					state |= BCT_PARTY; //Normal mobs with no ai are friends.
@@ -5533,8 +5535,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 		return (flag&state)?1:-1;
 	}
 
-	//cell_PVP by Mr Postman
-	if( map_flag_vs(m) || map_check_pvp(s_bl,t_bl) )
+	if( map_flag_vs(m) )
 	{ //Check rivalry settings.
 		int sbg_id = 0, tbg_id = 0;
 		if( map[m].flag.battleground )
@@ -5579,16 +5580,22 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	{ //Non pvp/gvg, check party/guild settings.
 		if( flag&BCT_PARTY || state&BCT_ENEMY )
 		{
-			int s_party = status_get_party_id(s_bl);
-			if(s_party && s_party == status_get_party_id(t_bl))
-				state |= BCT_PARTY;
+			if (!map_getcell( s_bl->m, s_bl->x, s_bl->y, CELL_CHKPVP ) && battle_config.cellpvp_party_enable)	
+			{	// Addon Cell PVP [Ize]
+				int s_party = status_get_party_id(s_bl);
+				if(s_party && s_party == status_get_party_id(t_bl))
+					state |= BCT_PARTY;
+			}
 		}
 		if( flag&BCT_GUILD || state&BCT_ENEMY )
 		{
-			int s_guild = status_get_guild_id(s_bl);
-			int t_guild = status_get_guild_id(t_bl);
-			if(s_guild && t_guild && (s_guild == t_guild || guild_isallied(s_guild, t_guild)))
-				state |= BCT_GUILD;
+			if(!map_getcell( s_bl->m, s_bl->x, s_bl->y, CELL_CHKPVP ) && battle_config.cellpvp_guild_enable)
+			{	// Addon Cell PVP [Ize]
+				int s_guild = status_get_guild_id(s_bl);
+				int t_guild = status_get_guild_id(t_bl);
+				if(s_guild && t_guild && (s_guild == t_guild || guild_isallied(s_guild, t_guild)))
+					state |= BCT_GUILD;
+			}
 		}
     } //end non pvp/gvg chk rivality
 
@@ -5597,10 +5604,6 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 	//Alliance state takes precedence over enemy one.
 	else if( state&BCT_ENEMY && strip_enemy && state&(BCT_SELF|BCT_PARTY|BCT_GUILD) )
 		state&=~BCT_ENEMY;
-	
-	//cell_pvp by Mr Postman
-	if( sd->state.pvp && (sd->state.pvp == ((TBL_PC*)t_bl)->state.pvp) )
-		state |= BCT_ENEMY;
 
 	return (flag&state)?1:-1;
 }
@@ -6030,6 +6033,16 @@ static const struct _battle_data {
 	{ "item_enabled_npc",                   &battle_config.item_enabled_npc,                1,      0,      1,              },
 	{ "item_flooritem_check",               &battle_config.item_onfloor,                    1,      0,      1,              },
 	{ "bowling_bash_area",                  &battle_config.bowling_bash_area,               0,      0,      20,             },
+
+	// Addon Cell PVP [Ize]
+	{ "cellpvp_deathmatch",               &battle_config.cellpvp_deathmatch,                    1,      0,      1,              },
+	{ "cellpvp_deathmatch_delay",               &battle_config.cellpvp_deathmatch_delay,                    1000,     0,      INT_MAX,        },
+	{ "deathmatch_hp_rate",           &battle_config.deathmatch_hp_rate,         0,		0,		100,				},
+	{ "deathmatch_sp_rate",           &battle_config.deathmatch_sp_rate,         0,		0,		100,				},
+	{ "cellpvp_autobuff",               &battle_config.cellpvp_autobuff,                    1,      0,      1,              },
+	{ "cellpvp_party_enable",               &battle_config.cellpvp_party_enable,                    1,      0,      1,              },
+	{ "cellpvp_guild_enable",               &battle_config.cellpvp_guild_enable,                    1,      0,      1,              },
+	{ "cellpvp_walkout_delay",                    &battle_config.cellpvp_walkout_delay,                 5000,     0,      INT_MAX,        },
 
 	//Custom Setting
 	{ "mado_skill_limit",                   &battle_config.mado_skill_limit,                 1,     0,      1,        		},

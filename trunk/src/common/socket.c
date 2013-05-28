@@ -1181,7 +1181,7 @@ void socket_final(void)
 		if(session[i])
 			do_close(i);
 
-	// session[0] ?~_?~?[?f?[?^????
+	// session[0]
 	aFree(session[0]->rdata);
 	aFree(session[0]->wdata);
 	aFree(session[0]);
