@@ -488,7 +488,17 @@ extern struct Battle_Config
 	int item_enabled_npc;
 	int item_onfloor; // Whether to drop an undroppable item on the map or destroy it if inventory is full.
 	int bowling_bash_area;
-	
+
+	// Addon Cell PVP [Ize]
+	int cellpvp_deathmatch;
+	int cellpvp_deathmatch_delay;
+	int deathmatch_hp_rate;
+	int deathmatch_sp_rate;
+	int cellpvp_autobuff;
+	int cellpvp_party_enable;
+	int cellpvp_guild_enable;
+	int cellpvp_walkout_delay;
+
 	int mado_skill_limit;
 	int block_relocation;
 	int tickdead_noexp;

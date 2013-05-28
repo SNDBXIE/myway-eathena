@@ -248,6 +248,7 @@ struct map_session_data {
 	unsigned int cansendmail_tick; // [Mail System Flood Protection]
 	unsigned int ks_floodprotect_tick; // [Kill Steal Protection]
 	unsigned int bloodylust_tick; // bloodylust player timer [out/in re full-heal protection]
+	unsigned int pvpcan_walkout_tick;		// Addon Cell PVP [Ize]
 
 	struct {
 		short nameid;

@@ -925,17 +925,13 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, uint
 		break;
 
 	case MG_FROSTDIVER:
-#ifndef RENEWAL
-	case WZ_FROSTNOVA:
-#endif
-		sc_start(src,bl,SC_FREEZE,skill_lv*3+35,skill_lv,skill_get_time2(skill_id,skill_lv));
+		if(!sc_start(src,bl,SC_FREEZE,skill_lv*3+35,skill_lv,skill_get_time2(skill_id,skill_lv)))
+			clif_skill_fail(sd,skill_id,0,0);
 		break;
 
-#ifdef RENEWAL
 	case WZ_FROSTNOVA:
 		sc_start(src,bl,SC_FREEZE,skill_lv*5+33,skill_lv,skill_get_time2(skill_id,skill_lv));
 		break;
-#endif
 
 	case WZ_STORMGUST:
 	/**
@@ -1846,7 +1842,7 @@ int skill_counter_additional_effect (struct block_list* src, struct block_list *
 
 	if( sd && status_isdead(bl) ) {
 		int sp = 0, hp = 0;
-		if( attack_type&(BF_WEAPON|BF_SHORT) == (BF_WEAPON|BF_SHORT) ) {
+		if( (attack_type&(BF_WEAPON|BF_SHORT)) == (BF_WEAPON|BF_SHORT) ) {
 			sp += sd->bonus.sp_gain_value;
 			sp += sd->sp_gain_race[status_get_race(bl)];
 			sp += sd->sp_gain_race[is_boss(bl)?RC_BOSS:RC_NONBOSS];
@@ -5227,7 +5223,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 				if (!ud) break;
 				if (inf&INF_SELF_SKILL || inf&INF_SUPPORT_SKILL) {
 					if (src->type == BL_PET)
-						bl = (struct block_list*)((TBL_PET*)src)->msd;
+						bl = (struct block_list*)((TBL_PET*)src)->master;
 					if (!bl) bl = src;
 					unit_skilluse_id(src, bl->id, abra_skill_id, abra_skill_lv);
 				} else {	//Assume offensive skills
@@ -5285,9 +5281,10 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 		break;
 	case SA_INSTANTDEATH:
 		clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-		status_set_hp(bl,1,0);
+		status_kill(src);
 		break;
 	case SA_QUESTION:
+		clif_emotion(src,E_WHAT);
 	case SA_GRAVITY:
 		clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 		break;
@@ -5933,7 +5930,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 	case NPC_SELFDESTRUCTION:
 		//Self Destruction hits everyone in range (allies+enemies)
 		//Except for Summoned Marine spheres on non-versus maps, where it's just enemy.
-		i = ((!md || md->special_state.ai == 2) && !map_flag_vs(src->m))?
+		i = ((!md || md->special_state.ai == AI_SPHERE) && !map_flag_vs(src->m))?
 			BCT_ENEMY:BCT_ALL;
 		clif_skill_nodamage(src, src, skill_id, -1, 1);
 		map_delblock(src); //Required to prevent chain-self-destructions hitting back.
@@ -8826,7 +8823,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 				if (!ud) break;
 				if (inf&INF_SELF_SKILL || inf&INF_SUPPORT_SKILL) {
 					if (src->type == BL_PET)
-						bl = (struct block_list*)((TBL_PET*)src)->msd;
+						bl = (struct block_list*)((TBL_PET*)src)->master;
 					if (!bl) bl = src;
 					unit_skilluse_id(src, bl->id, improv_skill_id, improv_skill_lv);
 				} else {
@@ -9358,7 +9355,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 			sum_md = mob_once_spawn_sub(src, src->m, src->x, src->y, status_get_name(src), summons[skill_lv - 1], "", SZ_SMALL, AI_ATTACK);
 			if (sum_md) {
 				sum_md->master_id =  src->id;
-				sum_md->special_state.ai = 5;
+				sum_md->special_state.ai = AI_LEGION;
 				if (sum_md->deletetimer != INVALID_TIMER)
 					delete_timer(sum_md->deletetimer, mob_timer_delete);
 				sum_md->deletetimer = add_timer(gettick() + skill_get_time(skill_id, skill_lv), mob_timer_delete, sum_md->bl.id, 0);
@@ -9588,7 +9585,16 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 			}
 			break;
 		}
-
+#ifdef OFFICIAL_WALKPATH
+		if( !path_search_long(NULL, src->m, src->x, src->y, target->x, target->y, CELL_CHKWALL) )
+		{
+			if (sd) {
+				clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_LEVEL,0);
+				skill_consume_requirement(sd,ud->skill_id,ud->skill_lv,3); //Consume items anyway.
+			}
+			break;
+		}
+#endif
 		if( sd )
 		{
 			if( !skill_check_condition_castend(sd, ud->skill_id, ud->skill_lv) )
@@ -9596,18 +9602,14 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 			else
 				skill_consume_requirement(sd,ud->skill_id,ud->skill_lv,1);
 		}
-#ifdef OFFICIAL_WALKPATH
-		if( !path_search_long(NULL, src->m, src->x, src->y, target->x, target->y, CELL_CHKWALL) )
-			break;
-#endif
+
 		if( (src->type == BL_MER || src->type == BL_HOM) && !skill_check_condition_mercenary(src, ud->skill_id, ud->skill_lv, 1) )
 			break;
 
-		if (ud->state.running && ud->skill_id == TK_JUMPKICK)
-		{
-		    ud->state.running = 0;
-		    status_change_end(src, SC_RUN, INVALID_TIMER);
-				flag = 1;
+		if (ud->state.running && ud->skill_id == TK_JUMPKICK){
+			ud->state.running = 0;
+			status_change_end(src, SC_RUN, INVALID_TIMER);
+			flag = 1;
 		}
 
 		if (ud->walktimer != INVALID_TIMER && ud->skill_id != TK_RUN && ud->skill_id != RA_WUGDASH)
@@ -9671,7 +9673,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 			if(sc->data[SC_SPIRIT] &&
 				sc->data[SC_SPIRIT]->val2 == SL_WIZARD &&
 				sc->data[SC_SPIRIT]->val3 == ud->skill_id &&
-			  	ud->skill_id != WZ_WATERBALL)
+				ud->skill_id != WZ_WATERBALL)
 				sc->data[SC_SPIRIT]->val3 = 0; //Clear bounced spell check.
 
 			if( sc->data[SC_DANCING] && skill_get_inf2(ud->skill_id)&INF2_SONG_DANCE && sd )
@@ -9692,7 +9694,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 
 	//Skill failed.
 	if (ud->skill_id == MO_EXTREMITYFIST && sd && !(sc && sc->data[SC_FOGWALL]))
-  	{	//When Asura fails... (except when it fails from Fog of Wall)
+	{	//When Asura fails... (except when it fails from Wall of Fog)
 		//Consume SP/spheres
 		skill_consume_requirement(sd,ud->skill_id, ud->skill_lv,1);
 		status_set_sp(src, 0, 0);
@@ -17680,7 +17682,7 @@ void skill_init_unit_layout (void) {
 						static const int dx[] = {-1,-1,-1,-1, 0, 0, 0, 0, 1, 1, 1, 1,
 									 -5,-5,-5,-5,-4,-4,-4,-4,-3,-3,-3,-3,-2,-2,-2,-2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
 									 -1,-1,-1, 0, 0, 0, 1, 1, 1};
-						static const int dy[] = { 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3, 
+						static const int dy[] = { 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3,
 									  0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3, 0,-1,-2,-3,
 									 -4,-5,-6,-4,-5,-6,-4,-5,-6};
 						skill_unit_layout[pos].count = 53;

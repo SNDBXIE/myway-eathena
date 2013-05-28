@@ -519,7 +519,7 @@ int pc_makesavestatus(struct map_session_data *sd)
 	if(!battle_config.save_clothcolor)
 		sd->status.clothes_color=0;
 
-  	//Only copy the Cart/Peco/Falcon options, the rest are handled via
+	//Only copy the Cart/Peco/Falcon options, the rest are handled via
 	//status change load/saving. [Skotlex]
 #ifdef NEW_CARTS
 	sd->status.option = sd->sc.option&(OPTION_INVISIBLE|OPTION_FALCON|OPTION_RIDING|OPTION_DRAGON|OPTION_WUG|OPTION_WUGRIDER|OPTION_MADOGEAR|OPTION_MOUNTING);
@@ -551,8 +551,8 @@ int pc_makesavestatus(struct map_session_data *sd)
 		sd->status.last_point.y = sd->bl.y;
 	}
 
-	//cell_PVP by Mr Postman
-	if(map[sd->bl.m].flag.nosave || map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP )){
+	if( map[sd->bl.m].flag.nosave || map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP ) )		// Addon Cell PVP [Ize]
+	{
 		struct map_data *m=&map[sd->bl.m];
 		if(m->save.map)
 			memcpy(&sd->status.last_point,&m->save,sizeof(sd->status.last_point));
@@ -585,8 +585,7 @@ int pc_setnewpc(struct map_session_data *sd, int account_id, int char_id, int lo
 	return 0;
 }
 
-int pc_equippoint(struct map_session_data *sd,int n)
-{
+int pc_equippoint(struct map_session_data *sd,int n){
 	int ep = 0;
 
 	nullpo_ret(sd);
@@ -4064,7 +4063,7 @@ int pc_takeitem(struct map_session_data *sd,struct flooritem_data *fitem)
 		}
 		else
 		if(fitem->second_get_charid > 0 && fitem->second_get_charid != sd->status.char_id)
-	  	{
+		{
 			second_sd = map_charid2sd(fitem->second_get_charid);
 			if(DIFF_TICK(tick, fitem->second_get_tick) < 0) {
 				if(!(p && p->party.item&1 &&
@@ -4132,7 +4131,7 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 		return 0; // You cannot use this item while sitting.
 	}
 
-	switch( nameid ) //@TODO, lot oh harcoded nameid here
+	switch( nameid ) //@TODO, lot of hardcoded nameid here
 	{
 		case 605: // Anodyne
 			if( map_flag_gvg(sd->bl.m) )
@@ -4143,14 +4142,15 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 			break;
 		case 601: // Fly Wing
 		case 12212: // Giant Fly Wing
-			if( map[sd->bl.m].flag.noteleport || map_flag_gvg(sd->bl.m) || map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP ))
+			if( map[sd->bl.m].flag.noteleport || map_flag_gvg(sd->bl.m) || map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP ) )		// Addon Cell PVP [Ize]
 			{
 				clif_skill_teleportmessage(sd,0);
 				return 0;
 			}
 		case 602: // ButterFly Wing
 		case 14527: // Dungeon Teleport Scroll
-		case 14581: // Dungeon Teleport Scroll
+		case 14581: // Dungeon Teleport Scroll 2
+		case 12352: // Dungeon Teleport Scroll 3
 		case 14582: // Yellow Butterfly Wing
 		case 14583: // Green Butterfly Wing
 		case 14584: // Red Butterfly Wing
@@ -4161,8 +4161,7 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 				clif_displaymessage(sd->fd, msg_txt(sd,663));
 				return 0;
 			}
-			//cell_PVP by Mr Postman
-			if( nameid != 601 && nameid != 12212 && map[sd->bl.m].flag.noreturn || map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP ))
+			if( nameid != 601 && nameid != 12212 && map[sd->bl.m].flag.noreturn || map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP ) )	// Addon Cell PVP [Ize]
 				return 0;
 			break;
 		case 604: // Dead Branch
@@ -4858,8 +4857,7 @@ int pc_setpos(struct map_session_data* sd, unsigned short mapindex, int x, int y
 	if(sd->bl.prev != NULL){
 		unit_remove_map_pc(sd,clrtype);
 		clif_changemap(sd,map[m].index,x,y); // [MouseJstr]
-	} else if(sd->state.active)
-		//Tag player for rewarping after map-loading is done. [Skotlex]
+	} else if(sd->state.active) //Tag player for rewarping after map-loading is done. [Skotlex]
 		sd->state.rewarp = 1;
 
 	sd->mapindex = mapindex;
@@ -4942,7 +4940,7 @@ int pc_memo(struct map_session_data* sd, int pos)
 	nullpo_ret(sd);
 
 	// check mapflags
-	if( sd->bl.m >= 0 && (map[sd->bl.m].flag.nomemo || map[sd->bl.m].flag.nowarpto) && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE) ) {
+	if( sd->bl.m >= 0 && (map[sd->bl.m].flag.nomemo || map[sd->bl.m].flag.nowarpto) && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE) || map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP ) ) {	// Addon Cell PVP [Ize]
 		clif_skill_teleportmessage(sd, 1); // "Saved point cannot be memorized."
 		return 0;
 	}
@@ -6546,24 +6544,6 @@ void pc_respawn(struct map_session_data* sd, clr_type clrtype)
 
 	pc_setstand(sd);
 	pc_setrestartvalue(sd,3);
-
-	
-	if( sd->state.pvp )
-	{
-		int x, y;
-
-		do {
-		x = rand( )%( map[sd->bl.m].xs-2 ) + 1;
-		y = rand( )%( map[sd->bl.m].ys-2 ) + 1;
-		} while( !map_getcell(sd->bl.m, x, y, CELL_CHKPVP) ||
-			map_getcell(sd->bl.m, x, y, CELL_CHKNOPASS) );
-
-		if ( pc_setpos( sd,map[sd->bl.m].index, x, y, clrtype ) )
-			clif_resurrection( &sd->bl, 1 );
-
-		return;
-	}
-
 	if( pc_setpos(sd, sd->status.save_point.map, sd->status.save_point.x, sd->status.save_point.y, clrtype) )
 		clif_resurrection(&sd->bl, 1); //If warping fails, send a normal stand up packet.
 }
@@ -6613,10 +6593,8 @@ static int pc_close_npc_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	TBL_PC *sd = map_id2sd(id);
 	if(sd) pc_close_npc(sd,data);
-
 	return 0;
 }
-
 /*
  *  Method to properly close npc for player and clear anything related
  * @flag == 1 : produce close button
@@ -7855,7 +7833,7 @@ int pc_setcart(struct map_session_data *sd,int type) {
 				clif_cartlist(sd);
 			clif_updatestatus(sd, SP_CARTINFO);
 			sc_start(&sd->bl,&sd->bl, SC_PUSH_CART, 100, type, 0);
-			clif_status_load_notick(&sd->bl, SI_ON_PUSH_CART,   2 , type, 0, 0);
+			clif_status_load_notick(&sd->bl, SI_ON_PUSH_CART, 2 , type, 0, 0);
 			if( sd->sc.data[SC_PUSH_CART] )/* forcefully update */
 				sd->sc.data[SC_PUSH_CART]->val1 = type;
 			break;
@@ -9007,7 +8985,9 @@ int pc_calc_pvprank(struct map_session_data *sd)
 	old=sd->pvp_rank;
 	sd->pvp_rank=1;
 	map_foreachinmap(pc_calc_pvprank_sub,sd->bl.m,BL_PC,sd);
-	if( sd->state.pvp ) {
+	// Addon Cell PVP [Ize]
+	if( sd->state.pvp ) 
+	{
 		clif_pvpset( sd, sd->pvp_rank, sd->pvp_lastusers = m->pvpuser, 0);
 		return sd->pvp_rank;
 	}
@@ -9283,7 +9263,7 @@ int pc_autosave(int tid, unsigned int tick, int id, intptr_t data)
 static int pc_daynight_timer_sub(struct map_session_data *sd,va_list ap)
 {
 	if (sd->state.night != night_flag && map[sd->bl.m].flag.nightenabled)
-  	{	//Night/day state does not match.
+	{	//Night/day state does not match.
 		clif_status_load(&sd->bl, SI_NIGHT, night_flag); //New night effect by dynamix [Skotlex]
 		sd->state.night = night_flag;
 		return 1;

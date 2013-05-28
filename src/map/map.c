@@ -1287,7 +1287,7 @@ int map_clearflooritem_timer(int tid, unsigned int tick, int id, intptr_t data)
 }
 
 /*
- * clears a single bl item out of the bazooonga.
+ * clears a single bl item out of the map.
  */
 void map_clearflooritem(struct block_list *bl) {
 	struct flooritem_data* fitem = (struct flooritem_data*)bl;
@@ -1739,43 +1739,38 @@ int map_quit(struct map_session_data *sd) {
 /*==========================================
  * Lookup, id to session (player,mob,npc,homon,merc..)
  *------------------------------------------*/
-struct map_session_data * map_id2sd(int id)
-{
+struct map_session_data * map_id2sd(int id){
 	if (id <= 0) return NULL;
 	return (struct map_session_data*)idb_get(pc_db,id);
 }
 
-struct mob_data * map_id2md(int id)
-{
+struct mob_data * map_id2md(int id){
 	if (id <= 0) return NULL;
 	return (struct mob_data*)idb_get(mobid_db,id);
 }
 
-struct npc_data * map_id2nd(int id)
-{// just a id2bl lookup because there's no npc_db
+struct npc_data * map_id2nd(int id){
 	struct block_list* bl = map_id2bl(id);
-
 	return BL_CAST(BL_NPC, bl);
 }
 
-struct homun_data* map_id2hd(int id)
-{
+struct homun_data* map_id2hd(int id){
 	struct block_list* bl = map_id2bl(id);
-
 	return BL_CAST(BL_HOM, bl);
 }
 
-struct mercenary_data* map_id2mc(int id)
-{
+struct mercenary_data* map_id2mc(int id){
 	struct block_list* bl = map_id2bl(id);
-
 	return BL_CAST(BL_MER, bl);
 }
 
-struct chat_data* map_id2cd(int id)
-{
+struct pet_data* map_id2pd(int id){
 	struct block_list* bl = map_id2bl(id);
+	return BL_CAST(BL_PET, bl);
+}
 
+struct chat_data* map_id2cd(int id){
+	struct block_list* bl = map_id2bl(id);
 	return BL_CAST(BL_CHAT, bl);
 }
 
@@ -3607,6 +3602,7 @@ void do_final(void)
 	do_final_elemental();
 	do_final_cashshop();
 	do_final_channel(); //should be called after final guild
+	do_final_vending();
 
 	map_db->destroy(map_db, map_db_final);
 
@@ -3913,6 +3909,7 @@ int do_init(int argc, char *argv[])
 	do_init_unit();
 	do_init_battleground();
 	do_init_duel();
+	do_init_vending();
 
 	npc_event_do_oninit();	// Init npcs (OnInit)
 
@@ -3951,20 +3948,23 @@ int map_check_pvp(struct block_list *src, struct block_list *target)
 		return 0;
 }
 
-
 int map_pvp_area(struct map_session_data* sd, bool flag)
 {
 	if(flag) {
 		clif_map_property(sd, MAPPROPERTY_FREEPVPZONE);
-		map[sd->bl.m].pvpuser++;
+		clif_maptypeproperty2(&sd->bl,SELF);
+		if (sd->pvp_timer == INVALID_TIMER) {
+				map[sd->bl.m].pvpuser++;
 
-		sd->pvp_timer  = add_timer(gettick()+200, pc_calc_pvprank_timer, sd->bl.id, 0);
-		sd->pvp_rank  = 0;
-		sd->pvp_lastusers = 0;
-		sd->pvp_point  = 5;
-		sd->pvp_won   = 0;
-		sd->pvp_lost  = 0;
-		sd->state.pvp  = 1;
+				sd->pvp_timer  = add_timer(gettick()+200, pc_calc_pvprank_timer, sd->bl.id, 0);
+				sd->pvp_rank  = 0;
+				sd->pvp_lastusers = 0;
+				sd->pvp_point  = 5;
+				sd->pvp_won   = 0;
+				sd->pvp_lost  = 0;
+				sd->state.pvp  = 1;
+				sd->pvpcan_walkout_tick =  gettick();
+		}
 	} else {
 		clif_pvpset(sd, 0, 0, 2);
 		map[sd->bl.m].pvpuser--;
@@ -3975,6 +3975,6 @@ int map_pvp_area(struct map_session_data* sd, bool flag)
 		sd->pvp_timer  = INVALID_TIMER;
 		sd->state.pvp  = 0;
 	}
+
 	return 0;
 }
-
