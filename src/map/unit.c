@@ -137,23 +137,18 @@ int* unit_get_masterteleport_timer(struct block_list *bl){
 }
 
 int unit_teleport_timer(int tid, unsigned int tick, int id, intptr_t data){
-	if(tid == INVALID_TIMER)
+	struct block_list *bl = map_id2bl(id);
+	int *mast_tid = unit_get_masterteleport_timer(bl);
+
+	if(tid == INVALID_TIMER || mast_tid == NULL)
+		return 0;
+	else if(*mast_tid != tid)
 		return 0;
 	else {
-		struct block_list *bl = map_id2bl(id);
-		int *mast_tid = unit_get_masterteleport_timer(bl);
 		TBL_PC *msd = unit_get_master(bl);
-
-		switch(data){
-		case BL_HOM:
-		case BL_ELEM:
-		case BL_PET :
-		case BL_MER :
-			if(msd && *mast_tid != INVALID_TIMER && !check_distance_bl(&msd->bl, bl, MAX_MER_DISTANCE)){
-				*mast_tid = INVALID_TIMER;
-				unit_warp(bl, msd->bl.id, msd->bl.x, msd->bl.y, CLR_TELEPORT );
-			}
-			break;
+		if(msd && !check_distance_bl(&msd->bl, bl, data)){
+			*mast_tid = INVALID_TIMER;
+			unit_warp(bl, msd->bl.id, msd->bl.x, msd->bl.y, CLR_TELEPORT );
 		}
 	}
 	return 0;
@@ -161,19 +156,19 @@ int unit_teleport_timer(int tid, unsigned int tick, int id, intptr_t data){
 
 int unit_check_start_teleport_timer(struct block_list *sbl){
 	TBL_PC *msd = unit_get_master(sbl);
-	int max_dist=AREA_SIZE;
+	int max_dist=0;
 	switch(sbl->type){
-		//case BL_HOM: max_dist = MAX_HOM_DISTANCE; break;
+		case BL_HOM: max_dist = AREA_SIZE; break;
 		case BL_ELEM: max_dist = MAX_ELEDISTANCE; break;
-		//case BL_PET : max_dist = MAX_PET_DISTANCE; break;
+		case BL_PET : max_dist = AREA_SIZE; break;
 		case BL_MER : max_dist = MAX_MER_DISTANCE; break;
 	}
-	if(msd){ //if there is a master
+	if(msd && max_dist){ //if there is a master and it's a valid type
 		int *msd_tid = unit_get_masterteleport_timer(sbl);
-
-		if (!check_distance_bl(&msd->bl, sbl, MAX_MER_DISTANCE)) {
+		if(msd_tid == NULL) return 0;
+		if (!check_distance_bl(&msd->bl, sbl, max_dist)) {
 			if(*msd_tid == INVALID_TIMER || *msd_tid == 0)
-				*msd_tid = add_timer(gettick()+3000,unit_teleport_timer,sbl->id,BL_MER);
+				*msd_tid = add_timer(gettick()+3000,unit_teleport_timer,sbl->id,max_dist);
 		}
 		else {
 			if(*msd_tid && *msd_tid != INVALID_TIMER)
@@ -265,11 +260,16 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 		if( sd->ed) unit_check_start_teleport_timer(&sd->ed->bl);
 		if( sd->hd) unit_check_start_teleport_timer(&sd->hd->bl);
 		if( sd->pd) unit_check_start_teleport_timer(&sd->pd->bl);
-		
-		if( !sd->state.pvp && map_getcell( bl->m, bl->x, bl->y, CELL_CHKPVP) )
+
+		// Addon Cell PVP [Ize]
+		if( !sd->state.pvp && map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP) )
+		{
 			map_pvp_area(sd, 1);
-  		else if( sd->state.pvp && !map_getcell( bl->m, bl->x, bl->y, CELL_CHKPVP) )
-  			map_pvp_area(sd, 0);
+		}
+		else if( sd->state.pvp && !map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP) )
+		{
+			map_pvp_area(sd, 0);
+		}
 
 	} else if (md) {
 		if( map_getcell(bl->m,x,y,CELL_CHKNPC) ) {
@@ -736,9 +736,13 @@ int unit_movepos(struct block_list *bl, short dst_x, short dst_y, int easy, bool
 
 		// Addon Cell PVP [Ize]
 		if( !sd->state.pvp && map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP) )
+		{
 			map_pvp_area(sd, 1);
+		}
 		else if( sd->state.pvp && !map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP) )
+		{
 			map_pvp_area(sd, 0);
+		}
 
 		if( sd->status.pet_id > 0 && sd->pd && sd->pd->pet.intimate > 0 )
 		{ // Check if pet needs to be teleported. [Skotlex]
@@ -969,9 +973,12 @@ int unit_stop_walking(struct block_list *bl,int type)
 int unit_skilluse_id(struct block_list *src, int target_id, uint16 skill_id, uint16 skill_lv)
 {
 	// Addon Cell PVP [Ize]
-	struct map_session_data* dstsd = map_id2sd(target_id);
-	if( src->id != target_id )
+	struct block_list *bl = map_id2bl(target_id);	
+
+	if( bl && src->type == BL_PC && bl->type == BL_PC && src->id != target_id)
 	{
+		struct map_session_data *dstsd = (TBL_PC*)bl;
+
 		 if( dstsd && dstsd->state.pvp != ((TBL_PC*)src)->state.pvp )
 			 return 0;
 	}

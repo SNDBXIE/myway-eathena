@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Current Version: =====================================
-//= 20130515
+//= 20130601
 //===== Description: =========================================
 //= List of available atcommands and their functions.
 //============================================================
@@ -578,8 +578,10 @@ Opens the auction window.
 ---------------------------------------
 
 @identify
+@identifyall
 
 Opens the Identification window if any unappraised items are in your inventory.
+@identifyall will automatically identify all unappraised items in your inventory.
 
 ---------------------------------------
 
@@ -639,6 +641,22 @@ If an amount is given for @item, that number will be created.
 Creates an item with the given parameters (the 'cards' can be any item).
 identify_flag: 0 = unidentified, 1 = identified
 attribute: 0 = not broken, 1 = broken
+
+---------------------------------------
+ 
+@itembound <item name/ID> <amount> <bound_type>
+
+Creates the specified item and bounds it to the account.
+bound_type: 1 = Account, 2 = Guild, 3 = Party
+
+---------------------------------------
+
+@itembound2 <item name/ID> <quantity> <identify_flag> <refine> <attribute> <card1> <card2> <card3> <card4> <bound_type>
+
+Creates an item with the given parameters (the 'cards' can be any item) and bounds it to the account.
+identify_flag: 0 = unidentified, 1 = identified
+attribute: 0 = not broken, 1 = broken
+bound_type: 1 = Account, 2 = Guild, 3 = Party
 
 ---------------------------------------
 
@@ -1239,6 +1257,16 @@ Unloads all NPCs in a file.
 
 Example:
 @unloadnpcfile npc/custom/jobmaster.txt
+
+---------------------------------------
+
+@partysharelvl <value>
+
+Updates party share level until character server is restarted.
+Automatically updates all online parties.
+
+Example:
+@partysharelvl 25
 
 ---------------------------------------
 

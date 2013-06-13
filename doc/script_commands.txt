@@ -3,9 +3,9 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Current Version: =====================================
-//= $Revision: 17334 $
+//= $Revision: 17351 $
 //===== Last Updated: ========================================
-//= $LastChangedDate: 2013-05-26 06:21:44 +0100 (Sun, 26 May 2013) $
+//= $LastChangedDate: 2013-06-08 23:47:10 +0100 (Sat, 08 Jun 2013) $
 //===== Description: =========================================
 //= A reference manual for the rAthena scripting language.
 //= Commands are sorted depending on their functionality.
@@ -134,7 +134,7 @@ Here is a list of valid top-level commands:
 <map name>%TAB%mapflag%TAB%<flag>
 
 This will, upon loading, set a specified map flag on a map you like. These are 
-normally in files inside 'conf/mapflag' and are loaded first, so by the time the 
+normally in files inside 'npc/mapflag' and are loaded first, so by the time the 
 server's up, all the maps have the flags they should have. Map flags determine 
 the behavior of the map in various situations. For more details, see 'setmapflag'
 and 'doc/mapflags.txt'.
@@ -2687,6 +2687,7 @@ recreate these items perfectly if they are destroyed. Here's what you get:
 @inventorylist_card4[]       if the character owns an item made by a specific 
                              craftsman.
 @inventorylist_expire[]    - expire time (Unix time stamp). 0 means never expires.
+@inventorylist_bound[]     - whether it is bound to the character
 @inventorylist_count       - the number of items in these lists.
 
 This could be handy to save/restore a character's inventory, since no other 
@@ -3613,17 +3614,6 @@ inserted into any equipment they have in their inventory, currently equipped or
 not.
 
 ---------------------------------------
-
-*getequipisidentify(<equipment slot>)
-
-This function will return 1 if an item in the specified equipment slot is 
-identified and 0 if it isn't. Since you can't even equip unidentified equipment, 
-there's a question of whether it can actually end up there, and it will normally 
-return 1 all the time if there is an item in this equipment slot.
-Which is kinda pointless.
-For a list of equipment slots see 'getequipid'.
-
----------------------------------------
 //
 3,1.- End of item-related commands
 //
@@ -4259,6 +4249,46 @@ command, creating a pet which is the same, but simultaneously exists in two
 eggs, and may hatch from either, although, I'm not sure what kind of a mess will 
 this really cause.
 
+ ---------------------------------------
+ 
+*getitembound <item id>,<amount>,<bound_type>{,<account ID>};
+*getitembound "<item name>",<amount>,<bound_type>{,<account ID>};
+
+This command will give an amount of specified items to the invoking character. 
+If an optional account ID is specified, and the target character is currently 
+online, items will be created in their inventory instead. If they are not 
+online, nothing will happen. 
+
+It works essentially the same as 'getitem', except that items created using
+this command will bound the item to the player's account. Depending on the bound type issued,
+the character may not be able to trade or store these items, however all bounded types
+cannot be sold, vended, auctioned, or mailed.
+
+Bound Types:
+	1 - Account Bound
+	2 - Guild Bound
+	3 - Party Bound
+
+---------------------------------------
+
+*getitembound2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound_type>{,<account ID>};
+*getitembound2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound_type>{,<account ID>};
+
+This command will give an amount of specified items to the invoking character. 
+If an optional account ID is specified, and the target character is currently 
+online, items will be created in their inventory instead. If they are not 
+online, nothing will happen. 
+
+It works essentially the same as 'getitem2', except that items created using
+this command will bound the item to the player's account. Depending on the bound type issued,
+the character may not be able to trade or store these items, however all bounded types
+cannot be sold, vended, auctioned, or mailed.
+
+Bound Types:
+	1 - Account Bound
+	2 - Guild Bound
+	3 - Party Bound
+
 ---------------------------------------
 
 *getnameditem <item id>,<character name|character ID>;
@@ -4397,6 +4427,30 @@ Expanded version of 'countitem' function, used for created/carded/forged items.
 This function will return the number of items for the specified item ID and
 other parameters that the invoking character has in the inventory.
 Check 'getitem2' to understand the arguments of the function.
+
+---------------------------------------
+
+*countbound({<bound_type>})
+
+This function will return a number of bounded items on the character.
+Optionally, you may count a specific type of bounded item on the character.
+
+countbound will also build an array of items in the form of @bound_items.
+Using countbound without a type counts all types of bounded items.
+
+Available types are:
+	1 - Account Bound
+	2 - Guild Bound
+	3 - Party Bound
+
+Example:
+	mes "[Bound Counter]";
+	mes "I see you currently have "+countbound+" bounded items.";
+	next;
+	mes "The list of bounded items include:";
+	for(.@i = 0; .@i<getarraysize(@bound_items); .@i++)
+		mes getitemname(@bound_items[.@i]);
+	close;
     
 ---------------------------------------
 
