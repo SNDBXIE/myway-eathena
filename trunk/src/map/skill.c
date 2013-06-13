@@ -911,7 +911,7 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, uint
 	case TF_POISON:
 	case AS_SPLASHER:
 		if(!sc_start2(src,bl,SC_POISON,(4*skill_lv+10),skill_lv,src->id,skill_get_time2(skill_id,skill_lv))
-			&&	sd && skill_id==TF_POISON
+			&& sd && skill_id==TF_POISON
 		)
 			clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
 		break;
@@ -925,7 +925,7 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, uint
 		break;
 
 	case MG_FROSTDIVER:
-		if(!sc_start(src,bl,SC_FREEZE,skill_lv*3+35,skill_lv,skill_get_time2(skill_id,skill_lv)))
+		if(!sc_start(src,bl,SC_FREEZE,skill_lv*3+35,skill_lv,skill_get_time2(skill_id,skill_lv)) && sd)
 			clif_skill_fail(sd,skill_id,0,0);
 		break;
 
@@ -2504,8 +2504,9 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 		skill_id == MER_INCAGI || skill_id == MER_BLESSING) && tsd->sc.data[SC_CHANGEUNDEAD] )
 		damage = 1;
 
-	if( damage > 0 && (( dmg.flag&BF_WEAPON && src != bl && ( src == dsrc || ( dsrc->type == BL_SKILL && ( skill_id == SG_SUN_WARM || skill_id == SG_MOON_WARM || skill_id == SG_STAR_WARM ) ) ))
-			|| ((sc && sc->data[SC_REFLECTDAMAGE]) && !dmg.flag&(BF_MAGIC|BF_LONG) && !skill_get_inf2(skill_id)&INF2_TRAP)) )
+	if( damage > 0 && (( dmg.flag&BF_WEAPON && src != bl && ( src == dsrc || ( dsrc->type == BL_SKILL &&
+		( skill_id == SG_SUN_WARM || skill_id == SG_MOON_WARM || skill_id == SG_STAR_WARM ) ) ))
+		|| ((sc && sc->data[SC_REFLECTDAMAGE]) && !(dmg.flag&(BF_MAGIC|BF_LONG)) && !(skill_get_inf2(skill_id)&INF2_TRAP)) ) )
 		rdamage = battle_calc_return_damage(bl,src, &damage, dmg.flag, skill_id);
 
 	if( damage && sc && sc->data[SC_GENSOU] && dmg.flag&BF_MAGIC ){
@@ -5818,7 +5819,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 
 	case MO_ABSORBSPIRITS:
 		i = 0;
-		if (dstsd && dstsd->spiritball && (sd == dstsd || map_flag_vs(src->m)) && (dstsd->class_&MAPID_BASEMASK)!=MAPID_GUNSLINGER)
+		if (dstsd && dstsd->spiritball && (sd == dstsd || map_flag_vs(src->m) || (map_getcell(src->m,src->x,src->y,CELL_CHKPVP) && map_getcell(bl->m,bl->x,bl->y,CELL_CHKPVP))) && (dstsd->class_&MAPID_BASEMASK)!=MAPID_GUNSLINGER)		// Addon Cell PVP [Ize]
 		{	// split the if for readability, and included gunslingers in the check so that their coins cannot be removed [Reddozen]
 			i = dstsd->spiritball * 7;
 			pc_delspiritball(dstsd,dstsd->spiritball,0);
@@ -6292,8 +6293,15 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 		break;
 
 	case MC_IDENTIFY:
-		if(sd)
+		if(sd) {
 			clif_item_identify_list(sd);
+			if( sd->menuskill_id != MC_IDENTIFY ) {/* failed, dont consume anything, return */
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				map_freeblock_unlock();
+				return 1;
+			}
+			status_zap(src,0,skill_db[skill_get_index(skill_id)].sp[skill_lv]); // consume sp only if succeeded
+		}
 		break;
 
 	// Weapon Refining [Celest]
@@ -9326,7 +9334,6 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 		if(sce->val1 == MH_MD_FIGHTING) sce->val1 = MH_MD_GRAPPLING;
 		else sce->val1 = MH_MD_FIGHTING;
 		if(hd->master && hd->sc.data[SC_STYLE_CHANGE]) {
-		    int mode = hd->sc.data[SC_STYLE_CHANGE]->val1;
 		    char output[128];
 		    safesnprintf(output,sizeof(output),msg_txt(sd,378),(sce->val1==MH_MD_FIGHTING?"fighthing":"grappling"));
 		    clif_colormes(hd->master,color_table[COLOR_RED],output);
@@ -11897,7 +11904,7 @@ int skill_unit_onplace_timer (struct skill_unit *src, struct block_list *bl, uns
 			break;
 		}
 
- 		case UNT_TATAMIGAESHI:
+		case UNT_TATAMIGAESHI:
 		case UNT_DEMONSTRATION:
 			skill_attack(BF_WEAPON,ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,0);
 			break;
@@ -13782,10 +13789,17 @@ int skill_consume_requirement( struct map_session_data *sd, uint16 skill_id, uin
 
 	req = skill_get_requirement(sd,skill_id,skill_lv);
 
-	if( type&1 )
-	{
-		if( skill_id == CG_TAROTCARD || sd->state.autocast )
-			req.sp = 0; // TarotCard will consume sp in skill_cast_nodamage_id [Inkfish]
+	if( type&1 ) {
+		switch( skill_id ) {
+			case CG_TAROTCARD: // TarotCard will consume sp in skill_cast_nodamage_id [Inkfish]
+			case MC_IDENTIFY:
+				req.sp = 0;
+				break;
+			default:
+				if(sd->state.autocast)
+					req.sp = 0;
+			break;
+		}
 		if(req.hp || req.sp)
 			status_zap(&sd->bl, req.hp, req.sp);
 
@@ -13802,8 +13816,7 @@ int skill_consume_requirement( struct map_session_data *sd, uint16 skill_id, uin
 		}
 	}
 
-	if( type&2 )
-	{
+	if( type&2 ) {
 		struct status_change *sc = &sd->sc;
 		int n,i;
 

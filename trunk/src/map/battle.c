@@ -801,7 +801,7 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,struct Damag
 		if( sc->data[SC_SAFETYWALL] && (flag&(BF_SHORT|BF_MAGIC))==BF_SHORT )
 		{
 			struct skill_unit_group* group = skill_id2group(sc->data[SC_SAFETYWALL]->val3);
-			uint16 skill_id = sc->data[SC_SAFETYWALL]->val2;
+			//uint16 skill_id = sc->data[SC_SAFETYWALL]->val2; (safetywall or steinwand)
 			if (group) {
 			//in RE, SW possesses a lifetime equal to group val2, (3x caster hp, or homon formula)
 			#ifdef RENEWAL
@@ -2072,6 +2072,9 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src,struct blo
 			case GN_CARTCANNON:
 				if( sd && pc_checkskill(sd, GN_REMODELING_CART) )
 					hitrate += pc_checkskill(sd, GN_REMODELING_CART) * 4;
+				break;
+			case LG_BANISHINGPOINT:
+				hitrate += 3 * skill_lv;
 				break;
 			case GC_VENOMPRESSURE:
 				hitrate += 10 + 4 * skill_lv;
@@ -3682,8 +3685,8 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 	short s_ele = 0;
 	unsigned int skillratio = 100;	//Skill dmg modifiers.
 
-    TBL_PC *sd;
-//    TBL_PC *tsd;
+	TBL_PC *sd;
+//	TBL_PC *tsd;
 	struct status_change *sc, *tsc;
 	struct Damage ad;
 	struct status_data *sstatus = status_get_status_data(src);
@@ -3713,7 +3716,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 	flag.imdef = nk&NK_IGNORE_DEF?1:0;
 
 	sd = BL_CAST(BL_PC, src);
-//    tsd = BL_CAST(BL_PC, target);
+//	tsd = BL_CAST(BL_PC, target);
 	sc = status_get_sc(src);
 	tsc = status_get_sc(target);
 
@@ -5479,7 +5482,9 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 						return 0; // You can't target anything out of your duel
 				}
 				 else if( map_getcell( s_bl->m, s_bl->x, s_bl->y, CELL_CHKPVP ) && map_getcell( t_bl->m, t_bl->x, t_bl->y, CELL_CHKPVP ) )
+				{	// Addon Cell PVP [Ize]
 					 state |= BCT_ENEMY;
+				}
 			}
 			if( map_flag_gvg(m) && !sd->status.guild_id && t_bl->type == BL_MOB && ((TBL_MOB*)t_bl)->class_ == MOBID_EMPERIUM )
 				return 0; //If you don't belong to a guild, can't target emperium.
@@ -5535,6 +5540,7 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
 		return (flag&state)?1:-1;
 	}
 
+	// Addon Cell PVP [Ize]
 	if( map_flag_vs(m) )
 	{ //Check rivalry settings.
 		int sbg_id = 0, tbg_id = 0;
@@ -5578,24 +5584,22 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
     }//end map_flag_vs chk rivality
 	else
 	{ //Non pvp/gvg, check party/guild settings.
-		if( flag&BCT_PARTY || state&BCT_ENEMY )
+		if( flag&BCT_PARTY || state&BCT_ENEMY)
 		{
-			if (!map_getcell( s_bl->m, s_bl->x, s_bl->y, CELL_CHKPVP ) && battle_config.cellpvp_party_enable)	
-			{	// Addon Cell PVP [Ize]
 				int s_party = status_get_party_id(s_bl);
-				if(s_party && s_party == status_get_party_id(t_bl))
+				if(s_party && s_party == status_get_party_id(t_bl) && !(battle_config.cellpvp_party_enable && map_getcell( t_bl->m, t_bl->x, t_bl->y, CELL_CHKPVP )) ) 		// Addon Cell PVP [Ize]
 					state |= BCT_PARTY;
-			}
+				else
+					state |= BCT_ENEMY;
 		}
-		if( flag&BCT_GUILD || state&BCT_ENEMY )
+		if( flag&BCT_GUILD || state&BCT_ENEMY)
 		{
-			if(!map_getcell( s_bl->m, s_bl->x, s_bl->y, CELL_CHKPVP ) && battle_config.cellpvp_guild_enable)
-			{	// Addon Cell PVP [Ize]
 				int s_guild = status_get_guild_id(s_bl);
 				int t_guild = status_get_guild_id(t_bl);
-				if(s_guild && t_guild && (s_guild == t_guild || guild_isallied(s_guild, t_guild)))
+				if(s_guild && t_guild && (s_guild == t_guild || guild_isallied(s_guild, t_guild)) && !(battle_config.cellpvp_guild_enable && map_getcell( t_bl->m, t_bl->x, t_bl->y, CELL_CHKPVP )) )		// Addon Cell PVP [Ize]
 					state |= BCT_GUILD;
-			}
+				else
+					state |= BCT_ENEMY;
 		}
     } //end non pvp/gvg chk rivality
 
@@ -5851,7 +5855,7 @@ static const struct _battle_data {
 	{ "cell_stack_limit",                   &battle_config.cell_stack_limit,                1,      1,      255,            },
 	{ "dancing_weaponswitch_fix",           &battle_config.dancing_weaponswitch_fix,        1,      0,      1,              },
 
-// eAthena additions
+	// eAthena additions
 	{ "item_logarithmic_drops",             &battle_config.logarithmic_drops,               0,      0,      1,              },
 	{ "item_drop_common_min",               &battle_config.item_drop_common_min,            1,      1,      10000,          },
 	{ "item_drop_common_max",               &battle_config.item_drop_common_max,            10000,  1,      10000,          },
@@ -6043,7 +6047,7 @@ static const struct _battle_data {
 	{ "cellpvp_party_enable",               &battle_config.cellpvp_party_enable,                    1,      0,      1,              },
 	{ "cellpvp_guild_enable",               &battle_config.cellpvp_guild_enable,                    1,      0,      1,              },
 	{ "cellpvp_walkout_delay",                    &battle_config.cellpvp_walkout_delay,                 5000,     0,      INT_MAX,        },
-
+	
 	//Custom Setting
 	{ "mado_skill_limit",                   &battle_config.mado_skill_limit,                 1,     0,      1,        		},
 	{ "block_relocation",           		&battle_config.block_relocation,        		 1,     0,      1,              },

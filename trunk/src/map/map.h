@@ -458,7 +458,7 @@ typedef enum {
 	CELL_MAELSTROM,
 	CELL_ICEWALL,
 
-	CELL_PVP = 0xFF,	//cell_PVP by Mr Postman
+	CELL_PVP = 0xFF,	// Addon Cell PVP [Ize]
 } cell_t;
 
 // used by map_getcell()
@@ -483,7 +483,7 @@ typedef enum {
 	CELL_CHKMAELSTROM,
 	CELL_CHKICEWALL,
 
-	CELL_CHKPVP = 0xFF,	//cell_PVP by Mr Postman
+	CELL_CHKPVP = 0xFF,	// Addon Cell PVP [Ize]
 } cell_chk;
 
 struct mapcell
@@ -503,7 +503,8 @@ struct mapcell
 		nochat : 1,
 		maelstrom : 1,
 		icewall : 1,
-		pvp : 1;	//cell_PVP by Mr Postman
+		pvp : 1;		// Addon Cell PVP [Ize]
+
 #ifdef CELL_NOSTACK
 	unsigned char cell_bl; //Holds amount of bls in this cell.
 #endif
@@ -529,7 +530,7 @@ struct map_data {
 	int npc_num;
 	int users;
 	int users_pvp;
-	int pvpuser;	//cell_PVP by Mr Postman
+	int cell_pvpuser;		// Addon Cell PVP [Ize]
 	int iwall_num; // Total of invisible walls in this map
 	struct map_flag {
 		unsigned town : 1; // [Suggestion to protect Mail System]
@@ -785,6 +786,7 @@ char *MSG_CONF_NAME_MAL;
 char *MSG_CONF_NAME_IDN;
 char *MSG_CONF_NAME_FRN;
 char *MSG_CONF_NAME_POR;
+char *MSG_CONF_NAME_THA;
 
 //Useful typedefs from jA [Skotlex]
 typedef struct map_session_data TBL_PC;
@@ -836,8 +838,7 @@ extern char mob_skill_db2_db[32];
 
 void do_shutdown(void);
 
-//cell_PVP by Mr Postman
-int map_check_pvp(struct block_list *src, struct block_list *target);
+// Addon Cell PVP [Ize]
 int map_pvp_area(struct map_session_data* sd, bool flag);
 
 #endif /* _MAP_H_ */

@@ -509,6 +509,14 @@ bool pc_can_give_items(struct map_session_data *sd)
 	return pc_has_permission(sd, PC_PERM_TRADE);
 }
 
+/**
+ * Determines if player can give / drop / trade / vend bounded items
+ */
+bool pc_can_give_bounded_items(struct map_session_data *sd)
+{
+	return pc_has_permission(sd, PC_PERM_TRADE_BOUNDED);
+}
+
 /*==========================================
  * prepares character for saving.
  *------------------------------------------*/
@@ -919,7 +927,8 @@ int pc_isequip(struct map_session_data *sd,int n)
  *------------------------------------------*/
 bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_time, int group_id, struct mmo_charstatus *st, bool changing_mapservers)
 {
-	int i;
+	int i, j;
+	int idxlist[MAX_INVENTORY];
 	unsigned long tick = gettick();
 	uint32 ip = session[sd->fd]->client_addr;
 
@@ -1095,6 +1104,12 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	 * Check if player have any item cooldowns on
 	 **/
 	pc_itemcd_do(sd,true);
+
+	// Party bound item check
+	if(sd->status.party_id == 0 && (j = pc_bound_chk(sd,3,idxlist))) { // Party was deleted while character offline
+		for(i=0;i<j;i++)
+			pc_delitem(sd,idxlist[i],sd->status.inventory[idxlist[i]].amount,0,1,LOG_TYPE_OTHER);
+	}
 
 	// Request all registries (auth is considered completed whence they arrive)
 	intif_request_registry(sd,7);
@@ -3891,7 +3906,7 @@ int pc_additem(struct map_session_data *sd,struct item *item_data,int amount,e_l
 	{ // Stackable | Non Rental
 		for( i = 0; i < MAX_INVENTORY; i++ )
 		{
-			if( sd->status.inventory[i].nameid == item_data->nameid && memcmp(&sd->status.inventory[i].card, &item_data->card, sizeof(item_data->card)) == 0 )
+			if( sd->status.inventory[i].nameid == item_data->nameid && sd->status.inventory[i].bound == item_data->bound && memcmp(&sd->status.inventory[i].card, &item_data->card, sizeof(item_data->card)) == 0 )
 			{
 				if( amount > MAX_AMOUNT - sd->status.inventory[i].amount || ( data->stack.inventory && amount > data->stack.amount - sd->status.inventory[i].amount ) )
 					return 5;
@@ -4049,11 +4064,14 @@ int pc_takeitem(struct map_session_data *sd,struct flooritem_data *fitem)
 	if(!check_distance_bl(&fitem->bl, &sd->bl, 2) && sd->ud.skill_id!=BS_GREED)
 		return 0;	// Distance is too far
 
+	if( sd->sc.cant.pickup )
+		return 0;
+
 	if (sd->status.party_id)
 		p = party_search(sd->status.party_id);
 
 	if(fitem->first_get_charid > 0 && fitem->first_get_charid != sd->status.char_id)
-  	{
+	{
 		first_sd = map_charid2sd(fitem->first_get_charid);
 		if(DIFF_TICK(tick,fitem->first_get_tick) < 0) {
 			if (!(p && p->party.item&1 &&
@@ -4074,7 +4092,7 @@ int pc_takeitem(struct map_session_data *sd,struct flooritem_data *fitem)
 			}
 			else
 			if(fitem->third_get_charid > 0 && fitem->third_get_charid != sd->status.char_id)
-		  	{
+			{
 				third_sd = map_charid2sd(fitem->third_get_charid);
 				if(DIFF_TICK(tick,fitem->third_get_tick) < 0) {
 					if(!(p && p->party.item&1 &&
@@ -4438,7 +4456,7 @@ int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amoun
 		return 1;
 	}
 
-	if( !itemdb_cancartstore(item_data, pc_get_group_level(sd)) )
+	if( !itemdb_cancartstore(item_data, pc_get_group_level(sd)) || ((item_data->bound == 2 || item_data->bound == 3) && !pc_can_give_bounded_items(sd)))
 	{ // Check item trade restrictions	[Skotlex]
 		clif_displaymessage (sd->fd, msg_txt(sd,264));
 		return 1;
@@ -4451,7 +4469,7 @@ int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amoun
 	if( itemdb_isstackable2(data) && !item_data->expire_time )
 	{
 		ARR_FIND( 0, MAX_CART, i,
-			sd->status.cart[i].nameid == item_data->nameid &&
+			sd->status.cart[i].nameid == item_data->nameid && sd->status.cart[i].bound == item_data->bound &&
 			sd->status.cart[i].card[0] == item_data->card[0] && sd->status.cart[i].card[1] == item_data->card[1] &&
 			sd->status.cart[i].card[2] == item_data->card[2] && sd->status.cart[i].card[3] == item_data->card[3] );
 	};
@@ -4584,6 +4602,25 @@ int pc_getitemfromcart(struct map_session_data *sd,int idx,int amount)
 
 	clif_additem(sd,0,0,flag);
 	return 1;
+}
+
+/*==========================================
+ * Bound Item Check
+ * Type:
+ * 1 Account Bound
+ * 2 Guild Bound
+ * 3 Party Bound
+ *------------------------------------------*/
+int pc_bound_chk(TBL_PC *sd,int type,int *idxlist)
+{
+	int i=0, j=0;
+	for(i=0;i<MAX_INVENTORY;i++){
+		if(sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].amount > 0 && sd->status.inventory[i].bound == type) {
+			idxlist[j] = i;
+			j++;
+		}
+	}
+	return j;
 }
 
 /*==========================================
@@ -4807,6 +4844,10 @@ int pc_setpos(struct map_session_data* sd, unsigned short mapindex, int x, int y
 		}
 
 		channel_pcquit(sd,4); //quit map chan
+
+		// Addon Cell PVP [Ize]
+		if(sd->state.pvp && map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP))
+			map[sd->state.pmap].cell_pvpuser--;
 	}
 
 	if( m < 0 )
@@ -6546,6 +6587,12 @@ void pc_respawn(struct map_session_data* sd, clr_type clrtype)
 	pc_setrestartvalue(sd,3);
 	if( pc_setpos(sd, sd->status.save_point.map, sd->status.save_point.x, sd->status.save_point.y, clrtype) )
 		clif_resurrection(&sd->bl, 1); //If warping fails, send a normal stand up packet.
+
+	// Addon Cell PVP [Ize]
+	if (sd->state.pvp && map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP) )
+		map_pvp_area(sd, 1);
+	else
+		map_pvp_area(sd, 0);
 }
 
 static int pc_respawn_timer(int tid, unsigned int tick, int id, intptr_t data)
@@ -6557,6 +6604,56 @@ static int pc_respawn_timer(int tid, unsigned int tick, int id, intptr_t data)
 		pc_respawn(sd,CLR_OUTSIGHT);
 	}
 
+	return 0;
+}
+
+// Addon Cell PVP [Ize]
+void pc_deathmatch(struct map_session_data* sd, clr_type clrtype)
+{
+	struct npc_data *nd;
+	short x = 0, y = 0;
+
+	if( !pc_isdead(sd) )
+		return; // not applicable
+
+	if( map_getcell(sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP) && battle_config.cellpvp_deathmatch ) 
+	{
+		do {
+			x = rand() % (map[sd->bl.m].xs - 2) + 1;
+			y = rand() % (map[sd->bl.m].ys - 2) + 1;
+		} while( !map_getcell(sd->bl.m, x, y, CELL_CHKPVP) || !map_getcell(sd->bl.m, x, y, CELL_CHKPVP) );
+
+		pc_setstand(sd);
+		pc_setrestartvalue(sd,3);
+		status_percent_heal(&sd->bl, battle_config.deathmatch_hp_rate, battle_config.deathmatch_sp_rate);
+
+		if( pc_setpos(sd, sd->mapindex, x, y, clrtype) )
+			clif_resurrection(&sd->bl, 1); //If warping fails, send a normal stand up packet.
+
+		status_change_clear(&sd->bl, 3);
+
+		if(sd && battle_config.cellpvp_autobuff)
+		{
+			nd = npc_name2id("deathmatch_core");
+			if (nd && nd->subtype == SCRIPT)
+				run_script(nd->u.scr.script, 0, sd->bl.id, nd->bl.id);
+		}
+	}
+}
+
+// Addon Cell PVP [Ize]
+int pc_deathmatch_timer(int tid, unsigned int tick, int id, intptr_t data)
+{
+	struct map_session_data *sd = map_id2sd(id);
+	if( sd != NULL )
+	{
+		pc_deathmatch(sd, CLR_OUTSIGHT);
+		if (sd->state.pvp && map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP ) )
+		{
+			map_pvp_area(sd, 1);
+			map[sd->bl.m].cell_pvpuser--;
+		}
+	}
 	return 0;
 }
 
@@ -6589,7 +6686,7 @@ void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int h
 	sd->canlog_tick = gettick();
 }
 
-static int pc_close_npc_timer(int tid, unsigned int tick, int id, intptr_t data)
+int pc_close_npc_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	TBL_PC *sd = map_id2sd(id);
 	if(sd) pc_close_npc(sd,data);
@@ -6785,7 +6882,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 	}
 
 	if(battle_config.bone_drop==2
-		|| (battle_config.bone_drop==1 && map[sd->bl.m].flag.pvp))
+		|| (battle_config.bone_drop==1 && (map[sd->bl.m].flag.pvp || map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP) && sd->state.pvp)) )	// Addon Cell PVP [Ize]
 	{
 		struct item item_tmp;
 		memset(&item_tmp,0,sizeof(item_tmp));
@@ -6805,6 +6902,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 		if( get_percentage(sd->status.base_exp,next) >= 99 ) {
 			sd->state.snovice_dead_flag = 1;
 			pc_setstand(sd);
+			pc_setrestartvalue(sd,1);
 			status_percent_heal(&sd->bl, 100, 100);
 			clif_resurrection(&sd->bl, 1);
 			if(battle_config.pc_invincible_time)
@@ -6861,6 +6959,13 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			if(base_penalty)
 				pc_payzeny(sd, base_penalty, LOG_TYPE_PICKDROP_PLAYER, NULL);
 		}
+	}
+
+	// Addon Cell PVP [Ize]
+	if (map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP ) && battle_config.cellpvp_deathmatch && sd->state.pvp)
+	{
+		add_timer(tick+battle_config.cellpvp_deathmatch_delay, pc_deathmatch_timer, sd->bl.id, 0);
+		return 1|8;
 	}
 
 	if(map[sd->bl.m].flag.pvp_nightmaredrop) { // Moved this outside so it works when PVP isn't enabled and during pk mode [Ancyker]
@@ -7359,13 +7464,11 @@ int pc_percentheal(struct map_session_data *sd,int hp,int sp)
 {
 	nullpo_ret(sd);
 
-	if(hp > 100) hp = 100;
-	else
-	if(hp <-100) hp =-100;
+	if (hp > 100) hp = 100;
+	else if (hp <-100) hp = -100;
 
-	if(sp > 100) sp = 100;
-	else
-	if(sp <-100) sp =-100;
+	if (sp > 100) sp = 100;
+	else if (sp <-100) sp = -100;
 
 	if(hp >= 0 && sp >= 0) //Heal
 		return status_percent_heal(&sd->bl, hp, sp);
@@ -7902,9 +8005,9 @@ int pc_setmadogear(TBL_PC* sd, int flag)
  *------------------------------------------*/
 int pc_candrop(struct map_session_data *sd, struct item *item)
 {
-	if( item && item->expire_time )
+	if( item && (item->expire_time || (item->bound && !pc_can_give_bounded_items(sd))) )
 		return 0;
-	if( !pc_can_give_items(sd) ) //check if this GM level can drop items
+	if( !pc_can_give_items(sd) || sd->sc.cant.drop) //check if this GM level can drop items
 		return 0;
 	return (itemdb_isdropable(item, pc_get_group_level(sd)));
 }
@@ -8988,7 +9091,7 @@ int pc_calc_pvprank(struct map_session_data *sd)
 	// Addon Cell PVP [Ize]
 	if( sd->state.pvp ) 
 	{
-		clif_pvpset( sd, sd->pvp_rank, sd->pvp_lastusers = m->pvpuser, 0);
+		clif_pvpset( sd, sd->pvp_rank, sd->pvp_lastusers = m->cell_pvpuser, 0);
 		return sd->pvp_rank;
 	}
 
@@ -9661,7 +9764,7 @@ static bool pc_readdb_levelpenalty(char* fields[], int columns, int current)
  *------------------------------------------*/
 int pc_readdb(void)
 {
-	int i,j,k,tmp=0;
+	int i,j,k;
 	FILE *fp;
 	char line[24000],*p;
 
@@ -9758,7 +9861,7 @@ int pc_readdb(void)
 	sv_readdb(db_path, "re/level_penalty.txt", ',', 4, 4, -1, &pc_readdb_levelpenalty);
 	for( k=1; k < 3; k++ ){ // fill in the blanks
 		for( j = 0; j < RC_MAX; j++ ){
-			tmp = 0;
+			int tmp = 0;
 			for( i = 0; i < MAX_LEVEL*2; i++ ){
 				if( i == MAX_LEVEL+1 )
 					tmp = level_penalty[k][j][0];// reset

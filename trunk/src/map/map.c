@@ -1724,9 +1724,9 @@ int map_quit(struct map_session_data *sd) {
 		}
 	}
 
-	//cell_PVP by Mr Postman
-	if( map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP ) )
-		 map[sd->bl.m].pvpuser--;
+	// Addon Cell PVP [Ize]
+	if( sd->state.pvp && map_getcell( sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKPVP ) )
+		map_pvp_area(sd, 0);
 
 	party_booking_delete(sd); // Party Booking [Spiria]
 	pc_makesavestatus(sd);
@@ -2497,6 +2497,8 @@ int map_getcellp(struct map_data* m,int16 x,int16 y,cell_chk cellchk)
 			return (cell.novending);
 		case CELL_CHKNOCHAT:
 			return (cell.nochat);
+		case CELL_CHKPVP:	// Addon Cell PVP [Ize]
+			return (cell.pvp);
 		case CELL_CHKMAELSTROM:
 			return (cell.maelstrom);
 		case CELL_CHKICEWALL:
@@ -2523,9 +2525,6 @@ int map_getcellp(struct map_data* m,int16 x,int16 y,cell_chk cellchk)
 #else
 			return 0;
 #endif
-		//cell_PVP by Mr Postman
-		case CELL_CHKPVP:
-			 return (cell.pvp);
 
 		default:
 			return 0;
@@ -2558,7 +2557,7 @@ void map_setcell(int16 m, int16 x, int16 y, cell_t cell, bool flag)
 		case CELL_NOCHAT:        map[m].cell[j].nochat = flag;        break;
 		case CELL_MAELSTROM:	 map[m].cell[j].maelstrom = flag;	  break;
 		case CELL_ICEWALL:		 map[m].cell[j].icewall = flag;		  break;
-		case CELL_PVP:			 map[m].cell[j].pvp = flag;			  break;
+		case CELL_PVP:        map[m].cell[j].pvp = flag;        break;		// Addon Cell PVP [Ize]
 		default:
 			ShowWarning("map_setcell: invalid cell type '%d'\n", (int)cell);
 			break;
@@ -3719,7 +3718,8 @@ void map_do_init_msg(void){
 		MSG_CONF_NAME_MAL,
 		MSG_CONF_NAME_IDN,
 		MSG_CONF_NAME_FRN,
-		MSG_CONF_NAME_POR
+		MSG_CONF_NAME_POR,
+		MSG_CONF_NAME_THA
 	};
 
 	map_msg_db = idb_alloc(DB_OPT_BASE);
@@ -3822,6 +3822,7 @@ int do_init(int argc, char *argv[])
 	MSG_CONF_NAME_IDN = "conf/msg_conf/map_msg_idn.conf";	// Indonesian
 	MSG_CONF_NAME_FRN = "conf/msg_conf/map_msg_frn.conf";	// French
 	MSG_CONF_NAME_POR = "conf/msg_conf/map_msg_por.conf";	// Brazilian Portuguese
+	MSG_CONF_NAME_THA = "conf/msg_conf/map_msg_tha.conf";	// Thai
 	/* Multilanguage */
 
 	cli_get_options(argc,argv);
@@ -3936,25 +3937,16 @@ int do_init(int argc, char *argv[])
 	return 0;
 }
 
-//cell_PVP by Mr Postman
-int map_check_pvp(struct block_list *src, struct block_list *target)
-{
-	if( (src->type && target->type) != BL_PC )
-		return 0;
-
-	if( ( (((TBL_PC*)src)->state.pvp) && (((TBL_PC*)target)->state.pvp) ) == 1 )
-		return 1;
-	else
-		return 0;
-}
-
+// Addon Cell PVP [Ize]
 int map_pvp_area(struct map_session_data* sd, bool flag)
 {
-	if(flag) {
-		clif_map_property(sd, MAPPROPERTY_FREEPVPZONE);
-		clif_maptypeproperty2(&sd->bl,SELF);
-		if (sd->pvp_timer == INVALID_TIMER) {
-				map[sd->bl.m].pvpuser++;
+	switch(flag) 
+	{
+		case 1:
+			clif_map_property(sd, MAPPROPERTY_FREEPVPZONE);
+			clif_maptypeproperty2(&sd->bl,SELF);
+			if (sd->pvp_timer == INVALID_TIMER) {
+				map[sd->bl.m].cell_pvpuser++;
 
 				sd->pvp_timer  = add_timer(gettick()+200, pc_calc_pvprank_timer, sd->bl.id, 0);
 				sd->pvp_rank  = 0;
@@ -3964,16 +3956,18 @@ int map_pvp_area(struct map_session_data* sd, bool flag)
 				sd->pvp_lost  = 0;
 				sd->state.pvp  = 1;
 				sd->pvpcan_walkout_tick =  gettick();
-		}
-	} else {
-		clif_pvpset(sd, 0, 0, 2);
-		map[sd->bl.m].pvpuser--;
+			}
+			break;
+		default:
+			clif_pvpset(sd, 0, 0, 2);
+			map[sd->bl.m].cell_pvpuser--;
 
-		if( sd->pvp_timer != INVALID_TIMER )
-			delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
+			if( sd->pvp_timer != INVALID_TIMER )
+				delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
 
-		sd->pvp_timer  = INVALID_TIMER;
-		sd->state.pvp  = 0;
+			sd->pvp_timer  = INVALID_TIMER;
+			sd->state.pvp  = 0;
+			break;
 	}
 
 	return 0;

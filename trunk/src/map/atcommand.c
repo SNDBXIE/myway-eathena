@@ -537,8 +537,7 @@ ACMD_FUNC(jump)
  * Display list of online characters with
  * various info.
  *------------------------------------------*/
-ACMD_FUNC(who)
-{
+ACMD_FUNC(who) {
 	struct map_session_data *pl_sd = NULL;
 	struct s_mapiterator *iter = NULL;
 	char map_name[MAP_NAME_LENGTH_EXT] = "";
@@ -750,11 +749,11 @@ ACMD_FUNC(load)
 	nullpo_retr(-1, sd);
 
 	m = map_mapindex2mapid(sd->status.save_point.map);
-	if (m >= 0 && map[m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (sd->state.pvp || m >= 0 && map[m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {	// Addon Cell PVP [Ize]
 		clif_displaymessage(fd, msg_txt(sd,249));	// You are not authorized to warp to your save map.
 		return -1;
 	}
-	if (sd->bl.m >= 0 && map[sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (sd->state.pvp || sd->bl.m >= 0 && map[sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {		// Addon Cell PVP [Ize]
 		clif_displaymessage(fd, msg_txt(sd,248));	// You are not authorized to warp from your current map.
 		return -1;
 	}
@@ -1113,11 +1112,12 @@ ACMD_FUNC(heal)
 
 /*==========================================
  * @item command (usage: @item <name/id_of_item> <quantity>) (modified by [Yor] for pet_egg)
+ * @itembound command (usage: @itembound <name/id_of_item> <quantity> <bound_type>)
  *------------------------------------------*/
 ACMD_FUNC(item)
 {
 	char item_name[100];
-	int number = 0, item_id, flag = 0;
+	int number = 0, item_id, flag = 0, bound = 0;
 	struct item item_tmp;
 	struct item_data *item_data;
 	int get_count, i;
@@ -1125,7 +1125,13 @@ ACMD_FUNC(item)
 
 	memset(item_name, '\0', sizeof(item_name));
 
-	if (!message || !*message || (
+	if (!strcmpi(command+1,"itembound") && (!message || !*message || (
+		sscanf(message, "\"%99[^\"]\" %d %d", item_name, &number, &bound) < 2 &&
+		sscanf(message, "%99s %d %d", item_name, &number, &bound) < 2
+	))) {
+		clif_displaymessage(fd, msg_txt(sd,295)); // Please enter an item name or ID (usage: @item <item name/ID> <quantity> <bound_type>).
+		return -1;
+	} else if (!message || !*message || (
 		sscanf(message, "\"%99[^\"]\" %d", item_name, &number) < 1 &&
 		sscanf(message, "%99s %d", item_name, &number) < 1
 	)) {
@@ -1143,13 +1149,8 @@ ACMD_FUNC(item)
 		return -1;
 	}
 
-	//item_block_atcmd.txt
-	#ifdef _PC_GROUPS_H_
-	if(item_data->atcmd_block && sd->group_level < item_data->atcmd_block_minlvl) {
-	#else
-	if(item_data->atcmd_block && sd->gmlevel < item_data->atcmd_block_minlvl) {
-	#endif
-		clif_displaymessage(fd, "This item is not available."); // Invalid item ID or name.
+	if( bound < 0 || bound > 3 ) {
+		clif_displaymessage(fd, msg_txt(sd,298)); // Invalid bound type
 		return -1;
 	}
 
@@ -1165,6 +1166,7 @@ ACMD_FUNC(item)
 			memset(&item_tmp, 0, sizeof(item_tmp));
 			item_tmp.nameid = item_id;
 			item_tmp.identify = 1;
+			item_tmp.bound = bound;
 
 			if ((flag = pc_additem(sd, &item_tmp, get_count, LOG_TYPE_COMMAND)))
 				clif_additem(sd, 0, 0, flag);
@@ -1184,17 +1186,23 @@ ACMD_FUNC(item2)
 	struct item item_tmp;
 	struct item_data *item_data;
 	char item_name[100];
-	int item_id, number = 0;
+	int item_id, number = 0, bound = 0;
 	int identify = 0, refine = 0, attr = 0;
 	int c1 = 0, c2 = 0, c3 = 0, c4 = 0;
 	nullpo_retr(-1, sd);
 
 	memset(item_name, '\0', sizeof(item_name));
 
-	if (!message || !*message || (
+	if (!strcmpi(command+1,"itembound2") && (!message || !*message || (
+		sscanf(message, "\"%99[^\"]\" %d %d %d %d %d %d %d %d %d", item_name, &number, &identify, &refine, &attr, &c1, &c2, &c3, &c4, &bound) < 10 &&
+		sscanf(message, "%99s %d %d %d %d %d %d %d %d %d", item_name, &number, &identify, &refine, &attr, &c1, &c2, &c3, &c4, &bound) < 10 ))) {
+		clif_displaymessage(fd, msg_txt(sd,296)); // Please enter all parameters (usage: @item2 <item name/ID> <quantity>
+		clif_displaymessage(fd, msg_txt(sd,297)); //   <identify_flag> <refine> <attribute> <card1> <card2> <card3> <card4> <bound_type>).
+		return -1;
+	} else if ( !message || !*message || (
 		sscanf(message, "\"%99[^\"]\" %d %d %d %d %d %d %d %d", item_name, &number, &identify, &refine, &attr, &c1, &c2, &c3, &c4) < 9 &&
 		sscanf(message, "%99s %d %d %d %d %d %d %d %d", item_name, &number, &identify, &refine, &attr, &c1, &c2, &c3, &c4) < 9
-	)) {
+		)) {
 		clif_displaymessage(fd, msg_txt(sd,984)); // Please enter all parameters (usage: @item2 <item name/ID> <quantity>
 		clif_displaymessage(fd, msg_txt(sd,985)); //   <identify_flag> <refine> <attribute> <card1> <card2> <card3> <card4>).
 		return -1;
@@ -1202,6 +1210,11 @@ ACMD_FUNC(item2)
 
 	if (number <= 0)
 		number = 1;
+
+	if( bound < 0 || bound > 3 ) {
+		clif_displaymessage(fd, msg_txt(sd,298)); // Invalid bound type
+		return -1;
+	}
 
 	item_id = 0;
 	if ((item_data = itemdb_searchname(item_name)) != NULL ||
@@ -1239,6 +1252,7 @@ ACMD_FUNC(item2)
 			item_tmp.card[1] = c2;
 			item_tmp.card[2] = c3;
 			item_tmp.card[3] = c4;
+			item_tmp.bound = bound;
 			if ((flag = pc_additem(sd, &item_tmp, get_count, LOG_TYPE_COMMAND)))
 				clif_additem(sd, 0, 0, flag);
 		}
@@ -3602,9 +3616,7 @@ ACMD_FUNC(partyrecall)
  *
  *------------------------------------------*/
 void atcommand_doload();
-ACMD_FUNC(reload)
-{
-
+ACMD_FUNC(reload) {
 	nullpo_retr(-1, sd);
 
 	if ((strlen(command) < 8 ) && (!message || !*message)) {
@@ -3690,7 +3702,7 @@ ACMD_FUNC(reload)
 		||  prev_config.base_exp_rate          != battle_config.base_exp_rate
 		||  prev_config.job_exp_rate           != battle_config.job_exp_rate
 		)
-	  	{	// Exp or Drop rates changed.
+		{	// Exp or Drop rates changed.
 			mob_reload(); //Needed as well so rate changes take effect.
 			chrif_ragsrvinfo(battle_config.base_exp_rate, battle_config.job_exp_rate, battle_config.item_rate_common);
 		}
@@ -3732,6 +3744,29 @@ ACMD_FUNC(reload)
 		clif_displaymessage(fd, msg_txt(sd,1477)); // Packet database has been reloaded.
 	}
 
+
+	return 0;
+}
+/*==========================================
+ * @partysharelvl <share_range> [Akinari]
+ * Updates char server party share level in runtime
+ * Temporary - Permanent update in inter_athena.conf
+ *------------------------------------------*/
+ACMD_FUNC(partysharelvl) {
+	unsigned int share_lvl;
+
+	nullpo_retr(-1, sd);
+
+	if(!message || !*message) {
+		clif_displaymessage(fd, msg_txt(sd,1322));
+		return -1;
+	} else
+		share_lvl = min(atof(message),MAX_LEVEL);
+
+	if(intif_party_sharelvlupdate(share_lvl)) //Successfully updated
+		clif_displaymessage(fd, msg_txt(sd,1478));
+	else //Char server offline
+		clif_displaymessage(fd, msg_txt(sd,1479));
 
 	return 0;
 }
@@ -6179,10 +6214,8 @@ ACMD_FUNC(npctalk)
 	bool ifcolor=(*(command + 8) != 'c' && *(command + 8) != 'C')?0:1;
 	unsigned long color=0;
 
-	if (sd->sc.count && //no "chatting" while muted.
-		(sd->sc.data[SC_BERSERK] || sd->sc.data[SC__BLOODYLUST] ||
-		(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOCHAT)))
-		return -1;
+	if (sd->sc.cant.chat)
+		return -1; //no "chatting" while muted.
 
 	if(!ifcolor) {
 		if (!message || !*message || sscanf(message, "%23[^,], %99[^\n]", name, mes) < 2) {
@@ -6230,10 +6263,8 @@ ACMD_FUNC(pettalk)
 		return -1;
 	}
 
-	if (sd->sc.count && //no "chatting" while muted.
-		(sd->sc.data[SC_BERSERK] || sd->sc.data[SC__BLOODYLUST] ||
-		(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOCHAT)))
-		return -1;
+	if (sd->sc.cant.chat)
+		return -1; //no "chatting" while muted.
 
 	if (!message || !*message || sscanf(message, "%99[^\n]", mes) < 1) {
 		clif_displaymessage(fd, msg_txt(sd,1224)); // Please enter a message (usage: @pettalk <message>).
@@ -6616,6 +6647,23 @@ ACMD_FUNC(identify)
 	return 0;
 }
 
+/*===============================================
+* @identifyall
+* => Indentify all items in inventory - Akinari
+*-----------------------------------------------*/
+ACMD_FUNC(identifyall)
+{
+	int i;
+	nullpo_retr(-1, sd);
+	for(i=0; i<MAX_INVENTORY; i++) {
+		if (sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].identify!=1) {
+			sd->status.inventory[i].identify=1;
+			clif_item_identified(sd,i,0);
+		}
+	}
+	return 0;
+}
+
 /*==========================================
  * @gmotd (Global MOTD)
  * by davidsiaw :P
@@ -6760,8 +6808,11 @@ ACMD_FUNC(mobinfo)
 			droprate = mob->dropitem[i].p;
 
 #ifdef RENEWAL_DROP
-			if( battle_config.atcommand_mobinfo_type )
+			if( battle_config.atcommand_mobinfo_type ) {
 				droprate = droprate * pc_level_penalty_mod(sd, mob->lv, mob->status.race, mob->status.mode, 2) / 100;
+				if (droprate <= 0 && !battle_config.drop_rate0item)
+						droprate = 1;
+			}
 #endif
 			if (item_data->slot)
 				sprintf(atcmd_output2, " - %s[%d]  %02.02f%%", item_data->jname, item_data->slot, (float)droprate / 100);
@@ -7044,10 +7095,8 @@ ACMD_FUNC(homtalk)
 		sd->cantalk_tick = gettick() + battle_config.min_chat_delay;
 	}
 
-	if (sd->sc.count && //no "chatting" while muted.
-		(sd->sc.data[SC_BERSERK] || sd->sc.data[SC__BLOODYLUST] ||
-		(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOCHAT)))
-		return -1;
+	if (sd->sc.cant.chat)
+		return -1; //no "chatting" while muted.
 
 	if ( !merc_is_hom_active(sd->hd) ) {
 		clif_displaymessage(fd, msg_txt(sd,1254)); // You do not have a homunculus.
@@ -7439,10 +7488,8 @@ ACMD_FUNC(me)
 	memset(tempmes, '\0', sizeof(tempmes));
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
 
-	if (sd->sc.count && //no "chatting" while muted.
-		(sd->sc.data[SC_BERSERK] || sd->sc.data[SC__BLOODYLUST] ||
-		(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOCHAT)))
-		return -1;
+	if (sd->sc.cant.chat)
+		return -1; //no "chatting" while muted.
 
 	if (!message || !*message || sscanf(message, "%199[^\n]", tempmes) < 0) {
 		clif_displaymessage(fd, msg_txt(sd,1302)); // Please enter a message (usage: @me <message>).
@@ -7626,6 +7673,7 @@ ACMD_FUNC(mapflag) {
 	if (!message || !*message || (sscanf(message, "%99s %hd", flag_name, &flag) < 1)) {
 		clif_displaymessage(sd->fd,msg_txt(sd,1311)); // Enabled Mapflags in this map:
 		clif_displaymessage(sd->fd,"----------------------------------");
+		checkflag(town);
 		checkflag(autotrade);			checkflag(allowks);				checkflag(nomemo);		checkflag(noteleport);
 		checkflag(noreturn);			checkflag(monster_noteleport);	checkflag(nosave);		checkflag(nobranch);
 		checkflag(noexppenalty);		checkflag(pvp);					checkflag(pvp_noparty);	checkflag(pvp_noguild);
@@ -7645,6 +7693,7 @@ ACMD_FUNC(mapflag) {
 	}
 	for (i = 0; flag_name[i]; i++) flag_name[i] = (char)tolower(flag_name[i]); //lowercase
 
+	setflag(town);
 	setflag(autotrade);			setflag(allowks);			setflag(nomemo);			setflag(noteleport);
 	setflag(noreturn);			setflag(monster_noteleport);setflag(nosave);			setflag(nobranch);
 	setflag(noexppenalty);		setflag(pvp);				setflag(pvp_noparty);		setflag(pvp_noguild);
@@ -7805,7 +7854,7 @@ ACMD_FUNC(duel)
 			struct map_session_data *target_sd;
 			target_sd = map_nick2sd((char *)message);
 			if(target_sd != NULL) {
-				unsigned int maxpl=0, newduel;
+				unsigned int newduel;
 				if((newduel = duel_create(sd, 2)) != -1) {
 					if(target_sd->duel_group > 0 ||	target_sd->duel_invite > 0) {
 						clif_displaymessage(fd, msg_txt(sd,353)); // "Duel: Player already in duel."
@@ -8503,8 +8552,7 @@ static void atcommand_commands_sub(struct map_session_data* sd, const int fd, At
 		slen = strlen(cmd->command);
 
 		// flush the text buffer if this command won't fit into it
-		if ( slen + cur - line_buff >= CHATBOX_SIZE )
-		{
+		if (slen + cur - line_buff >= CHATBOX_SIZE) {
 			clif_displaymessage(fd,line_buff);
 			cur = line_buff;
 			memset(line_buff,' ',CHATBOX_SIZE);
@@ -9405,6 +9453,8 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(heal),
 		ACMD_DEF(item),
 		ACMD_DEF(item2),
+		ACMD_DEF2("itembound",item),
+		ACMD_DEF2("itembound2",item2),
 		ACMD_DEF(itemreset),
 		ACMD_DEF(clearstorage),
 		ACMD_DEF(cleargstorage),
@@ -9479,6 +9529,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF2("reloadquestdb", reload),
 		ACMD_DEF2("reloadmsgconf", reload),
 		ACMD_DEF2("reloadpacketdb", reload),
+		ACMD_DEF(partysharelvl),
 		ACMD_DEF(mapinfo),
 		ACMD_DEF(dye),
 		ACMD_DEF2("hairstyle", hair_style),
@@ -9540,6 +9591,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(refresh),
 		ACMD_DEF(refreshall),
 		ACMD_DEF(identify),
+		ACMD_DEF(identifyall),
 		ACMD_DEF(gmotd),
 		ACMD_DEF(misceffect),
 		ACMD_DEF(mobsearch),

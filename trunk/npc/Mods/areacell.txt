@@ -3,9 +3,17 @@ OnInit:
 	setcell "morocc.gat",151,83,168,102,cell_pvp,1;
 	end;
 	
-//OnPCDieEvent:
-//	getmapxy(@mapname$,@mapx,@mapy,0,strcharinfo(0));
-//	if(checkcell(@mapname$,@mapx,@mapy,cell_chkpvp) == 1)
-//		warp "SavePoint",0,0;
-//	end;
+}
+
+-	script	deathmatch_core	-1,{
+	callfunc("test_scstart");
+	end;
+}
+
+function	script	test_scstart	{
+	setarray .@sc_basic[0], SC_BLESSING, SC_INCREASEAGI, SC_ANGELUS, SC_KYRIE;
+
+	for (set .@i, 0; .@i < getarraysize(.@sc_basic); set .@i, .@i +1)
+		sc_start .@sc_basic[.@i], 60000, 10;
+	return;
 }

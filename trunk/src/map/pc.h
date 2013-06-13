@@ -174,7 +174,7 @@ struct map_session_data {
 		unsigned int permanent_speed : 1; // When 1, speed cannot be changed through status_calc_pc().
 		unsigned int seeghp :1; // Display the HP of players of clan and alliances. [Created by Rad & Updated by Cainho]
 		unsigned int secure_items : 1; // Item Security [Zephyrus]
-		unsigned int pvp : 1;
+		unsigned int pvp : 1;		// Addon Cell PVP [Ize]
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;
@@ -710,6 +710,7 @@ int pc_get_group_level(struct map_session_data *sd);
 int pc_get_group_id(struct map_session_data *sd);
 int pc_getrefinebonus(int lv,int type);
 bool pc_can_give_items(struct map_session_data *sd);
+bool pc_can_give_bounded_items(struct map_session_data *sd);
 
 bool pc_can_use_command(struct map_session_data *sd, const char *command, AtCommandType type);
 #define pc_has_permission(sd, permission) ( ((sd)->permissions&permission) != 0 )
@@ -723,7 +724,7 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 void pc_authfail(struct map_session_data *);
 int pc_reg_received(struct map_session_data *sd);
 void pc_close_npc(struct map_session_data *sd,int flag);
-static int pc_close_npc_timer(int tid, unsigned int tick, int id, intptr_t data);
+int pc_close_npc_timer(int tid, unsigned int tick, int id, intptr_t data);
 
 int pc_isequip(struct map_session_data *sd,int n);
 int pc_equippoint(struct map_session_data *sd,int n);
@@ -752,6 +753,9 @@ int pc_payzeny(struct map_session_data*,int, enum e_log_pick_type type, struct m
 int pc_additem(struct map_session_data*,struct item*,int,e_log_pick_type);
 int pc_getzeny(struct map_session_data*,int, enum e_log_pick_type, struct map_session_data*);
 int pc_delitem(struct map_session_data*,int,int,int,short,e_log_pick_type);
+
+//Bound items
+int pc_bound_chk(TBL_PC *sd,int type,int *idxlist);
 
 // Special Shop System
 int pc_paycash( struct map_session_data *sd, int price, int points, e_log_pick_type type );
